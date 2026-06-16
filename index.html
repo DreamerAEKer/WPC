@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ระบบจัดการไปรษณียบัตรทายผลบอลโลก 2026</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --secondary: #10b981;
+  --bg-color: #f3f4f6;
+  --surface: #ffffff;
+  --text-dark: #1f2937;
+  --text-light: #6b7280;
+  --border: #e5e7eb;
+  --danger: #ef4444;
+  --sidebar-width: 260px;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --radius: 12px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Kanit', 'Inter', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-dark);
+  line-height: 1.5;
+}
+
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  width: var(--sidebar-width);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  height: 100vh;
+  z-index: 10;
+  box-shadow: var(--shadow-sm);
+  overflow-y: auto;
+}
+
+.sidebar-header {
+  padding: 2rem 1.5rem;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.logo-icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.sidebar-header h2 {
+  font-size: 1.25rem;
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.subtitle {
+  color: var(--text-light);
+  font-size: 0.875rem;
+}
+
+.sidebar-nav {
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.875rem 1rem;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.nav-btn:hover {
+  background: #f8fafc;
+  color: var(--primary);
+}
+
+.nav-btn.active {
+  background: var(--primary);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.sidebar-footer {
+  padding: 1.5rem;
+  border-top: 1px solid var(--border);
+  background: #f8fafc;
+}
+
+.price-info {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px dashed #cbd5e1;
+  font-size: 0.875rem;
+  color: var(--text-light);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.price-info b {
+  color: var(--primary);
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  margin-left: var(--sidebar-width);
+  padding: 2rem 3rem;
+  width: calc(100% - var(--sidebar-width));
+}
+
+.top-header {
+  margin-bottom: 2rem;
+}
+
+.top-header h1 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+/* Views */
+.view-section {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.view-section.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Dashboard KPIs */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.kpi-card {
+  background: var(--surface);
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  border-left: 4px solid var(--primary);
+  transition: transform 0.2s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+}
+
+.kpi-card h4 {
+  color: var(--text-light);
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.kpi-card .value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+.kpi-card .value.text-primary { color: var(--primary); }
+.kpi-card .value.text-success { color: var(--secondary); }
+.kpi-card .value.text-danger { color: var(--danger); }
+
+/* Cards & Tables */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+}
+
+.card-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.card-header h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th, .data-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.data-table th {
+  background: #f9fafb;
+  font-weight: 600;
+  color: var(--text-light);
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.data-table tr:hover td {
+  background: #f8fafc;
+}
+
+/* Forms */
+.inline-form {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.standard-form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-dark);
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+select {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+input:focus, select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: var(--text-light);
+}
+
+/* Buttons */
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+}
+
+.btn-secondary {
+  background: var(--secondary);
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #059669;
+}
+
+/* Utils */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .app-layout {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    position: relative;
+    height: auto;
+  }
+  .main-content {
+    margin-left: 0;
+    padding: 1.5rem;
+    width: 100%;
+  }
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media print {
+  body {
+    background: white;
+  }
+  body * {
+    visibility: hidden;
+  }
+  #printable-area, #printable-area * {
+    visibility: visible;
+    color: black !important;
+  }
+  #printable-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  .sidebar, .top-header, .btn, .card, .no-print {
+    border: none !important;
+    box-shadow: none !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-container {
+    border: none !important;
+    padding: 0 !important;
+  }
+}
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-icon">🏆</div>
+        <h2>World Cup 2026</h2>
+        <p class="subtitle">Postcard Tracker</p>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-btn active" data-view="dashboard">
+          <span>📊</span> ภาพรวมแผนก
+        </button>
+        <button class="nav-btn" data-view="individuals">
+          <span>👥</span> รายชื่อพนักงาน
+        </button>
+        <button class="nav-btn" data-view="transactions">
+          <span>📝</span> บันทึกเบิก/นำส่ง
+        </button>
+        <button class="nav-btn" data-view="gifts">
+          <span>🎁</span> ของสมมนาคุณ
+        </button>
+        <button class="nav-btn" data-view="print">
+          <span>🖨️</span> พิมพ์แบบฟอร์มเบิก
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="price-info">
+          <div>ราคาฉบับละ <b>3 บาท</b></div>
+          <div>ค่าคอมมิชชัน <b>10%</b></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="top-header">
+        <h1 id="page-title">ภาพรวมแผนก (Dashboard)</h1>
+      </header>
+
+      <div id="view-dashboard" class="view-section active">
+        <div class="kpi-grid" id="dashboard-kpi">
+          <!-- Populated by JS -->
+        </div>
+        <div class="dashboard-cards">
+          <div class="card">
+            <h3>สรุปยอดขายพนักงาน (Top Sales)</h3>
+            <div class="table-responsive">
+              <table class="data-table" id="dashboard-emp-table">
+                <thead>
+                  <tr>
+                    <th>พนักงาน</th>
+                    <th>เบิกไป (ฉบับ)</th>
+                    <th>นำส่งแล้ว (ฉบับ)</th>
+                    <th>ค้างส่ง (ฉบับ)</th>
+                    <th>คอมมิชชัน (฿)</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="view-individuals" class="view-section">
+        <div class="card">
+          <div class="card-header">
+            <h3>จัดการรายชื่อพนักงาน</h3>
+          </div>
+          <form id="form-add-emp" class="inline-form">
+            <input type="text" id="input-emp-name" placeholder="ชื่อพนักงาน" required />
+            <button type="submit" class="btn btn-primary">เพิ่มพนักงาน</button>
+          </form>
+          <div class="table-responsive" style="margin-top: 1rem;">
+            <table class="data-table" id="emp-manage-table">
+              <thead>
+                <tr>
+                  <th>รหัส</th>
+                  <th>ชื่อพนักงาน</th>
+                  <th>เบิกรวม (ฉบับ)</th>
+                  <th>นำส่งรวม (ฉบับ)</th>
+                  <th>ค้างส่ง (ฉบับ)</th>
+                  <th>ยอดเงินนำส่ง (฿)</th>
+                  <th>คอมมิชชัน (฿)</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="view-transactions" class="view-section">
+        <div class="card">
+          <div class="card-header">
+            <h3>บันทึกการเบิก และ นำส่งเงิน</h3>
+          </div>
+          <form id="form-add-tx" class="standard-form">
+            <div class="form-group">
+              <label>พนักงาน</label>
+              <select id="tx-emp" required></select>
+            </div>
+            <div class="form-group">
+              <label>ประเภทรายการ</label>
+              <select id="tx-type" required>
+                <option value="req">ขอเบิกไปรษณียบัตร</option>
+                <option value="remit">นำส่งเงิน (ขายได้)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>จำนวน (ฉบับ)</label>
+              <input type="number" id="tx-qty" min="1" required />
+              <small class="hint">มูลค่า: <span id="tx-value-calc">0</span> บาท</small>
+            </div>
+            <div class="form-group">
+              <label>วันที่</label>
+              <input type="date" id="tx-date" required />
+            </div>
+            <div class="form-group">
+              <label>หลักฐาน (ถ้ามี)</label>
+              <input type="file" id="tx-evidence" accept="image/*,.pdf" />
+            </div>
+            <div class="form-group" style="flex-direction: row; align-items: center; gap: 0.5rem;">
+              <input type="checkbox" id="tx-require-sign" style="width: 16px; height: 16px;" />
+              <label for="tx-require-sign" style="font-weight: normal; cursor: pointer;">ต้องการให้ พนง. มาลงชื่อด้วยกระดาษที่พิมพ์ออกมา</label>
+            </div>
+            <button type="submit" class="btn btn-primary">บันทึกรายการ</button>
+          </form>
+          
+          <h4 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--text-dark);">ประวัติรายการล่าสุด</h4>
+          <div class="table-responsive">
+            <table class="data-table" id="tx-history-table">
+              <thead>
+                <tr>
+                  <th>วันที่</th>
+                  <th>พนักงาน</th>
+                  <th>ประเภท</th>
+                  <th>จำนวน (ฉบับ)</th>
+                  <th>เป็นเงิน (฿)</th>
+                  <th>หลักฐาน/หมายเหตุ</th>
+                  <th>จัดการ</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div id="view-gifts" class="view-section">
+        <div class="grid-2">
+          <!-- Add Gift -->
+          <div class="card">
+            <div class="card-header">
+              <h3>เพิ่มของสมมนาคุณ (เข้าสต็อก)</h3>
+            </div>
+            <form id="form-add-gift" class="standard-form">
+              <div class="form-group">
+                <label>ชื่อของสมมนาคุณ</label>
+                <input type="text" id="gift-name" required />
+              </div>
+              <div class="form-group">
+                <label>จำนวนทั้งหมด</label>
+                <input type="number" id="gift-stock" min="1" required />
+              </div>
+              <button type="submit" class="btn btn-primary">เพิ่มเข้าคลัง</button>
+            </form>
+          </div>
+
+          <!-- Allocate Gift -->
+          <div class="card">
+            <div class="card-header">
+              <h3>บันทึกการเบิก/แจก ของสมมนาคุณ</h3>
+            </div>
+            <form id="form-allocate-gift" class="standard-form">
+              <div class="form-group">
+                <label>พนักงาน</label>
+                <select id="alloc-emp" required></select>
+              </div>
+              <div class="form-group">
+                <label>ของสมมนาคุณ</label>
+                <select id="alloc-gift" required></select>
+              </div>
+              <div class="form-group">
+                <label>จำนวนที่แจก</label>
+                <input type="number" id="alloc-qty" min="1" required />
+              </div>
+              <button type="submit" class="btn btn-secondary">บันทึกการแจก</button>
+            </form>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 1.5rem;">
+          <div class="card-header">
+            <h3>สต็อกของสมมนาคุณ</h3>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table" id="gifts-table">
+              <thead>
+                <tr>
+                  <th>ของสมมนาคุณ</th>
+                  <th>จำนวนทั้งหมด</th>
+                  <th>แจกไปแล้ว</th>
+                  <th>คงเหลือในคลัง</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Print Form View -->
+      <div id="view-print" class="view-section">
+        <div class="card" style="max-width: 950px; margin: 0 auto; background: white; padding: 2rem;">
+          <div style="display: flex; gap: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem;" class="no-print">
+            <button class="btn btn-primary" id="btn-tab-type1" onclick="switchPrintTab('1')">📄 ใบเบิกโควต้า (หน.แผนก)</button>
+            <button class="btn btn-secondary" style="background: white; color: var(--text-dark); border: 1px solid var(--border);" id="btn-tab-type2" onclick="switchPrintTab('2')">📑 ทะเบียนคุม (แม่แบบ A4)</button>
+          </div>
+          
+          <div id="printable-area">
+            
+            <!-- Type 1: Individual Form -->
+            <div id="print-type-1" class="print-layout">
+              <div class="no-print" style="background: var(--bg-color); padding: 1rem; border-radius: var(--radius); margin-bottom: 1.5rem; display: flex; justify-content: flex-end;">
+                <button class="btn btn-secondary" onclick="window.print()">🖨️ กดพิมพ์ใบเบิก</button>
+              </div>
+              <div style="font-family: 'Kanit', sans-serif; border: 1px dashed #ccc; padding: 2rem; background: white;" class="print-container">
+                <h2 style="text-align: center; margin-bottom: 0.5rem; color: black; font-size: 1.5rem;">ใบเบิกไปรษณียบัตรทายผลการแข่งขันฟุตบอลโลก 2026</h2>
+                <h3 style="text-align: center; margin-bottom: 2rem; font-weight: normal; color: black; font-size: 1.2rem;">แผนกลูกค้าธุรกิจ ปณฝ.กลาง 10501</h3>
+                
+                <table style="width: 100%; border-collapse: collapse; text-align: center; border: 2px solid black; color: black; font-size: 0.95rem;">
+                  <tr>
+                    <td style="border: 1px solid black; padding: 0.75rem; font-weight: bold; width: 25%;">โควต้าที่ได้รับ</td>
+                    <td style="border: 1px solid black; padding: 0.75rem; font-size: 1.25rem; font-weight: bold; width: 25%;" contenteditable="true" id="c-quota">32,500</td>
+                    <td style="border: 1px solid black; padding: 0.75rem; width: 10%;">ฉบับ</td>
+                    <td style="border: 1px solid black; padding: 0.75rem; font-weight: bold; width: 20%;">ปัจจุบันคงเหลือ</td>
+                    <td style="border: 1px solid black; padding: 0.75rem; width: 10%; font-weight: bold;" contenteditable="true" id="c-remain"></td>
+                    <td style="border: 1px solid black; padding: 0.75rem; width: 10%;">ฉบับ</td>
+                  </tr>
+                </table>
+
+                <table style="width: 100%; border-collapse: collapse; text-align: center; border: 2px solid black; border-top: none; color: black; font-size: 0.95rem;">
+                  <tr style="background: #f3f4f6;">
+                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">ว/ด/ป</th>
+                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">จำนวนที่ขอเบิก<br>ฉบับ</th>
+                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">คิดเป็นเงิน<br>บาท</th>
+                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">เบิกครั้งก่อน<br>ฉบับ</th>
+                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">คิดเป็นเงิน<br>บาท</th>
+                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">รวมเบิก<br>ฉบับ</th>
+                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">คิดเป็นเงิน<br>บาท</th>
+                  </tr>
+                  <tr style="height: 60px;">
+                    <td style="border: 1px solid black; background: #fffbe6;" contenteditable="true" id="c-date1" oninput="syncDates('c-date1')"></td>
+                    <td style="border: 1px solid black; background: #fffbe6;" contenteditable="true" id="c-req-qty" oninput="calcForm()"></td>
+                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-req-amt"></td>
+                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-prev-qty"></td>
+                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-prev-amt"></td>
+                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-total-qty"></td>
+                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-total-amt"></td>
+                  </tr>
+                </table>
+
+                <table style="width: 100%; border-collapse: collapse; text-align: center; border: 2px solid black; border-top: none; margin-bottom: 3rem; color: black; font-size: 0.95rem;">
+                  <tr style="background: #f3f4f6;">
+                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">ว/ด/ป</th>
+                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">นำส่งเงิน (ครั้งนี้)<br>ฉบับ<br><span class="no-print" style="font-weight:normal; font-size:0.75rem; color:#666;">(สะสม: <span id="c-remit-accum">0</span>)</span></th>
+                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">คิดเป็นเงิน<br>บาท</th>
+                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">ยอดค้างนำส่ง<br>ฉบับ</th>
+                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">คิดเป็นเงิน<br>บาท</th>
+                    <td style="border: 1px solid black; padding: 0.75rem; width: 28.56%;" colspan="2" rowspan="2"></td>
+                  </tr>
+                  <tr style="height: 60px;">
+                    <td style="border: 1px solid black; background: #fffbe6;" contenteditable="true" id="c-date2" oninput="syncDates('c-date2')"></td>
+                    <td style="border: 1px solid black; background: #fffbe6;" contenteditable="true" id="c-remit-qty" oninput="calcForm()"></td>
+                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-remit-amt"></td>
+                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-out-qty"></td>
+                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-out-amt"></td>
+                  </tr>
+                </table>
+
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 2rem; color: black;">
+                  <div style="text-align: center; width: 300px;">
+                    <p style="margin-bottom: 0.5rem;" contenteditable="true" id="p-sign-name">(...........................................................)</p>
+                    <p style="margin-top: 0.5rem;">(ผู้เบิก)</p>
+                    <p style="margin-top: 1rem; text-align: left; margin-left: 20px;">วันที่เบิก <span contenteditable="true" id="p-sign-date" oninput="syncDates('p-sign-date')">...................................................</span></p>
+                  </div>
+                </div>
+
+                <p style="font-weight: bold; font-size: 0.9rem; color: black;"><u>หมายเหตุ</u> : ยอดของ หน.ปณ. และ ผช.หน.ปณ. รวมอยู่กับ แผนกธุรการ ปณฝ.กลาง</p>
+              </div>
+              
+              <div class="no-print" style="margin-top: 3rem; border-top: 1px solid var(--border); padding-top: 2rem;">
+                <h3 style="margin-bottom: 1rem; color: var(--text-dark); font-size: 1.2rem;">ประวัติการรับโควต้า / นำส่งเงิน (Master History)</h3>
+                <div class="table-container">
+                  <table class="data-table" id="master-history-table">
+                    <thead>
+                      <tr>
+                        <th>ว/ด/ป</th>
+                        <th>รายการ</th>
+                        <th>จำนวน (ฉบับ)</th>
+                        <th>จำนวนเงิน (บาท)</th>
+                        <th>จัดการ</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <!-- Populated by JS -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Type 2: Log Book Form -->
+            <div id="print-type-2" class="print-layout" style="display: none;">
+              <div class="no-print" style="text-align: right; margin-bottom: 1rem;">
+                <button class="btn btn-primary" onclick="window.print()">🖨️ พิมพ์ตารางลงชื่อ</button>
+              </div>
+              <div style="font-family: 'Kanit', sans-serif; border: 1px dashed #ccc; padding: 2rem;" class="print-container">
+                <h2 style="text-align: center; margin-bottom: 0.5rem; color: black; font-size: 1.5rem;">ทะเบียนคุมการขอเบิกไปรษณียบัตรทายผลฟุตบอลโลก 2026</h2>
+                <h3 style="text-align: center; margin-bottom: 1.5rem; font-weight: normal; color: black; font-size: 1.2rem;">แผนกลูกค้าธุรกิจ ปณฝ.กลาง 10501</h3>
+                
+                <table style="width: 100%; border-collapse: collapse; text-align: center; border: 1px solid black; color: black; font-size: 0.95rem;">
+                  <thead>
+                    <tr style="background: #f3f4f6;">
+                      <th style="border: 1px solid black; padding: 0.75rem; width: 8%;">ลำดับ</th>
+                      <th style="border: 1px solid black; padding: 0.75rem; width: 15%;">ว/ด/ป</th>
+                      <th style="border: 1px solid black; padding: 0.75rem; width: 25%;">ชื่อผู้ขอเบิก</th>
+                      <th style="border: 1px solid black; padding: 0.75rem; width: 15%;">จำนวน (ฉบับ)</th>
+                      <th style="border: 1px solid black; padding: 0.75rem; width: 20%;">ลายมือชื่อ</th>
+                      <th style="border: 1px solid black; padding: 0.75rem; width: 17%;">หมายเหตุ</th>
+                    </tr>
+                  </thead>
+                  <tbody id="p-a4-tbody">
+                    <!-- Populated by JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+// --- STORE LOGIC ---
+const STORE_KEY = 'world_cup_tracker_data';
+
+const defaultData = {
+  quota: 32500,
+  pricePerTicket: 3,
+  commissionRate: 0.1,
+  employees: [],
+  transactions: [], // { id, type: 'req'|'remit', empId, date, qty, amount }
+  masterTransactions: [], // { id, type: 'req'|'remit', date, qty, amount }
+  gifts: [], // { id, name, totalStock }
+  giftAllocations: [] // { id, empId, giftId, qty, date }
+};
+
+class Store {
+  constructor() {
+    this.data = this.loadData();
+  }
+
+  loadData() {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw);
+        if(!parsed.masterTransactions) parsed.masterTransactions = [];
+        return { ...defaultData, ...parsed };
+      } catch (e) {
+        console.error('Failed to parse store', e);
+        return defaultData;
+      }
+    }
+    return defaultData;
+  }
+
+  saveData() {
+    localStorage.setItem(STORE_KEY, JSON.stringify(this.data));
+    // Trigger custom event so UI can re-render
+    window.dispatchEvent(new Event('storeUpdated'));
+  }
+
+  // --- Department Overview ---
+  getOverview() {
+    let totalRequested = 0;
+    let totalRemitted = 0;
+
+    this.data.transactions.forEach(t => {
+      if (t.type === 'req') totalRequested += t.qty;
+      if (t.type === 'remit') totalRemitted += t.qty;
+    });
+    
+    let masterRequested = 0;
+    let masterRemitted = 0;
+    this.data.masterTransactions.forEach(t => {
+      if (t.type === 'req') masterRequested += t.qty;
+      if (t.type === 'remit') masterRemitted += t.qty;
+    });
+
+    const masterRemainingQuota = this.data.quota - masterRequested;
+    const masterOutstanding = masterRequested - masterRemitted;
+    
+    // Remaining quota for employees is what the Head requested minus what employees requested
+    const remainingQuota = masterRequested - totalRequested;
+
+    const outstandingRemittance = totalRequested - totalRemitted;
+    
+    // Revenue = remitted tickets * price
+    const totalRevenue = totalRemitted * this.data.pricePerTicket;
+    // Commission is based on REMITTED sales
+    const totalCommission = totalRevenue * this.data.commissionRate;
+
+    return {
+      quota: this.data.quota,
+      totalRequested,
+      remainingQuota,
+      totalRemitted,
+      outstandingRemittance,
+      totalRevenue,
+      totalCommission,
+      masterRequested,
+      masterRemitted,
+      masterRemainingQuota,
+      masterOutstanding
+    };
+  }
+
+  // --- Master Transactions ---
+  addMasterTx(type, qty, dateStr) {
+    const amount = qty * this.data.pricePerTicket;
+    this.data.masterTransactions.push({
+      id: Date.now().toString(),
+      type,
+      qty,
+      amount,
+      date: dateStr || new Date().toISOString()
+    });
+    this.saveData();
+  }
+  
+  deleteMasterTx(txId) {
+    this.data.masterTransactions = this.data.masterTransactions.filter(t => t.id !== txId);
+    this.saveData();
+  }
+
+  // --- Employees ---
+  addEmployee(name) {
+    const id = Date.now().toString();
+    this.data.employees.push({ id, name });
+    this.saveData();
+    return id;
+  }
+
+  getEmployeesData() {
+    return this.data.employees.map(emp => {
+      let requested = 0;
+      let remitted = 0;
+
+      this.data.transactions.filter(t => t.empId === emp.id).forEach(t => {
+        if (t.type === 'req') requested += t.qty;
+        if (t.type === 'remit') remitted += t.qty;
+      });
+
+      const outstanding = requested - remitted;
+      const revenue = remitted * this.data.pricePerTicket;
+      const commission = revenue * this.data.commissionRate;
+
+      return {
+        ...emp,
+        requested,
+        remitted,
+        outstanding,
+        revenue,
+        commission
+      };
+    });
+  }
+
+  // --- Transactions ---
+  addTransaction(type, empId, qty, dateStr, evidenceUrl, requireSign) {
+    const amount = qty * this.data.pricePerTicket;
+    this.data.transactions.push({
+      id: Date.now().toString(),
+      type,
+      empId,
+      qty,
+      amount,
+      date: dateStr || new Date().toISOString(),
+      evidenceUrl: evidenceUrl || null,
+      requireSign: requireSign || false
+    });
+    this.saveData();
+  }
+
+  // --- Gifts ---
+  addGift(name, totalStock) {
+    const id = Date.now().toString();
+    this.data.gifts.push({ id, name, totalStock });
+    this.saveData();
+  }
+
+  allocateGift(empId, giftId, qty, dateStr) {
+    this.data.giftAllocations.push({
+      id: Date.now().toString(),
+      empId,
+      giftId,
+      qty,
+      date: dateStr || new Date().toISOString()
+    });
+    this.saveData();
+  }
+
+  getGiftsData() {
+    return this.data.gifts.map(gift => {
+      let allocated = 0;
+      this.data.giftAllocations.filter(a => a.giftId === gift.id).forEach(a => {
+        allocated += a.qty;
+      });
+      return {
+        ...gift,
+        allocated,
+        remaining: gift.totalStock - allocated
+      };
+    });
+  }
+}
+
+const store = new Store();
+
+
+// --- MAIN LOGIC ---
+function formatNum(num) {
+  if (isNaN(num)) return '0';
+  return num.toLocaleString('en-US');
+}
+
+function formatThaiDate(dateInput) {
+  if (!dateInput) return '';
+  const d = new Date(dateInput);
+  if (isNaN(d.getTime())) return dateInput;
+  const day = d.getDate();
+  const month = d.getMonth() + 1;
+  let year = d.getFullYear();
+  if (year < 2500) year += 543;
+  return `${day}/${month}/${year}`;
+}
+const formatMoney = (num) => new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(num);
+
+// --- Navigation ---
+const navButtons = document.querySelectorAll('.nav-btn');
+const views = document.querySelectorAll('.view-section');
+const pageTitle = document.getElementById('page-title');
+
+navButtons.forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    // Active class toggle
+    navButtons.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    
+    // View toggle
+    const targetView = btn.getAttribute('data-view');
+    views.forEach(v => v.classList.remove('active'));
+    document.getElementById(`view-${targetView}`).classList.add('active');
+    
+    // Update title
+    pageTitle.textContent = btn.textContent.trim();
+  });
+});
+
+// --- Renders ---
+function renderDashboard() {
+  const data = store.getOverview();
+  
+  document.getElementById('dashboard-kpi').innerHTML = `
+    <div style="grid-column: 1 / -1; margin-bottom: -0.5rem; margin-top: 0.5rem;">
+      <h3 style="color: var(--text-dark); font-size: 1.1rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem;">ข้อมูลโควต้าแผนก (ระดับหัวหน้า)</h3>
+    </div>
+    <div class="kpi-card" style="border-left-color: #3b82f6;">
+      <h4>โควต้ารวม ปณ.กลาง (ฉบับ)</h4>
+      <div class="value">${formatNum(data.quota)}</div>
+    </div>
+    <div class="kpi-card" style="border-left-color: #8b5cf6;">
+      <h4>เบิกมาแล้ว (ฉบับ)</h4>
+      <div class="value text-primary">${formatNum(data.masterRequested)}</div>
+    </div>
+    <div class="kpi-card" style="border-left-color: #10b981;">
+      <h4>คงเหลือที่ ปณ.กลาง (ฉบับ)</h4>
+      <div class="value text-success">${formatNum(data.masterRemainingQuota)}</div>
+    </div>
+    <div class="kpi-card" style="border-left-color: #f59e0b;">
+      <h4>นำส่ง ปณ.กลางแล้ว (ฉบับ)</h4>
+      <div class="value">${formatNum(data.masterRemitted)}</div>
+    </div>
+    <div class="kpi-card" style="border-left-color: #ef4444;">
+      <h4>ค้างนำส่ง ปณ.กลาง (ฉบับ)</h4>
+      <div class="value text-danger">${formatNum(data.masterOutstanding)}</div>
+    </div>
+
+    <div style="grid-column: 1 / -1; margin-bottom: -0.5rem; margin-top: 1rem;">
+      <h3 style="color: var(--text-dark); font-size: 1.1rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem;">ข้อมูลพนักงาน (ระดับบุคคล)</h3>
+    </div>
+    <div class="kpi-card" style="border-left-color: #3b82f6;">
+      <h4>พนักงานเบิกไป (ฉบับ)</h4>
+      <div class="value">${formatNum(data.totalRequested)}</div>
+    </div>
+    <div class="kpi-card" style="border-left-color: #10b981;">
+      <h4>คงเหลือในมือ หน.แผนก (ฉบับ)</h4>
+      <div class="value text-success">${formatNum(data.remainingQuota)}</div>
+    </div>
+    <div class="kpi-card" style="border-left-color: #8b5cf6;">
+      <h4>ยอดขายรวม (บาท)</h4>
+      <div class="value text-primary">${formatNum(data.totalRevenue)}</div>
+    </div>
+    <div class="kpi-card" style="border-left-color: #ef4444;">
+      <h4>พนักงานค้างนำส่ง (ฉบับ)</h4>
+      <div class="value text-danger">${formatNum(data.outstandingRemittance)}</div>
+    </div>
+    <div class="kpi-card" style="border-left-color: #f59e0b;">
+      <h4>คอมมิชชันรวม (บาท)</h4>
+      <div class="value">${formatNum(data.totalCommission)}</div>
+    </div>
+  `;
+
+  const emps = store.getEmployeesData().sort((a, b) => b.remitted - a.remitted);
+  const tbody = document.querySelector('#dashboard-emp-table tbody');
+  tbody.innerHTML = '';
+  
+  if (emps.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-light);">ยังไม่มีข้อมูลพนักงาน</td></tr>';
+  }
+
+  emps.forEach(emp => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${emp.name}</td>
+      <td>${formatNum(emp.requested)}</td>
+      <td>${formatNum(emp.remitted)}</td>
+      <td>${formatNum(emp.outstanding)}</td>
+      <td style="color: var(--secondary); font-weight: 600;">${formatNum(emp.commission)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderEmployees() {
+  const emps = store.getEmployeesData();
+  const tbody = document.querySelector('#emp-manage-table tbody');
+  tbody.innerHTML = '';
+  
+  if (emps.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-light);">ยังไม่มีข้อมูลพนักงาน</td></tr>';
+  }
+
+  emps.forEach(emp => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${emp.id.slice(-4)}</td>
+      <td>${emp.name}</td>
+      <td>${formatNum(emp.requested)}</td>
+      <td>${formatNum(emp.remitted)}</td>
+      <td style="${emp.outstanding > 0 ? 'color: var(--danger); font-weight:600;' : ''}">${formatNum(emp.outstanding)}</td>
+      <td>${formatNum(emp.revenue)}</td>
+      <td style="color: var(--secondary); font-weight: 600;">${formatNum(emp.commission)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderTransactions() {
+  // Update Dropdowns
+  const emps = store.getEmployeesData();
+  const txEmpSelect = document.getElementById('tx-emp');
+  txEmpSelect.innerHTML = '<option value="">-- เลือกพนักงาน --</option>';
+  emps.forEach(emp => {
+    txEmpSelect.innerHTML += `<option value="${emp.id}">${emp.name} (ค้างส่ง: ${emp.outstanding})</option>`;
+  });
+
+  const allocEmpSelect = document.getElementById('alloc-emp');
+  allocEmpSelect.innerHTML = '<option value="">-- เลือกพนักงาน --</option>';
+  emps.forEach(emp => {
+    allocEmpSelect.innerHTML += `<option value="${emp.id}">${emp.name}</option>`;
+  });
+
+  // History Table
+  const tbody = document.querySelector('#tx-history-table tbody');
+  if(!tbody) return;
+  tbody.innerHTML = '';
+  const txs = [...store.data.transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  if (txs.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-light);">ยังไม่มีรายการ</td></tr>';
+  }
+
+  txs.forEach(tx => {
+    const empId = tx.employeeId || tx.empId;
+    const emp = store.data.employees.find(e => e.id === empId);
+    const dateStr = formatThaiDate(tx.date);
+    let typeBadge = '';
+    let valStr = '';
+    
+    const qty = tx.quantity || tx.qty;
+    const isReq = tx.type === 'req' || tx.type === 'request';
+    
+    if (isReq) {
+      typeBadge = '<span style="color: var(--text-dark); font-weight: 600;">เบิกไปรษณียบัตร</span>';
+      valStr = `<span style="color: var(--text-dark)">${formatNum(qty)}</span>`;
+    } else {
+      typeBadge = '<span style="color: var(--secondary); font-weight: 600;">นำส่งเงิน</span>';
+      valStr = `<span style="color: var(--secondary)">${formatNum(qty)}</span>`;
+    }
+    
+    const amountStr = formatNum(qty * store.data.pricePerTicket);
+    
+    let evidenceHtml = '';
+    if (tx.evidenceUrl) {
+      evidenceHtml += `<a href="${tx.evidenceUrl}" target="_blank" style="color: var(--primary); text-decoration: underline; font-size: 0.85rem; display: block; margin-bottom: 4px;">📎 ดูหลักฐาน</a>`;
+    }
+    if (tx.requireSign) {
+      evidenceHtml += `<span style="color: #ea580c; font-size: 0.8rem; background: #ffedd5; padding: 2px 6px; border-radius: 4px; display: inline-block;">⚠️ รอ พนง. ลงชื่อ</span>`;
+    }
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${dateStr}</td>
+      <td>${emp ? emp.name : 'ไม่ทราบชื่อ'}</td>
+      <td>${typeBadge}</td>
+      <td>${valStr}</td>
+      <td>${amountStr}</td>
+      <td>${evidenceHtml || '-'}</td>
+      <td>
+        <button class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-right: 4px;" onclick="editTx('${tx.id}')">แก้ไข</button>
+        <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;" onclick="deleteTx('${tx.id}')">ลบ</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderGifts() {
+  // Update dropdown
+  const gifts = store.getGiftsData();
+  const allocGiftSelect = document.getElementById('alloc-gift');
+  allocGiftSelect.innerHTML = '<option value="">-- เลือกของสมมนาคุณ --</option>';
+  gifts.forEach(gift => {
+    allocGiftSelect.innerHTML += `<option value="${gift.id}">${gift.name} (เหลือ: ${gift.remaining})</option>`;
+  });
+
+  // Table
+  const tbody = document.querySelector('#gifts-table tbody');
+  tbody.innerHTML = '';
+  if (gifts.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-light);">ยังไม่มีของสมมนาคุณในระบบ</td></tr>';
+  }
+  gifts.forEach(gift => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${gift.name}</td>
+      <td>${formatNum(gift.totalStock)}</td>
+      <td>${formatNum(gift.allocated)}</td>
+      <td style="font-weight: 600; color: ${gift.remaining <= 0 ? 'var(--danger)' : 'var(--secondary)'}">${formatNum(gift.remaining)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderMasterHistory() {
+  const tbody = document.querySelector('#master-history-table tbody');
+  if(!tbody) return;
+  tbody.innerHTML = '';
+  
+  const txs = [...store.data.masterTransactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  if (txs.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-light); padding: 2rem;">ยังไม่มีประวัติการรับโควต้าหรือนำส่งเงิน</td></tr>';
+    return;
+  }
+  
+  txs.forEach(tx => {
+    const dateStr = formatThaiDate(tx.date);
+    let typeBadge = '';
+    let valStr = '';
+    
+    if (tx.type === 'req') {
+      typeBadge = '<span style="color: var(--text-dark); font-weight: 600;">รับโควต้าเพิ่ม</span>';
+      valStr = `<span style="color: var(--text-dark)">${formatNum(tx.qty)}</span>`;
+    } else {
+      typeBadge = '<span style="color: var(--secondary); font-weight: 600;">นำส่งเงิน</span>';
+      valStr = `<span style="color: var(--secondary)">${formatNum(tx.qty)}</span>`;
+    }
+    
+    const amountStr = formatNum(tx.amount);
+    
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${dateStr}</td>
+      <td>${typeBadge}</td>
+      <td>${valStr}</td>
+      <td>${amountStr}</td>
+      <td>
+        <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;" onclick="deleteMasterTx('${tx.id}')">ลบ</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function renderAll() {
+  renderDashboard();
+  renderEmployees();
+  renderTransactions();
+  renderGifts();
+  renderMasterHistory();
+}
+
+function calcForm() {
+  const price = store.data.pricePerTicket;
+  
+  const parseCell = (id) => {
+    const el = document.getElementById(id);
+    if(!el) return 0;
+    return parseInt(el.textContent.replace(/,/g, '')) || 0;
+  };
+  
+  const reqQty = parseCell('c-req-qty');
+  const prevQty = parseCell('c-prev-qty');
+  const remitNewQty = parseCell('c-remit-qty');
+  const remitAccum = parseCell('c-remit-accum');
+  
+  const reqAmt = reqQty * price;
+  const prevAmt = prevQty * price;
+  
+  const totalQty = reqQty + prevQty;
+  const totalAmt = totalQty * price;
+  
+  const remitAmt = remitNewQty * price;
+  
+  const outQty = totalQty - (remitNewQty + remitAccum);
+  const outAmt = outQty * price;
+  
+  document.getElementById('c-req-amt').textContent = reqAmt ? formatNum(reqAmt) : '';
+  document.getElementById('c-prev-amt').textContent = prevAmt ? formatNum(prevAmt) : '';
+  
+  document.getElementById('c-total-qty').textContent = totalQty ? formatNum(totalQty) : '';
+  document.getElementById('c-total-amt').textContent = totalAmt ? formatNum(totalAmt) : '';
+  
+  document.getElementById('c-remit-amt').textContent = remitAmt ? formatNum(remitAmt) : '';
+  
+  document.getElementById('c-out-qty').textContent = outQty ? formatNum(outQty) : '';
+  document.getElementById('c-out-amt').textContent = outAmt ? formatNum(outAmt) : '';
+  
+  // Update Remaining
+  const overview = store.getOverview();
+  const remain = overview.quota - (overview.masterRequested + reqQty);
+  document.getElementById('c-remain').textContent = formatNum(remain);
+}
+
+function initPrintForm() {
+  const dateStr = formatThaiDate(new Date());
+  
+  document.getElementById('c-date1').textContent = dateStr;
+  document.getElementById('c-date2').textContent = dateStr;
+  
+  const overview = store.getOverview();
+  document.getElementById('c-prev-qty').textContent = overview.masterRequested || '';
+  document.getElementById('c-remit-accum').textContent = overview.masterRemitted || '0';
+  
+  document.getElementById('c-remit-qty').textContent = '';
+  document.getElementById('p-sign-name').innerHTML = '(...........................................................)';
+  document.getElementById('p-sign-date').textContent = dateStr;
+  document.getElementById('c-req-qty').textContent = '';
+  
+  calcForm();
+}
+
+function saveMasterTx() {
+  const reqQty = parseInt(document.getElementById('c-req-qty').textContent.replace(/,/g, '')) || 0;
+  const remitQty = parseInt(document.getElementById('c-remit-qty').textContent.replace(/,/g, '')) || 0;
+  
+  if (reqQty === 0 && remitQty === 0) {
+    alert('กรุณาระบุจำนวนที่ขอเบิก หรือ จำนวนที่นำส่ง อย่างน้อย 1 รายการ');
+    return;
+  }
+  
+  if(confirm('ยืนยันการบันทึกประวัติ (แผนก) เข้าสู่ระบบ?')) {
+    if (reqQty > 0) store.addMasterTx('req', reqQty, new Date().toISOString());
+    if (remitQty > 0) store.addMasterTx('remit', remitQty, new Date().toISOString());
+    
+    alert('บันทึกข้อมูลเรียบร้อยแล้ว');
+    renderAll();
+    initPrintForm();
+  }
+}
+
+function syncDates(sourceId) {
+  const sourceVal = document.getElementById(sourceId).textContent;
+  if (sourceId !== 'c-date1') document.getElementById('c-date1').textContent = sourceVal;
+  if (sourceId !== 'c-date2') document.getElementById('c-date2').textContent = sourceVal;
+  if (sourceId !== 'p-sign-date') document.getElementById('p-sign-date').textContent = sourceVal;
+}
+
+function renderA4Logbook() {
+  const tbody = document.getElementById('p-a4-tbody');
+  tbody.innerHTML = '';
+  
+  const rowCount = 20;
+  
+  for(let i=0; i<rowCount; i++) {
+    tbody.innerHTML += `
+      <tr style="height: 40px;">
+        <td style="border: 1px solid black;">${i+1}</td>
+        <td style="border: 1px solid black;">&nbsp;</td>
+        <td style="border: 1px solid black;">&nbsp;</td>
+        <td style="border: 1px solid black;">&nbsp;</td>
+        <td style="border: 1px solid black;">&nbsp;</td>
+        <td style="border: 1px solid black;">&nbsp;</td>
+      </tr>
+    `;
+  }
+}
+
+// Transaction Deletion
+function deleteTx(txId) {
+  if(confirm('คุณแน่ใจหรือไม่ที่จะลบรายการนี้? (การลบจะดึงยอดกลับคืนอัตโนมัติ)')) {
+    store.data.transactions = store.data.transactions.filter(t => t.id !== txId);
+    store.saveData();
+    renderAll();
+  }
+}
+
+
+
+// Event Listeners
+window.addEventListener('storeUpdated', renderAll);
+window.addEventListener('storeUpdated', renderA4Logbook);
+
+// Calculate value dynamically
+document.getElementById('tx-qty').addEventListener('input', (e) => {
+  const val = parseInt(e.target.value) || 0;
+  document.getElementById('tx-value-calc').textContent = formatNum(val * store.data.pricePerTicket);
+});
+
+// Add Employee
+document.getElementById('form-add-emp').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const nameInput = document.getElementById('input-emp-name');
+  if (nameInput.value.trim()) {
+    store.addEmployee(nameInput.value.trim());
+    nameInput.value = '';
+  }
+});
+
+let editingTxId = null;
+
+function editTx(txId) {
+  const tx = store.data.transactions.find(t => t.id === txId);
+  if (!tx) return;
+  
+  editingTxId = tx.id;
+  document.getElementById('tx-emp').value = tx.empId || tx.employeeId;
+  document.getElementById('tx-type').value = tx.type === 'request' ? 'req' : tx.type;
+  document.getElementById('tx-qty').value = tx.qty || tx.quantity;
+  
+  const d = new Date(tx.date);
+  document.getElementById('tx-date').value = d.toISOString().split('T')[0];
+  document.getElementById('tx-require-sign').checked = !!tx.requireSign;
+  document.getElementById('tx-value-calc').textContent = formatNum((tx.qty || tx.quantity) * store.data.pricePerTicket);
+  
+  const submitBtn = document.querySelector('#form-add-tx button[type="submit"]');
+  submitBtn.textContent = 'บันทึกการแก้ไข';
+  submitBtn.classList.remove('btn-primary');
+  submitBtn.classList.add('btn-secondary');
+  
+  if (!document.getElementById('btn-cancel-edit')) {
+    const cancelBtn = document.createElement('button');
+    cancelBtn.id = 'btn-cancel-edit';
+    cancelBtn.type = 'button';
+    cancelBtn.className = 'btn';
+    cancelBtn.style = 'margin-left: 10px; border: 1px solid #ccc; background: white; color: black;';
+    cancelBtn.textContent = 'ยกเลิก';
+    cancelBtn.onclick = cancelEdit;
+    submitBtn.parentNode.insertBefore(cancelBtn, submitBtn.nextSibling);
+  }
+  
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function cancelEdit() {
+  editingTxId = null;
+  document.getElementById('form-add-tx').reset();
+  document.getElementById('tx-value-calc').textContent = '0';
+  
+  const submitBtn = document.querySelector('#form-add-tx button[type="submit"]');
+  submitBtn.textContent = 'บันทึกรายการ';
+  submitBtn.classList.remove('btn-secondary');
+  submitBtn.classList.add('btn-primary');
+  
+  const cancelBtn = document.getElementById('btn-cancel-edit');
+  if (cancelBtn) cancelBtn.remove();
+}
+
+// Add Transaction
+document.getElementById('form-add-tx').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const empId = document.getElementById('tx-emp').value;
+  const type = document.getElementById('tx-type').value;
+  const qty = parseInt(document.getElementById('tx-qty').value);
+  const date = document.getElementById('tx-date').value;
+  const fileInput = document.getElementById('tx-evidence');
+  const requireSign = document.getElementById('tx-require-sign').checked;
+
+  if (empId && qty > 0) {
+    const processSave = (evidenceUrl) => {
+      if (editingTxId) {
+        const tx = store.data.transactions.find(t => t.id === editingTxId);
+        if (tx) {
+          tx.empId = empId;
+          tx.type = type;
+          tx.qty = qty;
+          tx.amount = qty * store.data.pricePerTicket;
+          tx.date = date;
+          tx.requireSign = requireSign;
+          if (evidenceUrl !== undefined) {
+            tx.evidenceUrl = evidenceUrl;
+          }
+          store.saveData();
+        }
+        cancelEdit();
+      } else {
+        store.addTransaction(type, empId, qty, date, evidenceUrl || null, requireSign);
+        document.getElementById('form-add-tx').reset();
+        document.getElementById('tx-value-calc').textContent = '0';
+      }
+    };
+
+    if (fileInput.files && fileInput.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        processSave(evt.target.result);
+      };
+      reader.readAsDataURL(fileInput.files[0]);
+    } else {
+      processSave(editingTxId ? undefined : null);
+    }
+  }
+});
+
+// Add Gift
+document.getElementById('form-add-gift').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const name = document.getElementById('gift-name').value.trim();
+  const stock = parseInt(document.getElementById('gift-stock').value);
+
+  if (name && stock > 0) {
+    store.addGift(name, stock);
+    document.getElementById('form-add-gift').reset();
+  }
+});
+
+// Allocate Gift
+document.getElementById('form-allocate-gift').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const empId = document.getElementById('alloc-emp').value;
+  const giftId = document.getElementById('alloc-gift').value;
+  const qty = parseInt(document.getElementById('alloc-qty').value);
+
+  if (empId && giftId && qty > 0) {
+    store.allocateGift(empId, giftId, qty);
+    document.getElementById('form-allocate-gift').reset();
+  }
+});
+
+// Initialize Date Pickers to today
+document.getElementById('tx-date').valueAsDate = new Date();
+
+// Initial Render
+renderAll();
+initPrintForm();
+renderA4Logbook();
+
+// Print Function
+function switchPrintTab(type) {
+  // Hide all layouts
+  document.querySelectorAll('.print-layout').forEach(el => el.style.display = 'none');
+  // Show selected layout
+  document.getElementById('print-type-' + type).style.display = 'block';
+  
+  // Update active state on tab buttons
+  const btn1 = document.getElementById('btn-tab-type1');
+  const btn2 = document.getElementById('btn-tab-type2');
+  
+  if (type === '1') {
+    btn1.className = 'btn btn-primary';
+    btn1.style = '';
+    btn2.className = 'btn btn-secondary';
+    btn2.style = 'background: white; color: var(--text-dark); border: 1px solid var(--border);';
+  } else {
+    btn2.className = 'btn btn-primary';
+    btn2.style = '';
+    btn1.className = 'btn btn-secondary';
+    btn1.style = 'background: white; color: var(--text-dark); border: 1px solid var(--border);';
+  }
+}
+  </script>
+</body>
+</html>
