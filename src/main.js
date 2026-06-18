@@ -74,6 +74,57 @@ function renderDashboard() {
   });
 }
 
+function renderSummary() {
+  const emps = store.getEmployeesData();
+  const tbody = document.querySelector('#summary-emp-table tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  
+  if (emps.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-light);">ยังไม่มีข้อมูลพนักงาน</td></tr>';
+    return;
+  }
+
+  emps.forEach(emp => {
+    const empGifts = {};
+    store.data.giftAllocations
+      .filter(alloc => alloc.empId === emp.id)
+      .forEach(alloc => {
+        const gift = store.data.gifts.find(g => g.id === alloc.giftId);
+        if (gift) {
+          empGifts[gift.name] = (empGifts[gift.name] || 0) + alloc.qty;
+        }
+      });
+
+    const giftStr = Object.entries(empGifts)
+      .map(([name, qty]) => `${name} (${qty})`)
+      .join(', ') || '-';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="font-weight: 600; color: var(--text-dark);">${emp.name}</td>
+      <td>
+        <span style="font-weight: 500;">${formatNum(emp.requested)}</span>
+        <span style="font-size: 0.8rem; color: var(--text-light); display: block;">(${formatNum(emp.requested * store.data.pricePerTicket)} ฿)</span>
+      </td>
+      <td style="color: var(--secondary); font-weight: 600;">
+        <span>${formatNum(emp.remitted * store.data.pricePerTicket)}</span>
+        <span style="font-size: 0.8rem; color: var(--text-light); display: block; font-weight: normal;">(${formatNum(emp.remitted)} ฉบับ)</span>
+      </td>
+      <td style="${emp.outstanding > 0 ? 'color: var(--danger); font-weight:600;' : ''}">
+        <span>${formatNum(emp.outstanding)}</span>
+        <span style="font-size: 0.8rem; color: ${emp.outstanding > 0 ? 'var(--danger)' : 'var(--text-light)'}; display: block; font-weight: normal;">(${formatNum(emp.outstanding * store.data.pricePerTicket)} ฿)</span>
+      </td>
+      <td style="font-size: 0.9rem; color: #4b5563;">${giftStr}</td>
+      <td style="color: var(--primary); font-weight: 600;">
+        <span>${formatNum(emp.commission)}</span>
+        <span style="font-size: 0.8rem; color: var(--text-light); display: block; font-weight: normal;">(${(store.data.commissionRate * 100)}%)</span>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
 function renderEmployees() {
   const emps = store.getEmployeesData();
   const tbody = document.querySelector('#emp-manage-table tbody');
@@ -166,6 +217,7 @@ function renderGifts() {
 
 function renderAll() {
   renderDashboard();
+  renderSummary();
   renderEmployees();
   renderTransactions();
   renderGifts();
