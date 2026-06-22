@@ -1944,11 +1944,11 @@ function renderDashboard() {
       <h3 style="color: var(--text-dark); font-size: 1.1rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem;">ข้อมูลพนักงาน (ระดับบุคคล)</h3>
     </div>
     <div class="kpi-card" style="border-left-color: #3b82f6;">
-      <h4>พนักงานเบิกไป (ฉบับ)</h4>
+      <h4>พนักงานเบิกไป (ใบ)</h4>
       <div class="value">${formatNum(data.totalRequested)}</div>
     </div>
     <div class="kpi-card" style="border-left-color: #10b981;">
-      <h4>คงเหลือในมือ หน.แผนก (ฉบับ)</h4>
+      <h4>คงเหลือในมือ หน.แผนก (ใบ)</h4>
       <div class="value text-success">${formatNum(data.remainingQuota)}</div>
     </div>
     <div class="kpi-card" style="border-left-color: #8b5cf6;">
@@ -1956,7 +1956,7 @@ function renderDashboard() {
       <div class="value text-primary">${formatNum(data.totalRevenue)}</div>
     </div>
     <div class="kpi-card" style="border-left-color: #ef4444;">
-      <h4>พนักงานค้างนำส่ง (ฉบับ)</h4>
+      <h4>พนักงานค้างนำส่ง (ใบ)</h4>
       <div class="value text-danger">${formatNum(data.outstandingRemittance)}</div>
     </div>
     <div class="kpi-card" style="border-left-color: #f59e0b;">
@@ -2035,19 +2035,14 @@ function renderSummary() {
         <span style="font-size: 0.8rem; color: var(--text-light); display: block; font-weight: normal;">(${(store.data.commissionRate * 100)}%)</span>
       </td>
       <td>
-        <div style="display:flex; align-items:center; gap:0.25rem;">
-          <input type="number" class="note-input" style="width: 80px; text-align: right;" value="${emp.paidAmount || 0}"
-            onchange="store.setEmployeePaidAmount('${emp.id}', this.value); renderSummary(); renderEmployees(); renderRanking();"
-            onclick="this.select()" />
-          <span style="font-size: 0.85rem; color: var(--text-light);">฿</span>
-          ${emp.paid ? '<span title="จ่ายครบแล้ว" style="font-size:1.1rem;">✅</span>' : ''}
+        <div style="font-weight: 600; color: ${emp.paidAmount >= emp.commission && emp.commission > 0 ? 'var(--success)' : (emp.paidAmount > 0 ? 'var(--warning)' : 'var(--text-light)')}">
+          ${formatNum(emp.paidAmount)} ฿
+          ${emp.paidAmount >= emp.commission && emp.commission > 0 ? '✅' : ''}
+          ${emp.commission > emp.paidAmount && emp.commission > 0 ? `<span style="font-size:0.75rem; color: var(--danger); display:block; font-weight:normal;">(ค้างจ่าย ${formatNum(emp.commission - emp.paidAmount)})</span>` : ''}
         </div>
       </td>
       <td>
-        <input type="text" class="note-input" value="${emp.note.replace(/"/g,'&quot;')}"
-          placeholder="พิมพ์หมายเหตุ..."
-          onchange="store.setEmployeeNote('${emp.id}', this.value); renderSummary(); renderEmployees();"
-          onclick="this.select()" />
+        <span style="font-size: 0.85rem; color: var(--text-light);">${emp.note || '-'}</span>
       </td>
     `;
     tbody.appendChild(tr);
@@ -2055,7 +2050,7 @@ function renderSummary() {
 }
 
 function renderEmployees() {
-  const emps = store.getEmployeesData();
+  const emps = store.getEmployeesData().sort((a, b) => a.name.localeCompare(b.name, 'th'));
   const tbody = document.querySelector('#emp-manage-table tbody');
   tbody.innerHTML = '';
   
@@ -2089,12 +2084,13 @@ function renderEmployees() {
       </td>
       <td>
         <div style="display:flex; align-items:center; gap:0.25rem; justify-content:center;">
-          <input type="number" class="note-input" style="width: 80px; text-align: right;" value="${emp.paidAmount || 0}"
+          <input type="number" class="note-input" style="width: 70px; text-align: right; border-color: ${emp.paidAmount >= emp.commission && emp.commission > 0 ? '#10b981' : 'var(--border)'};" value="${emp.paidAmount || 0}"
             onchange="store.setEmployeePaidAmount('${emp.id}', this.value); renderEmployees(); renderSummary(); renderRanking();"
             onclick="this.select()" />
           <span style="font-size: 0.85rem; color: var(--text-light);">฿</span>
-          ${emp.paid ? '<span title="จ่ายครบแล้ว" style="font-size:1.1rem;">✅</span>' : ''}
+          ${emp.paidAmount >= emp.commission && emp.commission > 0 ? '<span title="จ่ายครบแล้ว" style="font-size:1.1rem;">✅</span>' : ''}
         </div>
+        ${emp.commission > emp.paidAmount && emp.commission > 0 ? `<div style="font-size:0.7rem; color:var(--danger); text-align:center; margin-top:2px;">ค้างจ่าย ${formatNum(emp.commission - emp.paidAmount)} ฿</div>` : ''}
       </td>
       <td>
         <input type="text" class="note-input" value="${emp.note.replace(/"/g,'&quot;')}"
@@ -2121,7 +2117,7 @@ function deleteEmployee(empId, empName) {
 
 function renderTransactions() {
   // Update Dropdowns
-  const emps = store.getEmployeesData();
+  const emps = store.getEmployeesData().sort((a, b) => a.name.localeCompare(b.name, 'th'));
   const txEmpSelect = document.getElementById('tx-emp');
   txEmpSelect.innerHTML = '<option value="">-- เลือกพนักงาน --</option>';
   emps.forEach(emp => {
@@ -2474,19 +2470,19 @@ function shareAsText() {
   text += `👥 อันดับพนักงาน:\n`;
   emps.forEach((emp, i) => {
     const medal = rankMedals[i] || `${i+1}.`;
-    text += `${medal} ${emp.name} — ยอดเบิก ${formatNum(emp.requested)} ฉบับ\n`;
+    text += `${medal} ${emp.name} — ยอดเบิก ${formatNum(emp.requested)} ใบ\n`;
   });
   
   if (managers.length > 0) {
     text += `${'─'.repeat(30)}\n`;
     managers.forEach(mgr => {
-      text += `• ${mgr.name} — ยอดเบิก ${formatNum(mgr.requested)} ฉบับ\n`;
+      text += `• ${mgr.name} — ยอดเบิก ${formatNum(mgr.requested)} ใบ\n`;
     });
   }
   
   text += `${'─'.repeat(30)}\n`;
-  text += `📦 ไปรษณียบัตรคงเหลือในแผนก: ${formatNum(totalStockRemaining)} ฉบับ\n`;
-  text += `💎 รวมยอดเบิกทั้งหมด: ${formatNum(overview.totalRequested)} ฉบับ`;
+  text += `📦 ไปรษณียบัตรคงเหลือในแผนก: ${formatNum(totalStockRemaining)} ใบ\n`;
+  text += `💎 รวมยอดเบิกทั้งหมด: ${formatNum(overview.totalRequested)} ใบ`;
 
   document.getElementById('share-text-content').value = text;
   const encoded = encodeURIComponent(text);
