@@ -2301,8 +2301,8 @@ function renderRanking() {
   // Let's show: ยอดไปรษณียบัตรคงเหลือในโควต้ารวม (โควต้ารวม - เบิกไปแล้ว) และ คงเหลือในมือ หน.แผนก
   const totalStockRemaining = overview.quota - overview.totalRequested;
 
-  // Helper to generate 3D stacks
-  const get3DStacksHtml = (totalQty) => {
+  // Helper to generate text statistics for remaining stock
+  const getStockStatsHtml = (totalQty) => {
     const boxCapacity = 4000;
     const packCapacity = 100;
     
@@ -2310,190 +2310,17 @@ function renderRanking() {
     let remainder = totalQty % boxCapacity;
     let packs = Math.floor(remainder / packCapacity);
     let singleSheets = remainder % packCapacity;
-    
-    // Draw 3D Box (Isometric using CSS 3D Transforms)
-    // Box dimensions: width 50px, depth 40px, height 35px
-    // Rendered using clean CSS isometric projection: rotateX(60deg) rotateZ(-45deg)
-    const drawBox = (x, y, z) => {
-      // Shaded colors for faces to give realistic 3D volume
-      const topColor = '#f59e0b';
-      const frontColor = '#d97706';
-      const sideColor = '#b45309';
-      return `
-        <div style="
-          position: absolute;
-          transform: translate3d(${x}px, ${y}px, ${z}px);
-          width: 50px;
-          height: 40px;
-          transform-style: preserve-3d;
-        ">
-          <!-- Top Face -->
-          <div style="
-            position: absolute;
-            width: 50px;
-            height: 40px;
-            background: ${topColor};
-            border: 1px solid rgba(255,255,255,0.4);
-            transform: translate3d(0, 0, 30px);
-            box-shadow: inset 0 0 10px rgba(255,255,255,0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 2px;
-          ">
-            <span style="font-size: 8px; color: #78350f; font-weight: bold; transform: rotate(45deg);">4,000</span>
-          </div>
-          <!-- Front Face (Left Side) -->
-          <div style="
-            position: absolute;
-            width: 50px;
-            height: 30px;
-            background: ${frontColor};
-            border: 1px solid rgba(0,0,0,0.15);
-            transform: rotateX(-90deg) translate3d(0, -15px, 20px);
-            transform-origin: bottom center;
-          "></div>
-          <!-- Side Face (Right Side) -->
-          <div style="
-            position: absolute;
-            width: 40px;
-            height: 30px;
-            background: ${sideColor};
-            border: 1px solid rgba(0,0,0,0.2);
-            transform: rotateY(90deg) translate3d(20px, 0, 30px);
-            transform-origin: center right;
-          "></div>
-        </div>
-      `;
-    };
 
-    // Draw 3D Pack (Gohn - pack of 100, thinner)
-    // Pack dimensions: width 35px, depth 25px, height 8px
-    const drawPack = (x, y, z) => {
-      const topColor = '#60a5fa';
-      const frontColor = '#3b82f6';
-      const sideColor = '#2563eb';
-      return `
-        <div style="
-          position: absolute;
-          transform: translate3d(${x}px, ${y}px, ${z}px);
-          width: 35px;
-          height: 25px;
-          transform-style: preserve-3d;
-        ">
-          <!-- Top Face -->
-          <div style="
-            position: absolute;
-            width: 35px;
-            height: 25px;
-            background: ${topColor};
-            border: 1px solid rgba(255,255,255,0.5);
-            transform: translate3d(0, 0, 8px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 1px;
-          ">
-            <span style="font-size: 6px; color: #1e3a8a; font-weight: bold; transform: scale(0.85);">100</span>
-          </div>
-          <!-- Front Face -->
-          <div style="
-            position: absolute;
-            width: 35px;
-            height: 8px;
-            background: ${frontColor};
-            border: 1px solid rgba(0,0,0,0.15);
-            transform: rotateX(-90deg) translate3d(0, -4px, 21px);
-            transform-origin: bottom center;
-          "></div>
-          <!-- Side Face -->
-          <div style="
-            position: absolute;
-            width: 25px;
-            height: 8px;
-            background: ${sideColor};
-            border: 1px solid rgba(0,0,0,0.2);
-            transform: rotateY(90deg) translate3d(12.5px, 0, 22.5px);
-            transform-origin: center right;
-          "></div>
-        </div>
-      `;
-    };
-
-    // We stack them in an grid system.
-    // To prevent cluttering, let's stack boxes up to 5 high, arranged in columns.
-    let boxesHtml = '';
-    let boxCols = 6;
-    for (let i = 0; i < boxes; i++) {
-      const col = i % boxCols;
-      const row = Math.floor(i / boxCols) % 3; // depth rows
-      const h = Math.floor(i / (boxCols * 3)); // height stack level
-      
-      // Calculate isometric spacing
-      const x = col * 75 - row * 15;
-      const y = row * 50;
-      const z = h * 32;
-      boxesHtml += drawBox(x, y, z);
-    }
-
-    // Stacking Packs next to boxes
-    let packsHtml = '';
-    let startX = (Math.min(boxes, boxCols) * 75) + 30;
-    if (boxes === 0) startX = 20;
-    for (let i = 0; i < packs; i++) {
-      const col = i % 4;
-      const row = Math.floor(i / 4) % 2;
-      const h = Math.floor(i / 8);
-      
-      const x = startX + col * 48 - row * 10;
-      const y = row * 32;
-      const z = h * 9;
-      packsHtml += drawPack(x, y, z);
-    }
-
-    // Return the isometric view container with perspective settings
     return `
       <div style="
-        position: relative;
-        width: 100%;
-        min-height: 190px;
-        margin-top: 1rem;
-        background: rgba(0,0,0,0.2);
-        border-radius: 12px;
-        padding: 15px;
-        overflow: hidden;
         display: flex;
-        flex-direction: column;
-        justify-content: flex-end;
-        border: 1px solid rgba(255,255,255,0.1);
+        gap: 0.75rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
       ">
-        <div style="font-size: 0.8rem; opacity: 0.95; font-weight: bold; margin-bottom: 5px; color: white; display: flex; align-items: center; gap: 0.5rem; z-index: 200;">
-          <span>📦 คลังของคงเหลือในแผนก:</span>
-          <span style="background: rgba(255,255,255,0.2); padding: 1px 8px; border-radius: 20px;">${boxes} กล่อง</span>
-          <span style="background: rgba(255,255,255,0.2); padding: 1px 8px; border-radius: 20px;">${packs} ก้อน</span>
-          ${singleSheets > 0 ? `<span style="background: rgba(255,255,255,0.2); padding: 1px 8px; border-radius: 20px;">${singleSheets} ใบ</span>` : ''}
-        </div>
-        
-        <!-- 3D Perspective Wrapper -->
-        <div style="
-          position: relative;
-          width: 100%;
-          height: 150px;
-          perspective: 800px;
-          perspective-origin: 50% 0%;
-        ">
-          <!-- Isometric coordinate spacer -->
-          <div style="
-            position: absolute;
-            left: 20px;
-            bottom: 20px;
-            transform: rotateX(55deg) rotateZ(-30deg);
-            transform-style: preserve-3d;
-          ">
-            ${boxesHtml}
-            ${packsHtml}
-          </div>
-        </div>
+        <div style="background: rgba(255, 255, 255, 0.2); padding: 0.5rem 1rem; border-radius: 12px; font-weight: bold; font-size: 0.95rem;">📦 ${boxes} กล่อง</div>
+        <div style="background: rgba(255, 255, 255, 0.2); padding: 0.5rem 1rem; border-radius: 12px; font-weight: bold; font-size: 0.95rem;">✉️ ${packs} ก้อน (ก้อนละ 100 ใบ)</div>
+        ${singleSheets > 0 ? `<div style="background: rgba(255, 255, 255, 0.2); padding: 0.5rem 1rem; border-radius: 12px; font-weight: bold; font-size: 0.95rem;">📄 ${singleSheets} ใบ</div>` : ''}
       </div>
     `;
   };
@@ -2509,7 +2336,7 @@ function renderRanking() {
         </div>
         <div style="font-size: 3rem; opacity: 0.9; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)); align-self: center;">📦</div>
       </div>
-      ${get3DStacksHtml(totalStockRemaining)}
+      ${getStockStatsHtml(totalStockRemaining)}
     </div>
   `;
 
@@ -2798,8 +2625,8 @@ async function shareAsImage() {
     });
   }
 
-  // Helper to generate 3D stacks
-  const get3DStacksHtml = (totalQty) => {
+  // Helper to generate text statistics for remaining stock
+  const getStockStatsHtml = (totalQty) => {
     const boxCapacity = 4000;
     const packCapacity = 100;
     
@@ -2807,72 +2634,17 @@ async function shareAsImage() {
     let remainder = totalQty % boxCapacity;
     let packs = Math.floor(remainder / packCapacity);
     let singleSheets = remainder % packCapacity;
-    
-    const drawBox = (xOffset, yOffset, zIndex) => `
-      <div style="
-        position: absolute;
-        left: ${xOffset}px;
-        bottom: ${yOffset}px;
-        width: 40px;
-        height: 25px;
-        z-index: ${zIndex};
-        transform-style: preserve-3d;
-      ">
-        <div style="position: absolute; width: 40px; height: 25px; background: #d97706; border: 1px solid #b45309; transform: rotateY(0deg) translateZ(10px); border-radius: 2px;">
-          <div style="font-size: 8px; color: #fff; font-weight: bold; text-align: center; line-height: 23px; transform: scale(0.85);">4,000</div>
-        </div>
-        <div style="position: absolute; width: 20px; height: 25px; background: #b45309; border: 1px solid #78350f; left: 30px; transform: rotateY(90deg) translateZ(10px);"></div>
-        <div style="position: absolute; width: 40px; height: 20px; background: #f59e0b; border: 1px solid #d97706; top: -10px; transform: rotateX(90deg) translateZ(10px);"></div>
-      </div>
-    `;
-
-    const drawPack = (xOffset, yOffset, zIndex) => `
-      <div style="
-        position: absolute;
-        left: ${xOffset}px;
-        bottom: ${yOffset}px;
-        width: 28px;
-        height: 8px;
-        z-index: ${zIndex};
-        transform-style: preserve-3d;
-      ">
-        <div style="position: absolute; width: 28px; height: 8px; background: #3b82f6; border: 1px solid #1d4ed8; transform: rotateY(0deg) translateZ(5px); border-radius: 1px;">
-          <div style="font-size: 5px; color: #fff; text-align: center; line-height: 7px; font-weight: bold;">100</div>
-        </div>
-        <div style="position: absolute; width: 10px; height: 8px; background: #1d4ed8; border: 1px solid #1e3a8a; left: 23px; transform: rotateY(90deg) translateZ(5px);"></div>
-        <div style="position: absolute; width: 28px; height: 10px; background: #93c5fd; border: 1px solid #3b82f6; top: -5px; transform: rotateX(90deg) translateZ(5px);"></div>
-      </div>
-    `;
-
-    let boxesHtml = '';
-    let maxCols = 5;
-    for (let i = 0; i < boxes; i++) {
-      const col = i % maxCols;
-      const row = Math.floor(i / maxCols) % 3;
-      const stackHeight = Math.floor(i / (maxCols * 3));
-      const x = col * 46 + row * 10;
-      const y = stackHeight * 28 + row * 6;
-      boxesHtml += drawBox(x, y, i + stackHeight * 10);
-    }
-
-    let packsHtml = '';
-    let startX = (Math.min(boxes, maxCols) * 46) + 20 || 0;
-    if (boxes === 0) startX = 0;
-    for (let i = 0; i < packs; i++) {
-      const col = i % 4;
-      const stackHeight = Math.floor(i / 4);
-      const x = startX + col * 32;
-      const y = stackHeight * 10;
-      packsHtml += drawPack(x, y, 100 + i);
-    }
 
     return `
-      <div style="position: relative; width: 100%; min-height: 110px; margin-top: 0.75rem; background: rgba(0,0,0,0.1); border-radius: 12px; padding: 10px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end;">
-        <div style="position: absolute; top: 8px; left: 10px; font-size: 0.7rem; opacity: 0.9; font-weight: bold; z-index: 200; color: white;">📦 คงเหลือ: ${boxes} กล่อง + ${packs} ก้อน ${singleSheets > 0 ? `+ ${singleSheets} ใบ` : ''}</div>
-        <div style="position: relative; width: 100%; height: 80px; transform: scale(0.95); transform-origin: left bottom;">
-          ${boxesHtml}
-          ${packsHtml}
-        </div>
+      <div style="
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+        flex-wrap: wrap;
+      ">
+        <div style="background: rgba(255, 255, 255, 0.2); padding: 0.4rem 0.8rem; border-radius: 10px; font-weight: bold; font-size: 0.8rem;">📦 ${boxes} กล่อง</div>
+        <div style="background: rgba(255, 255, 255, 0.2); padding: 0.4rem 0.8rem; border-radius: 10px; font-weight: bold; font-size: 0.8rem;">✉️ ${packs} ก้อน (ก้อนละ 100 ใบ)</div>
+        ${singleSheets > 0 ? `<div style="background: rgba(255, 255, 255, 0.2); padding: 0.4rem 0.8rem; border-radius: 10px; font-weight: bold; font-size: 0.8rem;">📄 ${singleSheets} ใบ</div>` : ''}
       </div>
     `;
   };
@@ -2887,7 +2659,7 @@ async function shareAsImage() {
         </div>
         <div style="font-size: 2.2rem; opacity: 0.8;">📦</div>
       </div>
-      ${get3DStacksHtml(totalStockRemaining)}
+      ${getStockStatsHtml(totalStockRemaining)}
     </div>
   `;
 
