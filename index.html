@@ -118,10 +118,97 @@ body {
 }
 
 .sidebar-footer {
-  padding: 1.5rem;
+  padding: 1rem 1.5rem 1.5rem;
   border-top: 1px solid var(--border);
   background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
+.data-backup-section {
+  background: linear-gradient(135deg, #1e1b4b, #4f46e5);
+  border-radius: 10px;
+  padding: 0.85rem;
+  color: white;
+}
+.backup-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  opacity: 0.95;
+}
+.backup-btns {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+.btn-backup {
+  flex: 1;
+  background: rgba(255,255,255,0.2);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 7px;
+  padding: 0.45rem 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: center;
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+.btn-backup:hover { background: rgba(255,255,255,0.3); }
+.btn-import { cursor: pointer; }
+.backup-hint {
+  font-size: 0.7rem;
+  opacity: 0.65;
+  text-align: center;
+}
+/* Paid checkbox & note input */
+.paid-toggle {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  gap: 0.25rem;
+}
+.paid-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: #10b981;
+  cursor: pointer;
+}
+.paid-checkmark {
+  font-size: 1rem;
+  line-height: 1;
+}
+.note-input {
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 0.4rem 0.65rem;
+  font-size: 0.85rem;
+  font-family: inherit;
+  width: 180px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  color: var(--text-dark);
+}
+.note-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(79,70,229,0.12);
+}
+.btn-delete-emp {
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.15s;
+}
+.btn-delete-emp:hover { background: #fecaca; }
 
 .price-info {
   background: white;
@@ -545,6 +632,27 @@ input:focus, select:focus {
   .top-header {
     display: none; /* We use sticky mobile-header instead */
   }
+
+  .ranking-header-card {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.25rem;
+  }
+
+  .ranking-share-btns {
+    width: 100%;
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .ranking-cards-container {
+    grid-template-columns: 1fr;
+  }
+
+  .rank-podium-row {
+    flex-direction: column;
+    align-items: center;
+  }
 }
 
 @media print {
@@ -577,6 +685,411 @@ input:focus, select:focus {
     border: none !important;
     padding: 0 !important;
   }
+}
+
+/* ===== RANKING STYLES ===== */
+.ranking-header-card {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4f46e5 100%);
+  border-radius: 16px;
+  padding: 1.75rem 2rem;
+  margin-bottom: 1.5rem;
+  color: white;
+  box-shadow: 0 8px 32px rgba(79, 70, 229, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+.ranking-header-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -10%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.ranking-trophy {
+  font-size: 3.5rem;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+  flex-shrink: 0;
+}
+.ranking-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem;
+}
+.ranking-subtitle {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin: 0;
+}
+.ranking-share-btns {
+  display: flex;
+  gap: 0.75rem;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.btn-share-text {
+  background: rgba(255,255,255,0.15);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.3);
+  backdrop-filter: blur(10px);
+  padding: 0.6rem 1.25rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.btn-share-text:hover {
+  background: rgba(255,255,255,0.25);
+  transform: translateY(-1px);
+}
+.btn-share-img {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.25rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.btn-share-img:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.5);
+}
+
+/* Podium top 3 */
+.rank-podium-row {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  align-items: flex-end;
+}
+.rank-podium-card {
+  border-radius: 20px;
+  padding: 1.5rem 1.25rem;
+  text-align: center;
+  position: relative;
+  flex: 1;
+  max-width: 220px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  transition: transform 0.2s;
+}
+.rank-podium-card:hover { transform: translateY(-4px); }
+.rank-podium-card.rank-1 {
+  background: linear-gradient(145deg, #fffbeb, #fef3c7);
+  border: 2px solid #f59e0b;
+  order: 2;
+  flex: 1.15;
+}
+.rank-podium-card.rank-2 {
+  background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+  border: 2px solid #94a3b8;
+  order: 1;
+}
+.rank-podium-card.rank-3 {
+  background: linear-gradient(145deg, #fff7ed, #ffedd5);
+  border: 2px solid #c2785e;
+  order: 3;
+}
+.rank-medal {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+.rank-podium-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+.rank-podium-score {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--primary);
+  line-height: 1;
+}
+.rank-podium-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.25rem;
+}
+.rank-podium-sub {
+  font-size: 0.8rem;
+  color: #4b5563;
+  margin-top: 0.5rem;
+}
+.rank-badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.rank-1 .rank-badge { background: #f59e0b; color: white; }
+.rank-2 .rank-badge { background: #94a3b8; color: white; }
+.rank-3 .rank-badge { background: #c2785e; color: white; }
+
+/* Other ranks list */
+.ranking-cards-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+.rank-list-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: white;
+  border-radius: 14px;
+  padding: 1rem 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+.rank-list-item:hover {
+  border-color: var(--primary);
+  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.12);
+  transform: translateX(4px);
+}
+.rank-list-num {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text-light);
+  width: 40px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.rank-list-info {
+  flex: 1;
+}
+.rank-list-name {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--text-dark);
+}
+.rank-list-detail {
+  font-size: 0.8rem;
+  color: var(--text-light);
+  margin-top: 2px;
+}
+.rank-list-right {
+  text-align: right;
+}
+.rank-list-score {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+.rank-list-score-label {
+  font-size: 0.75rem;
+  color: var(--text-light);
+}
+.progress-bar-outer {
+  background: #e5e7eb;
+  border-radius: 999px;
+  height: 6px;
+  margin-top: 4px;
+  width: 100px;
+}
+.progress-bar-inner {
+  background: linear-gradient(90deg, var(--primary), #818cf8);
+  height: 6px;
+  border-radius: 999px;
+  transition: width 0.8s ease;
+}
+
+/* Share Modal */
+.share-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.share-modal-inner {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  max-width: 520px;
+  width: 90%;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.25);
+  animation: fadeIn 0.3s ease;
+}
+.share-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.share-modal-header h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+.share-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  color: var(--text-light);
+  padding: 0.25rem;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.share-modal-close:hover { background: #f3f4f6; }
+.share-textarea {
+  width: 100%;
+  height: 220px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+  font-family: 'Kanit', monospace;
+  font-size: 0.9rem;
+  color: var(--text-dark);
+  resize: none;
+  line-height: 1.6;
+  outline: none;
+}
+.share-modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+.btn-line {
+  background: #06c755;
+  color: white;
+  text-decoration: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background 0.2s;
+}
+.btn-line:hover { background: #05b34c; }
+
+/* Snapshot card (hidden, used for image capture) */
+#ranking-snapshot {
+  position: fixed;
+  left: -9999px;
+  top: 0;
+  width: 540px;
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #4f46e5 100%);
+  padding: 2rem;
+  font-family: 'Kanit', 'Inter', sans-serif;
+  color: white;
+  border-radius: 24px;
+}
+#ranking-snapshot h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 0.25rem;
+}
+#ranking-snapshot .snap-subtitle {
+  text-align: center;
+  font-size: 0.85rem;
+  opacity: 0.75;
+  margin-bottom: 1.5rem;
+}
+#ranking-snapshot .snap-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(255,255,255,0.1);
+  border-radius: 14px;
+  padding: 0.9rem 1.25rem;
+  margin-bottom: 0.6rem;
+}
+#ranking-snapshot .snap-rank {
+  font-size: 1.4rem;
+  font-weight: 800;
+  width: 36px;
+  text-align: center;
+  flex-shrink: 0;
+}
+#ranking-snapshot .snap-info {
+  flex: 1;
+}
+#ranking-snapshot .snap-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+#ranking-snapshot .snap-detail {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  margin-top: 2px;
+}
+#ranking-snapshot .snap-score {
+  font-size: 1.3rem;
+  font-weight: 800;
+  text-align: right;
+}
+#ranking-snapshot .snap-score-label {
+  font-size: 0.7rem;
+  opacity: 0.7;
+  text-align: right;
+}
+#ranking-snapshot .snap-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.75rem;
+  opacity: 0.6;
+}
+.snap-top-row {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+.snap-top-card {
+  background: rgba(255,255,255,0.15);
+  border-radius: 16px;
+  padding: 1rem;
+  text-align: center;
+  flex: 1;
+}
+.snap-top-medal {
+  font-size: 1.8rem;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+.snap-top-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.snap-top-score {
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+.snap-top-label {
+  font-size: 0.65rem;
+  opacity: 0.7;
 }
   </style>
 </head>
@@ -613,6 +1126,9 @@ input:focus, select:focus {
         <button class="nav-btn" data-view="gifts">
           <span>🎁</span> ของสมมนาคุณ
         </button>
+        <button class="nav-btn" data-view="ranking">
+          <span>🏅</span> อันดับยอดขาย
+        </button>
         <button class="nav-btn" data-view="print">
           <span>🖨️</span> พิมพ์แบบฟอร์มเบิก
         </button>
@@ -621,6 +1137,17 @@ input:focus, select:focus {
         <div class="price-info">
           <div>ราคาฉบับละ <b>3 บาท</b></div>
           <div>ค่าคอมมิชชัน <b>10%</b></div>
+        </div>
+        <div class="data-backup-section">
+          <div class="backup-label">💾 สำรอง / กู้คืนข้อมูล</div>
+          <div class="backup-btns">
+            <button class="btn-backup" onclick="exportData()" title="ดาวน์โหลดไฟล์สำรองข้อมูล">📤 Export</button>
+            <label class="btn-backup btn-import" title="นำเข้าข้อมูลจากไฟล์สำรอง">
+              📥 Import
+              <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(this)" />
+            </label>
+          </div>
+          <div class="backup-hint">กดก่อน update เวอร์ชันใหม่</div>
         </div>
       </div>
     </aside>
@@ -674,6 +1201,8 @@ input:focus, select:focus {
                   <th>เหลือค้าง (ฉบับ)</th>
                   <th>ของสมมนาคุณที่ได้รับ</th>
                   <th>เปอร์ที่ได้ (บาท)</th>
+                  <th style="text-align:center;">✅ จ่ายแล้ว</th>
+                  <th>📝 หมายเหตุ</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -702,6 +1231,9 @@ input:focus, select:focus {
                   <th>ค้างส่ง (ฉบับ)</th>
                   <th>ยอดเงินนำส่ง (฿)</th>
                   <th>คอมมิชชัน (฿)</th>
+                  <th style="text-align:center;">✅ จ่ายแล้ว</th>
+                  <th>📝 หมายเหตุ</th>
+                  <th>จัดการ</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -822,6 +1354,67 @@ input:focus, select:focus {
                   <th>จำนวนทั้งหมด</th>
                   <th>แจกไปแล้ว</th>
                   <th>คงเหลือในคลัง</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ranking View -->
+      <div id="view-ranking" class="view-section">
+        <!-- Header card -->
+        <div class="ranking-header-card no-print">
+          <div class="ranking-trophy">🏆</div>
+          <div>
+            <h2 class="ranking-title">อันดับยอดขายไปรษณียบัตร</h2>
+            <p class="ranking-subtitle">World Cup 2026 — เรียงตามยอดนำส่งสูงสุด</p>
+          </div>
+          <div class="ranking-share-btns">
+            <button class="btn btn-share-text" id="btn-share-text" onclick="shareAsText()">
+              <span>💬</span> แชร์ข้อความ
+            </button>
+            <button class="btn btn-share-img" id="btn-share-img" onclick="shareAsImage()">
+              <span>🖼️</span> แชร์รูปภาพ
+            </button>
+          </div>
+        </div>
+
+        <!-- Share text preview modal -->
+        <div id="share-text-modal" class="share-modal" style="display:none;">
+          <div class="share-modal-inner">
+            <div class="share-modal-header">
+              <h3>📋 ข้อความสำหรับแชร์</h3>
+              <button onclick="document.getElementById('share-text-modal').style.display='none'" class="share-modal-close">✕</button>
+            </div>
+            <textarea id="share-text-content" class="share-textarea" readonly></textarea>
+            <div class="share-modal-actions">
+              <button class="btn btn-primary" onclick="copyShareText()" id="btn-copy-text">📋 คัดลอก</button>
+              <a id="line-share-link" href="#" target="_blank" class="btn btn-line">💚 แชร์ใน LINE</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Leaderboard Cards -->
+        <div id="ranking-cards" class="ranking-cards-container"></div>
+
+        <!-- Full table -->
+        <div class="card" style="margin-top: 1.5rem;">
+          <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+            <h3>📊 ตารางรายละเอียดทั้งหมด</h3>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table" id="ranking-table">
+              <thead>
+                <tr>
+                  <th style="text-align:center;">#</th>
+                  <th>ชื่อพนักงาน</th>
+                  <th>นำส่งแล้ว (ฉบับ)</th>
+                  <th>ยอดเงิน (฿)</th>
+                  <th>ค้างส่ง (ฉบับ)</th>
+                  <th>คอมมิชชัน (฿)</th>
+                  <th>ความคืบหน้า</th>
                 </tr>
               </thead>
               <tbody></tbody>
@@ -1072,9 +1665,26 @@ class Store {
   // --- Employees ---
   addEmployee(name) {
     const id = Date.now().toString();
-    this.data.employees.push({ id, name });
+    this.data.employees.push({ id, name, paid: false, note: '' });
     this.saveData();
     return id;
+  }
+
+  setEmployeePaid(empId, paid) {
+    const emp = this.data.employees.find(e => e.id === empId);
+    if (emp) { emp.paid = paid; this.saveData(); }
+  }
+
+  setEmployeeNote(empId, note) {
+    const emp = this.data.employees.find(e => e.id === empId);
+    if (emp) { emp.note = note; this.saveData(); }
+  }
+
+  deleteEmployee(empId) {
+    this.data.employees = this.data.employees.filter(e => e.id !== empId);
+    this.data.transactions = this.data.transactions.filter(t => t.empId !== empId);
+    this.data.giftAllocations = this.data.giftAllocations.filter(a => a.empId !== empId);
+    this.saveData();
   }
 
   getEmployeesData() {
@@ -1097,7 +1707,9 @@ class Store {
         remitted,
         outstanding,
         revenue,
-        commission
+        commission,
+        paid: emp.paid || false,
+        note: emp.note || ''
       };
     });
   }
@@ -1281,7 +1893,7 @@ function renderSummary() {
   tbody.innerHTML = '';
   
   if (emps.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-light);">ยังไม่มีข้อมูลพนักงาน</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-light);">ยังไม่มีข้อมูลพนักงาน</td></tr>';
     return;
   }
 
@@ -1302,6 +1914,7 @@ function renderSummary() {
       .join(', ') || '-';
 
     const tr = document.createElement('tr');
+    tr.style.background = emp.paid ? 'linear-gradient(90deg, #f0fdf4, #ffffff)' : '';
     tr.innerHTML = `
       <td style="font-weight: 600; color: var(--text-dark);">${emp.name}</td>
       <td>
@@ -1321,6 +1934,19 @@ function renderSummary() {
         <span>${formatNum(emp.commission)}</span>
         <span style="font-size: 0.8rem; color: var(--text-light); display: block; font-weight: normal;">(${(store.data.commissionRate * 100)}%)</span>
       </td>
+      <td style="text-align:center;">
+        <label class="paid-toggle" title="ติ๊กเมื่อจ่ายเงินครบแล้ว">
+          <input type="checkbox" class="paid-checkbox" ${emp.paid ? 'checked' : ''}
+            onchange="store.setEmployeePaid('${emp.id}', this.checked); renderSummary(); renderEmployees(); renderRanking();" />
+          <span class="paid-checkmark">${emp.paid ? '✅' : '⬜'}</span>
+        </label>
+      </td>
+      <td>
+        <input type="text" class="note-input" value="${emp.note.replace(/"/g,'&quot;')}"
+          placeholder="พิมพ์หมายเหตุ..."
+          onchange="store.setEmployeeNote('${emp.id}', this.value); renderSummary(); renderEmployees();"
+          onclick="this.select()" />
+      </td>
     `;
     tbody.appendChild(tr);
   });
@@ -1332,22 +1958,48 @@ function renderEmployees() {
   tbody.innerHTML = '';
   
   if (emps.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-light);">ยังไม่มีข้อมูลพนักงาน</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: var(--text-light);">ยังไม่มีข้อมูลพนักงาน</td></tr>';
   }
 
   emps.forEach(emp => {
     const tr = document.createElement('tr');
+    tr.style.background = emp.paid ? 'linear-gradient(90deg, #f0fdf4, #ffffff)' : '';
     tr.innerHTML = `
       <td>${emp.id.slice(-4)}</td>
-      <td>${emp.name}</td>
+      <td style="font-weight:600;">${emp.name}</td>
       <td>${formatNum(emp.requested)}</td>
       <td>${formatNum(emp.remitted)}</td>
       <td style="${emp.outstanding > 0 ? 'color: var(--danger); font-weight:600;' : ''}">${formatNum(emp.outstanding)}</td>
       <td>${formatNum(emp.revenue)}</td>
       <td style="color: var(--secondary); font-weight: 600;">${formatNum(emp.commission)}</td>
+      <td style="text-align:center;">
+        <label class="paid-toggle">
+          <input type="checkbox" class="paid-checkbox" ${emp.paid ? 'checked' : ''}
+            onchange="store.setEmployeePaid('${emp.id}', this.checked); renderEmployees(); renderSummary(); renderRanking();" />
+          <span class="paid-checkmark">${emp.paid ? '✅' : '⬜'}</span>
+        </label>
+      </td>
+      <td>
+        <input type="text" class="note-input" value="${emp.note.replace(/"/g,'&quot;')}"
+          placeholder="หมายเหตุ..."
+          onchange="store.setEmployeeNote('${emp.id}', this.value); renderEmployees(); renderSummary();"
+          onclick="this.select()" />
+      </td>
+      <td>
+        <button class="btn-delete-emp" onclick="deleteEmployee('${emp.id}', '${emp.name}')" title="ลบพนักงาน">
+          🗑️
+        </button>
+      </td>
     `;
     tbody.appendChild(tr);
   });
+}
+
+function deleteEmployee(empId, empName) {
+  if (confirm(`ลบพนักงาน "${empName}" ออกจากระบบ?\n(รายการทั้งหมดของพนักงานคนนี้จะถูกลบด้วย)`)) {
+    store.deleteEmployee(empId);
+    renderAll();
+  }
 }
 
 function renderTransactions() {
@@ -1495,6 +2147,232 @@ function renderAll() {
   renderTransactions();
   renderGifts();
   renderMasterHistory();
+  renderRanking();
+}
+
+// ===== RANKING RENDER =====
+function getRankingData() {
+  return store.getEmployeesData()
+    .sort((a, b) => b.remitted - a.remitted || b.requested - a.requested);
+}
+
+const rankMedals = ['🥇', '🥈', '🥉'];
+const rankLabels = ['อันดับ 1', 'อันดับ 2', 'อันดับ 3'];
+
+function renderRanking() {
+  const emps = getRankingData();
+  const maxRemitted = emps.length > 0 ? (emps[0].remitted || 1) : 1;
+  const cardsContainer = document.getElementById('ranking-cards');
+  const tbody = document.querySelector('#ranking-table tbody');
+  if (!cardsContainer || !tbody) return;
+
+  // Build podium (top 3) + list (4+)
+  let podiumHtml = '';
+  let listHtml = '';
+  if (emps.length === 0) {
+    cardsContainer.innerHTML = '<div style="text-align:center; padding: 3rem; color: var(--text-light); font-size: 1.1rem;">⚠️ ยังไม่มีข้อมูลพนักงาน</div>';
+  } else {
+    const top3 = emps.slice(0, 3);
+    podiumHtml = `<div class="rank-podium-row">`;
+    top3.forEach((emp, i) => {
+      podiumHtml += `
+        <div class="rank-podium-card rank-${i+1}">
+          <div class="rank-badge">${rankLabels[i]}</div>
+          <span class="rank-medal">${rankMedals[i]}</span>
+          <div class="rank-podium-name">${emp.name}</div>
+          <div class="rank-podium-score">${formatNum(emp.remitted)}</div>
+          <div class="rank-podium-label">ฉบับนำส่ง</div>
+          <div class="rank-podium-sub">เงิน ${formatNum(emp.remitted * store.data.pricePerTicket)} ฿</div>
+          ${emp.outstanding > 0 ? `<div style="margin-top:0.5rem; font-size:0.78rem; color:#ef4444; background:#fee2e2; border-radius:8px; padding:2px 8px; display:inline-block;">ค้าง ${formatNum(emp.outstanding)} ฉบับ</div>` : `<div style="margin-top:0.5rem; font-size:0.78rem; color:#10b981; background:#d1fae5; border-radius:8px; padding:2px 8px; display:inline-block;">✓ ส่งครบแล้ว</div>`}
+        </div>`;
+    });
+    podiumHtml += '</div>';
+
+    const rest = emps.slice(3);
+    rest.forEach((emp, i) => {
+      const rank = i + 4;
+      const pct = maxRemitted > 0 ? Math.round((emp.remitted / maxRemitted) * 100) : 0;
+      listHtml += `
+        <div class="rank-list-item">
+          <div class="rank-list-num">${rank}</div>
+          <div class="rank-list-info">
+            <div class="rank-list-name">${emp.name}</div>
+            <div class="rank-list-detail">เบิก ${formatNum(emp.requested)} | ค้าง ${formatNum(emp.outstanding)}</div>
+            <div class="progress-bar-outer"><div class="progress-bar-inner" style="width:${pct}%"></div></div>
+          </div>
+          <div class="rank-list-right">
+            <div class="rank-list-score">${formatNum(emp.remitted)}</div>
+            <div class="rank-list-score-label">ฉบับ | ${formatNum(emp.remitted * store.data.pricePerTicket)} ฿</div>
+          </div>
+        </div>`;
+    });
+
+    cardsContainer.innerHTML = podiumHtml + listHtml;
+  }
+
+  // Full table
+  tbody.innerHTML = '';
+  if (emps.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-light);">ยังไม่มีข้อมูล</td></tr>';
+    return;
+  }
+  emps.forEach((emp, i) => {
+    const rank = i + 1;
+    const medal = rankMedals[i] || '';
+    const maxR = emps[0].remitted || 1;
+    const pct = Math.round((emp.remitted / maxR) * 100);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="text-align:center; font-weight:700; color:${rank<=3?'var(--primary)':'var(--text-light)'}">${medal}${rank<=3?'':rank}</td>
+      <td style="font-weight:600;">${emp.name}</td>
+      <td style="color:var(--secondary); font-weight:700;">${formatNum(emp.remitted)}</td>
+      <td>${formatNum(emp.remitted * store.data.pricePerTicket)}</td>
+      <td style="${emp.outstanding>0?'color:var(--danger);font-weight:600;':''};">${formatNum(emp.outstanding)}</td>
+      <td style="color:var(--primary);">${formatNum(emp.commission)}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <div class="progress-bar-outer" style="width:80px;"><div class="progress-bar-inner" style="width:${pct}%"></div></div>
+          <span style="font-size:0.8rem;color:var(--text-light);">${pct}%</span>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ===== SHARE LOGIC =====
+function shareAsText() {
+  const emps = getRankingData();
+  const now = new Date().toLocaleDateString('th-TH', {day:'numeric', month:'long', year:'numeric'});
+  let text = `🏆 อันดับยอดขายไปรษณียบัตร World Cup 2026\n`;
+  text += `📅 อัพเดทวันที่ ${now}\n`;
+  text += `${'─'.repeat(30)}\n`;
+  emps.forEach((emp, i) => {
+    const medal = rankMedals[i] || `${i+1}.`;
+    text += `${medal} ${emp.name}\n`;
+    text += `   📬 นำส่ง ${formatNum(emp.remitted)} ฉบับ | 💰 ${formatNum(emp.remitted * store.data.pricePerTicket)} ฿\n`;
+    if (emp.outstanding > 0) {
+      text += `   ⏳ ค้างส่ง ${formatNum(emp.outstanding)} ฉบับ\n`;
+    }
+  });
+  text += `${'─'.repeat(30)}\n`;
+  text += `💎 รวมยอดส่งทั้งหมด: ${formatNum(emps.reduce((s,e)=>s+e.remitted,0))} ฉบับ`;
+
+  document.getElementById('share-text-content').value = text;
+  const encoded = encodeURIComponent(text);
+  document.getElementById('line-share-link').href = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(location.href)}&text=${encoded}`;
+  document.getElementById('share-text-modal').style.display = 'flex';
+}
+
+function copyShareText() {
+  const ta = document.getElementById('share-text-content');
+  ta.select();
+  try {
+    navigator.clipboard.writeText(ta.value).then(() => {
+      const btn = document.getElementById('btn-copy-text');
+      btn.textContent = '✅ คัดลอกแล้ว!';
+      setTimeout(() => { btn.textContent = '📋 คัดลอก'; }, 2000);
+    });
+  } catch(e) {
+    document.execCommand('copy');
+    const btn = document.getElementById('btn-copy-text');
+    btn.textContent = '✅ คัดลอกแล้ว!';
+    setTimeout(() => { btn.textContent = '📋 คัดลอก'; }, 2000);
+  }
+}
+
+async function shareAsImage() {
+  const emps = getRankingData();
+  const now = new Date().toLocaleDateString('th-TH', {day:'numeric', month:'long', year:'numeric'});
+
+  // Build snapshot DOM
+  let snapEl = document.getElementById('ranking-snapshot');
+  if (!snapEl) {
+    snapEl = document.createElement('div');
+    snapEl.id = 'ranking-snapshot';
+    document.body.appendChild(snapEl);
+  }
+
+  const top3 = emps.slice(0, 3);
+  const rest = emps.slice(3);
+
+  let topRowHtml = '';
+  const podiumOrder = top3.length === 3 ? [1, 0, 2] : top3.map((_, i) => i);
+  podiumOrder.filter(i => i < top3.length).forEach(i => {
+    const emp = top3[i];
+    topRowHtml += `
+      <div class="snap-top-card">
+        <span class="snap-top-medal">${rankMedals[i]}</span>
+        <div class="snap-top-name">${emp.name}</div>
+        <div class="snap-top-score">${formatNum(emp.remitted)}</div>
+        <div class="snap-top-label">ฉบับนำส่ง</div>
+      </div>`;
+  });
+
+  let restHtml = '';
+  rest.forEach((emp, i) => {
+    restHtml += `
+      <div class="snap-row">
+        <div class="snap-rank">${i+4}</div>
+        <div class="snap-info">
+          <div class="snap-name">${emp.name}</div>
+          <div class="snap-detail">ค้าง ${formatNum(emp.outstanding)} ฉบับ</div>
+        </div>
+        <div>
+          <div class="snap-score">${formatNum(emp.remitted)}</div>
+          <div class="snap-score-label">ฉบับ</div>
+        </div>
+      </div>`;
+  });
+
+  snapEl.innerHTML = `
+    <h2>🏆 อันดับยอดขายไปรษณียบัตร</h2>
+    <div class="snap-subtitle">World Cup 2026 — อัพเดท ${now}</div>
+    <div class="snap-top-row">${topRowHtml}</div>
+    ${restHtml}
+    <div class="snap-footer">แผนกลูกค้าธุรกิจ ปณฝ.กลาง 10501</div>
+  `;
+
+  const btn = document.getElementById('btn-share-img');
+  btn.textContent = '⏳ กำลังสร้างรูป...';
+  btn.disabled = true;
+
+  // Dynamically load html2canvas if not loaded
+  if (!window.html2canvas) {
+    await new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+
+  // Move into view for capture
+  snapEl.style.left = '-9999px';
+  snapEl.style.top = '0';
+
+  try {
+    const canvas = await html2canvas(snapEl, {
+      scale: 2,
+      backgroundColor: null,
+      useCORS: true,
+      logging: false
+    });
+
+    const link = document.createElement('a');
+    link.download = `ranking-worldcup-${Date.now()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+
+    btn.textContent = '✅ โหลดรูปแล้ว!';
+    setTimeout(() => { btn.innerHTML = '<span>🖼️</span> แชร์รูปภาพ'; btn.disabled = false; }, 2500);
+  } catch(err) {
+    console.error(err);
+    alert('เกิดข้อผิดพลาดในการสร้างรูป กรุณาลองใหม่อีกครั้ง');
+    btn.innerHTML = '<span>🖼️</span> แชร์รูปภาพ';
+    btn.disabled = false;
+  }
 }
 
 function calcForm() {
@@ -1613,6 +2491,87 @@ function deleteTx(txId) {
 }
 
 
+// ===== EXPORT / IMPORT DATA =====
+function exportData() {
+  const json = JSON.stringify(store.data, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const now = new Date();
+  const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}`;
+  a.download = `wpc_backup_${dateStr}.json`;
+  a.href = url;
+  a.click();
+  URL.revokeObjectURL(url);
+
+  // Toast notification
+  showToast('✅ Export สำเร็จ! ไฟล์ถูกดาวน์โหลดแล้ว', 'success');
+}
+
+function importData(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      if (!parsed.employees && !parsed.transactions) {
+        throw new Error('ไฟล์ไม่ถูกต้อง');
+      }
+      if (!confirm(`นำเข้าข้อมูลจากไฟล์ "${file.name}"?\n\nข้อมูลปัจจุบันในเครื่องจะถูกแทนที่ทั้งหมด\nกรุณา Export สำรองก่อนหากต้องการ`)) {
+        input.value = '';
+        return;
+      }
+      // Merge defaults with imported data
+      const newData = { ...store.data, ...parsed };
+      if (!newData.masterTransactions) newData.masterTransactions = [];
+      if (!newData.giftAllocations) newData.giftAllocations = [];
+      if (!newData.gifts) newData.gifts = [];
+      // Ensure each employee has paid/note fields
+      newData.employees = newData.employees.map(emp => ({
+        paid: false, note: '', ...emp
+      }));
+      store.data = newData;
+      store.saveData();
+      renderAll();
+      initPrintForm();
+      renderA4Logbook();
+      showToast(`✅ Import สำเร็จ! โหลดข้อมูล ${newData.employees.length} คน`, 'success');
+    } catch(err) {
+      showToast('❌ เกิดข้อผิดพลาด: ไฟล์ไม่ถูกต้องหรือเสียหาย', 'error');
+      console.error(err);
+    }
+    input.value = '';
+  };
+  reader.readAsText(file, 'utf-8');
+}
+
+// Toast notification helper
+function showToast(message, type = 'success') {
+  let toast = document.getElementById('app-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'app-toast';
+    toast.style.cssText = `
+      position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px);
+      padding: 0.75rem 1.5rem; border-radius: 12px; font-size: 0.95rem; font-weight: 600;
+      font-family: 'Kanit', sans-serif; z-index: 9999; opacity: 0;
+      transition: all 0.3s ease; box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      max-width: 320px; text-align: center; white-space: nowrap;
+    `;
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.style.background = type === 'success' ? '#10b981' : '#ef4444';
+  toast.style.color = 'white';
+  toast.style.opacity = '1';
+  toast.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(-50%) translateY(20px)';
+  }, 3000);
+}
 
 // Event Listeners
 window.addEventListener('storeUpdated', renderAll);
@@ -1756,6 +2715,11 @@ document.getElementById('form-allocate-gift').addEventListener('submit', (e) => 
 
 // Initialize Date Pickers to today
 document.getElementById('tx-date').valueAsDate = new Date();
+
+// Close share modal on backdrop click
+document.getElementById('share-text-modal').addEventListener('click', function(e) {
+  if (e.target === this) this.style.display = 'none';
+});
 
 // Initial Render
 renderAll();
