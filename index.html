@@ -825,31 +825,36 @@ input:focus, select:focus {
 .rank-podium-card:hover { transform: translateY(-4px); }
 /* อันดับ 2 — ซ้าย */
 .rank-podium-card.rank-2 {
-  background: linear-gradient(160deg, #c8d6e5 0%, #e8eef5 60%, #f8fafc 100%);
-  border: 2px solid #94a3b8;
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  border: 2px solid #cbd5e1;
   order: 1;
   min-height: 200px;
   padding-top: 2rem;
   max-width: 180px;
+  color: #334155;
+  box-shadow: 0 10px 15px -3px rgba(148, 163, 184, 0.15);
 }
 /* อันดับ 1 — กลาง ใหญ่ที่สุด */
 .rank-podium-card.rank-1 {
-  background: linear-gradient(160deg, #f59e0b 0%, #fbbf24 40%, #fef3c7 100%);
-  border: 3px solid #d97706;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 3px solid #f59e0b;
   order: 2;
   min-height: 280px;
   padding-top: 2.5rem;
   flex: 1.3;
-  box-shadow: 0 12px 40px rgba(245, 158, 11, 0.4), 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 20px 25px -5px rgba(245, 158, 11, 0.25), 0 8px 10px -6px rgba(0,0,0,0.1);
+  color: #78350f;
 }
 /* อันดับ 3 — ขวา */
 .rank-podium-card.rank-3 {
-  background: linear-gradient(160deg, #d4a574 0%, #e8c4a0 60%, #fff7ed 100%);
-  border: 2px solid #c2785e;
+  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+  border: 2px solid #fdba74;
   order: 3;
   min-height: 160px;
   padding-top: 1.5rem;
   max-width: 160px;
+  color: #c2410c;
+  box-shadow: 0 10px 15px -3px rgba(253, 186, 116, 0.15);
 }
 .rank-medal {
   font-size: 2rem;
@@ -2310,23 +2315,23 @@ function renderRanking() {
     </div>
   `;
 
-  // Build manager stats HTML (not ranked but showing requested stats)
+  // Build manager stats HTML (placed at the bottom)
   let managerHtml = '';
   if (managers.length > 0) {
     managerHtml = `
-      <div class="card" style="background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); color: white; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; border-radius: 16px; border: none; box-shadow: 0 4px 20px rgba(79, 70, 229, 0.2);">
-        <h4 style="margin: 0 0 0.75rem; font-size: 0.95rem; opacity: 0.95; letter-spacing: 0.05em; color: white; display: flex; align-items: center; gap: 0.5rem;">
-          <span>👑 ยอดหัวหน้าแผนก (ไม่เข้าร่วมการจัดอันดับ)</span>
+      <div class="card" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); color: var(--text-dark); padding: 1.25rem 1.5rem; margin-top: 2rem; border-radius: 16px; border: 1px solid var(--border); box-shadow: var(--shadow-md);">
+        <h4 style="margin: 0 0 0.75rem; font-size: 0.95rem; font-weight: 700; color: var(--text-dark); display: flex; align-items: center; gap: 0.5rem;">
+          <span>👤 ยอดหัวหน้าแผนก (ไม่เข้าร่วมการจัดอันดับ)</span>
         </h4>
         <div style="display: flex; flex-direction: column; gap: 0.5rem;">
     `;
     managers.forEach(mgr => {
       managerHtml += `
-        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.1); padding: 0.75rem 1rem; border-radius: 10px;">
-          <span style="font-weight: 700; font-size: 1rem;">${mgr.name}</span>
+        <div style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid var(--border);">
+          <span style="font-weight: 700; font-size: 1rem; color: var(--text-dark);">${mgr.name}</span>
           <div style="text-align: right;">
-            <span style="font-size: 1.4rem; font-weight: 900;">${formatNum(mgr.requested)}</span>
-            <span style="font-size: 0.8rem; opacity: 0.8;"> ฉบับ</span>
+            <span style="font-size: 1.4rem; font-weight: 900; color: var(--primary);">${formatNum(mgr.requested)}</span>
+            <span style="font-size: 0.8rem; opacity: 0.8; color: var(--text-light);"> ฉบับ</span>
           </div>
         </div>
       `;
@@ -2342,11 +2347,15 @@ function renderRanking() {
   } else {
     const top3 = emps.slice(0, 3);
     podiumHtml = `<div class="rank-podium-row">`;
-    top3.forEach((emp, i) => {
+    
+    // Order of podium display: Index 1 (Silver, Left), Index 0 (Gold, Center), Index 2 (Bronze, Right)
+    const displayIndices = top3.length === 3 ? [1, 0, 2] : top3.map((_, i) => i);
+    displayIndices.filter(idx => idx < top3.length).forEach(idx => {
+      const emp = top3[idx];
       podiumHtml += `
-        <div class="rank-podium-card rank-${i+1}">
-          <div class="rank-badge">${rankLabels[i]}</div>
-          <span class="rank-medal">${rankMedals[i]}</span>
+        <div class="rank-podium-card rank-${idx+1}">
+          <div class="rank-badge">${rankLabels[idx]}</div>
+          <span class="rank-medal">${rankMedals[idx]}</span>
           <div class="rank-podium-name">${emp.name}</div>
           <div class="rank-podium-score">${formatNum(emp.requested)}</div>
           <div class="rank-podium-label">ฉบับ</div>
@@ -2373,7 +2382,7 @@ function renderRanking() {
     });
   }
 
-  cardsContainer.innerHTML = motivatorHtml + managerHtml + podiumHtml + listHtml;
+  cardsContainer.innerHTML = motivatorHtml + podiumHtml + listHtml + managerHtml;
 
   // Full table
   tbody.innerHTML = '';
@@ -2435,19 +2444,18 @@ function shareAsText() {
   text += `📅 อัพเดทวันที่ ${now}\n`;
   text += `${'─'.repeat(30)}\n`;
   
-  if (managers.length > 0) {
-    text += `👑 ยอดหัวหน้าแผนก (ไม่จัดอันดับ):\n`;
-    managers.forEach(mgr => {
-      text += `• ${mgr.name} — ยอดเบิก ${formatNum(mgr.requested)} ฉบับ\n`;
-    });
-    text += `${'─'.repeat(30)}\n`;
-  }
-  
   text += `👥 อันดับพนักงาน:\n`;
   emps.forEach((emp, i) => {
     const medal = rankMedals[i] || `${i+1}.`;
     text += `${medal} ${emp.name} — ยอดเบิก ${formatNum(emp.requested)} ฉบับ\n`;
   });
+  
+  if (managers.length > 0) {
+    text += `${'─'.repeat(30)}\n`;
+    managers.forEach(mgr => {
+      text += `• ${mgr.name} — ยอดเบิก ${formatNum(mgr.requested)} ฉบับ\n`;
+    });
+  }
   
   text += `${'─'.repeat(30)}\n`;
   text += `📦 ไปรษณียบัตรคงเหลือในแผนก: ${formatNum(totalStockRemaining)} ฉบับ\n`;
@@ -2492,16 +2500,23 @@ async function shareAsImage() {
     document.body.appendChild(snapEl);
   }
 
+  // Make the snapshot layout lighter and more vibrant (no dark blue/purple gradients, let's use a nice soft clean theme)
+  snapEl.style.background = 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)';
+  snapEl.style.color = '#1e2937';
+  snapEl.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+  snapEl.style.border = '1px solid #cbd5e1';
+
+  // Podium backgrounds and sizing for premium look
   const podiumSizes = [
-    { order: 1, height: '160px', numSize: '2.6rem', bg: 'rgba(148,163,184,0.25)', border: 'rgba(148,163,184,0.5)', nameSize: '0.85rem' }, // silver
-    { order: 0, height: '220px', numSize: '4.2rem', bg: 'rgba(245,158,11,0.25)', border: 'rgba(245,158,11,0.7)', nameSize: '1rem' },      // gold
-    { order: 2, height: '120px', numSize: '2rem',   bg: 'rgba(194,120,94,0.2)',  border: 'rgba(194,120,94,0.5)',  nameSize: '0.8rem' },   // bronze
+    { height: '160px', numSize: '2.6rem', bg: 'linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%)', border: '#94a3b8', nameColor: '#334155', numColor: '#1e2937', labelColor: '#64748b' }, // silver
+    { height: '220px', numSize: '4rem',   bg: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)', border: '#f59e0b', nameColor: '#78350f', numColor: '#92400e', labelColor: '#b45309' }, // gold
+    { height: '130px', numSize: '2.2rem', bg: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)', border: '#fdba74', nameColor: '#9a3412', numColor: '#c2410c', labelColor: '#ea580c' }, // bronze
   ];
 
   const top3 = emps.slice(0, 3);
   const rest = emps.slice(3);
 
-  // Build ordered display: Silver, Gold, Bronze  
+  // Build ordered display: Silver (1), Gold (0), Bronze (2)  
   let podiumCardsHtml = '';
   const displayOrder = top3.length === 3 ? [1, 0, 2] : top3.map((_, i) => i);
   displayOrder.filter(i => i < top3.length).forEach(idx => {
@@ -2521,11 +2536,12 @@ async function shareAsImage() {
         justify-content: flex-end;
         min-height: ${sz.height};
         position: relative;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
       ">
         <div style="font-size: 1.6rem; margin-bottom: 0.3rem;">${rankMedals[idx]}</div>
-        <div style="font-size: ${sz.nameSize}; font-weight: 700; color: white; margin-bottom: 0.4rem; line-height: 1.2;">${emp.name}</div>
-        <div style="font-size: ${sz.numSize}; font-weight: 900; color: white; line-height: 1; letter-spacing: -2px;">${formatNum(emp.requested)}</div>
-        <div style="font-size: 0.65rem; color: rgba(255,255,255,0.7); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 0.2rem;">ฉบับ</div>
+        <div style="font-size: 0.9rem; font-weight: 700; color: ${sz.nameColor}; margin-bottom: 0.4rem; line-height: 1.2;">${emp.name}</div>
+        <div style="font-size: ${sz.numSize}; font-weight: 900; color: ${sz.numColor}; line-height: 1; letter-spacing: -2px;">${formatNum(emp.requested)}</div>
+        <div style="font-size: 0.65rem; color: ${sz.labelColor}; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 0.2rem;">ฉบับ</div>
       </div>`;
   });
 
@@ -2536,48 +2552,54 @@ async function shareAsImage() {
         display: flex;
         align-items: center;
         gap: 0.75rem;
-        background: rgba(255,255,255,0.1);
+        background: white;
         border-radius: 12px;
         padding: 0.7rem 1rem;
         margin-bottom: 0.5rem;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
       ">
-        <div style="font-size: 1.1rem; font-weight: 800; width: 28px; text-align: center; color: rgba(255,255,255,0.6);">${i+4}</div>
+        <div style="font-size: 1.1rem; font-weight: 800; width: 28px; text-align: center; color: #94a3b8;">${i+4}</div>
         <div style="flex: 1;">
-          <div style="font-weight: 700; font-size: 0.9rem;">${emp.name}</div>
+          <div style="font-weight: 700; font-size: 0.95rem; color: #1e2937;">${emp.name}</div>
         </div>
         <div style="text-align: right;">
-          <div style="font-size: 1.5rem; font-weight: 900; line-height: 1;">${formatNum(emp.requested)}</div>
-          <div style="font-size: 0.6rem; opacity: 0.6; text-transform: uppercase;">ฉบับ</div>
+          <div style="font-size: 1.5rem; font-weight: 900; line-height: 1; color: #4f46e5;">${formatNum(emp.requested)}</div>
+          <div style="font-size: 0.6rem; opacity: 0.6; text-transform: uppercase; color: #64748b;">ฉบับ</div>
         </div>
       </div>`;
   });
 
-  // Render managers in snapshot image
+  // Render managers at the bottom of snapshot list (just names and scores without Manager header)
   let snapshotManagerHtml = '';
   if (managers.length > 0) {
-    snapshotManagerHtml = `
-      <div style="background: rgba(79, 70, 229, 0.25); border: 1px solid rgba(79, 70, 229, 0.5); border-radius: 16px; padding: 0.8rem 1.2rem; margin-bottom: 1rem;">
-        <div style="font-size: 0.8rem; font-weight: bold; color: rgba(255,255,255,0.85); margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.4rem;">
-          <span>👑 ยอดหัวหน้าแผนก:</span>
-        </div>
-    `;
     managers.forEach(mgr => {
       snapshotManagerHtml += `
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
-          <span style="font-weight: 700; font-size: 0.9rem;">${mgr.name}</span>
-          <div>
-            <span style="font-size: 1.2rem; font-weight: 900;">${formatNum(mgr.requested)}</span>
-            <span style="font-size: 0.7rem; opacity: 0.7;"> ฉบับ</span>
+        <div style="
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          background: #f8fafc;
+          border-radius: 12px;
+          padding: 0.7rem 1rem;
+          margin-bottom: 0.5rem;
+          border: 1px dashed #cbd5e1;
+        ">
+          <div style="font-size: 1.1rem; width: 28px; text-align: center;">👤</div>
+          <div style="flex: 1;">
+            <div style="font-weight: 700; font-size: 0.95rem; color: #1e2937;">${mgr.name}</div>
           </div>
-        </div>
-      `;
+          <div style="text-align: right;">
+            <div style="font-size: 1.5rem; font-weight: 900; line-height: 1; color: #64748b;">${formatNum(mgr.requested)}</div>
+            <div style="font-size: 0.6rem; opacity: 0.6; text-transform: uppercase; color: #64748b;">ฉบับ</div>
+          </div>
+        </div>`;
     });
-    snapshotManagerHtml += `</div>`;
   }
 
-  // Render stock motivator in snapshot image
+  // Render stock motivator in snapshot image (Clean green look)
   let snapshotMotivatorHtml = `
-    <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 16px; padding: 0.8rem 1.2rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+    <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 16px; padding: 0.8rem 1.2rem; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1);">
       <div>
         <div style="font-size: 0.75rem; font-weight: bold; opacity: 0.9;">🔥 ไปรษณียบัตรคงเหลือในแผนก:</div>
         <div style="font-size: 1.6rem; font-weight: 900; margin-top: 0.1rem;">${formatNum(totalStockRemaining)} <span style="font-size: 0.85rem; font-weight: normal;">ฉบับ</span></div>
@@ -2588,14 +2610,14 @@ async function shareAsImage() {
 
   snapEl.innerHTML = `
     <div style="text-align:center; margin-bottom: 1.25rem;">
-      <div style="font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px;">🏆 อันดับยอดขาย</div>
-      <div style="font-size: 0.8rem; opacity: 0.65; margin-top: 0.2rem;">ฟุตบอลระดับโลก 2026 — ${now}</div>
+      <div style="font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; color: #1e2937;">🏆 อันดับยอดเบิกสะสม</div>
+      <div style="font-size: 0.8rem; opacity: 0.75; margin-top: 0.2rem; color: #475569;">ฟุตบอลระดับโลก 2026 — ${now}</div>
     </div>
     ${snapshotMotivatorHtml}
-    ${snapshotManagerHtml}
     <div style="display: flex; gap: 0.75rem; align-items: flex-end; margin-bottom: 1.25rem;">${podiumCardsHtml}</div>
     ${restHtml}
-    <div style="text-align:center; margin-top: 1.25rem; font-size: 0.7rem; opacity: 0.5;">แผนกลูกค้าธุรกิจ ปณฝ.กลาง 10501</div>
+    ${snapshotManagerHtml}
+    <div style="text-align:center; margin-top: 1.25rem; font-size: 0.7rem; opacity: 0.6; color: #475569;">แผนกลูกค้าธุรกิจ ปณฝ.กลาง 10501</div>
   `;
 
   const btn = document.getElementById('btn-share-img');
