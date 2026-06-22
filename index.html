@@ -2301,17 +2301,111 @@ function renderRanking() {
   // Let's show: ยอดไปรษณียบัตรคงเหลือในโควต้ารวม (โควต้ารวม - เบิกไปแล้ว) และ คงเหลือในมือ หน.แผนก
   const totalStockRemaining = overview.quota - overview.totalRequested;
 
+  // Helper to generate 3D stacks
+  const get3DStacksHtml = (totalQty) => {
+    const boxCapacity = 4000;
+    const packCapacity = 100;
+    
+    let boxes = Math.floor(totalQty / boxCapacity);
+    let remainder = totalQty % boxCapacity;
+    let packs = Math.floor(remainder / packCapacity);
+    let singleSheets = remainder % packCapacity;
+    
+    // Draw 3D Box (Isometric using CSS skew and transforms)
+    // Box dimensions: width 40px, height 30px, depth 20px
+    const drawBox = (xOffset, yOffset, zIndex) => `
+      <div style="
+        position: absolute;
+        left: ${xOffset}px;
+        bottom: ${yOffset}px;
+        width: 40px;
+        height: 25px;
+        z-index: ${zIndex};
+        transform-style: preserve-3d;
+      ">
+        <!-- Front side -->
+        <div style="position: absolute; width: 40px; height: 25px; background: #d97706; border: 1px solid #b45309; transform: rotateY(0deg) translateZ(10px); border-radius: 2px;">
+          <div style="font-size: 8px; color: #fff; font-weight: bold; text-align: center; line-height: 23px; transform: scale(0.85);">4,000</div>
+        </div>
+        <!-- Right side -->
+        <div style="position: absolute; width: 20px; height: 25px; background: #b45309; border: 1px solid #78350f; left: 30px; transform: rotateY(90deg) translateZ(10px);"></div>
+        <!-- Top side -->
+        <div style="position: absolute; width: 40px; height: 20px; background: #f59e0b; border: 1px solid #d97706; top: -10px; transform: rotateX(90deg) translateZ(10px);"></div>
+      </div>
+    `;
+
+    // Draw 3D Pack (Gohn - smaller pack of 100, thinner)
+    // Pack dimensions: width 24px, height 6px, depth 14px
+    const drawPack = (xOffset, yOffset, zIndex) => `
+      <div style="
+        position: absolute;
+        left: ${xOffset}px;
+        bottom: ${yOffset}px;
+        width: 28px;
+        height: 8px;
+        z-index: ${zIndex};
+        transform-style: preserve-3d;
+      ">
+        <!-- Front side -->
+        <div style="position: absolute; width: 28px; height: 8px; background: #3b82f6; border: 1px solid #1d4ed8; transform: rotateY(0deg) translateZ(5px); border-radius: 1px;">
+          <div style="font-size: 5px; color: #fff; text-align: center; line-height: 7px; font-weight: bold;">100</div>
+        </div>
+        <!-- Right side -->
+        <div style="position: absolute; width: 10px; height: 8px; background: #1d4ed8; border: 1px solid #1e3a8a; left: 23px; transform: rotateY(90deg) translateZ(5px);"></div>
+        <!-- Top side -->
+        <div style="position: absolute; width: 28px; height: 10px; background: #93c5fd; border: 1px solid #3b82f6; top: -5px; transform: rotateX(90deg) translateZ(5px);"></div>
+      </div>
+    `;
+
+    // Stack configuration: stack boxes in grids (e.g. columns of max 4 boxes high)
+    let boxesHtml = '';
+    let boxX = 0;
+    let boxY = 0;
+    let maxCols = 5;
+    for (let i = 0; i < boxes; i++) {
+      const col = i % maxCols;
+      const row = Math.floor(i / maxCols) % 3; // depth offset
+      const stackHeight = Math.floor(i / (maxCols * 3));
+      
+      const x = col * 46 + row * 10;
+      const y = stackHeight * 28 + row * 6;
+      boxesHtml += drawBox(x, y, i + stackHeight * 10);
+    }
+
+    let packsHtml = '';
+    let startX = (Math.min(boxes, maxCols) * 46) + 20 || 0;
+    if (boxes === 0) startX = 0;
+    for (let i = 0; i < packs; i++) {
+      const col = i % 4;
+      const stackHeight = Math.floor(i / 4);
+      const x = startX + col * 32;
+      const y = stackHeight * 10;
+      packsHtml += drawPack(x, y, 100 + i);
+    }
+
+    return `
+      <div style="position: relative; width: 100%; min-height: 110px; margin-top: 1rem; background: rgba(0,0,0,0.15); border-radius: 12px; padding: 10px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end;">
+        <div style="position: absolute; top: 8px; left: 10px; font-size: 0.75rem; opacity: 0.85; font-weight: bold; z-index: 200;">📦 คลังของคงเหลือในแผนก: ${boxes} กล่อง (กล่องละ 4,000 ใบ) + ${packs} ก้อน (ก้อนละ 100 ใบ) ${singleSheets > 0 ? `+ ${singleSheets} ใบ` : ''}</div>
+        <div style="position: relative; width: 100%; height: 80px; transform: scale(0.9); transform-origin: left bottom;">
+          ${boxesHtml}
+          ${packsHtml}
+        </div>
+      </div>
+    `;
+  };
+
   // Build motivator HTML
   let motivatorHtml = `
     <div class="card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 1.5rem; margin-bottom: 1.5rem; border-radius: 16px; border: none; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+        <div style="flex: 1; min-width: 250px;">
           <h3 style="margin: 0; font-size: 1.1rem; opacity: 0.9; color: white;">🔥 พลังขับเคลื่อนแผนก (ไปรษณียบัตรคงเหลือทั้งหมด)</h3>
           <div style="font-size: 2.2rem; font-weight: 900; margin-top: 0.5rem; line-height: 1;">${formatNum(totalStockRemaining)} <span style="font-size: 1.1rem; font-weight: normal; opacity: 0.85;">ฉบับ</span></div>
           <p style="margin: 0.5rem 0 0; font-size: 0.85rem; opacity: 0.85;">(จากโควต้าทั้งหมด ${formatNum(overview.quota)} ฉบับ | หัวหน้าแผนกมีในมืออีก ${formatNum(overview.remainingQuota)} ฉบับ)</p>
         </div>
-        <div style="font-size: 3rem; opacity: 0.9; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));">📦</div>
+        <div style="font-size: 3rem; opacity: 0.9; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)); align-self: center;">📦</div>
       </div>
+      ${get3DStacksHtml(totalStockRemaining)}
     </div>
   `;
 
@@ -2597,14 +2691,96 @@ async function shareAsImage() {
     });
   }
 
+  // Helper to generate 3D stacks
+  const get3DStacksHtml = (totalQty) => {
+    const boxCapacity = 4000;
+    const packCapacity = 100;
+    
+    let boxes = Math.floor(totalQty / boxCapacity);
+    let remainder = totalQty % boxCapacity;
+    let packs = Math.floor(remainder / packCapacity);
+    let singleSheets = remainder % packCapacity;
+    
+    const drawBox = (xOffset, yOffset, zIndex) => `
+      <div style="
+        position: absolute;
+        left: ${xOffset}px;
+        bottom: ${yOffset}px;
+        width: 40px;
+        height: 25px;
+        z-index: ${zIndex};
+        transform-style: preserve-3d;
+      ">
+        <div style="position: absolute; width: 40px; height: 25px; background: #d97706; border: 1px solid #b45309; transform: rotateY(0deg) translateZ(10px); border-radius: 2px;">
+          <div style="font-size: 8px; color: #fff; font-weight: bold; text-align: center; line-height: 23px; transform: scale(0.85);">4,000</div>
+        </div>
+        <div style="position: absolute; width: 20px; height: 25px; background: #b45309; border: 1px solid #78350f; left: 30px; transform: rotateY(90deg) translateZ(10px);"></div>
+        <div style="position: absolute; width: 40px; height: 20px; background: #f59e0b; border: 1px solid #d97706; top: -10px; transform: rotateX(90deg) translateZ(10px);"></div>
+      </div>
+    `;
+
+    const drawPack = (xOffset, yOffset, zIndex) => `
+      <div style="
+        position: absolute;
+        left: ${xOffset}px;
+        bottom: ${yOffset}px;
+        width: 28px;
+        height: 8px;
+        z-index: ${zIndex};
+        transform-style: preserve-3d;
+      ">
+        <div style="position: absolute; width: 28px; height: 8px; background: #3b82f6; border: 1px solid #1d4ed8; transform: rotateY(0deg) translateZ(5px); border-radius: 1px;">
+          <div style="font-size: 5px; color: #fff; text-align: center; line-height: 7px; font-weight: bold;">100</div>
+        </div>
+        <div style="position: absolute; width: 10px; height: 8px; background: #1d4ed8; border: 1px solid #1e3a8a; left: 23px; transform: rotateY(90deg) translateZ(5px);"></div>
+        <div style="position: absolute; width: 28px; height: 10px; background: #93c5fd; border: 1px solid #3b82f6; top: -5px; transform: rotateX(90deg) translateZ(5px);"></div>
+      </div>
+    `;
+
+    let boxesHtml = '';
+    let maxCols = 5;
+    for (let i = 0; i < boxes; i++) {
+      const col = i % maxCols;
+      const row = Math.floor(i / maxCols) % 3;
+      const stackHeight = Math.floor(i / (maxCols * 3));
+      const x = col * 46 + row * 10;
+      const y = stackHeight * 28 + row * 6;
+      boxesHtml += drawBox(x, y, i + stackHeight * 10);
+    }
+
+    let packsHtml = '';
+    let startX = (Math.min(boxes, maxCols) * 46) + 20 || 0;
+    if (boxes === 0) startX = 0;
+    for (let i = 0; i < packs; i++) {
+      const col = i % 4;
+      const stackHeight = Math.floor(i / 4);
+      const x = startX + col * 32;
+      const y = stackHeight * 10;
+      packsHtml += drawPack(x, y, 100 + i);
+    }
+
+    return `
+      <div style="position: relative; width: 100%; min-height: 110px; margin-top: 0.75rem; background: rgba(0,0,0,0.1); border-radius: 12px; padding: 10px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end;">
+        <div style="position: absolute; top: 8px; left: 10px; font-size: 0.7rem; opacity: 0.9; font-weight: bold; z-index: 200; color: white;">📦 คงเหลือ: ${boxes} กล่อง + ${packs} ก้อน ${singleSheets > 0 ? `+ ${singleSheets} ใบ` : ''}</div>
+        <div style="position: relative; width: 100%; height: 80px; transform: scale(0.95); transform-origin: left bottom;">
+          ${boxesHtml}
+          ${packsHtml}
+        </div>
+      </div>
+    `;
+  };
+
   // Render stock motivator in snapshot image (Clean green look)
   let snapshotMotivatorHtml = `
-    <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 16px; padding: 0.8rem 1.2rem; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1);">
-      <div>
-        <div style="font-size: 0.75rem; font-weight: bold; opacity: 0.9;">🔥 ไปรษณียบัตรคงเหลือในแผนก:</div>
-        <div style="font-size: 1.6rem; font-weight: 900; margin-top: 0.1rem;">${formatNum(totalStockRemaining)} <span style="font-size: 0.85rem; font-weight: normal;">ฉบับ</span></div>
+    <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 16px; padding: 1.25rem 1.2rem; margin-bottom: 1.25rem; display: flex; flex-direction: column; color: white; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1);">
+      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <div>
+          <div style="font-size: 0.75rem; font-weight: bold; opacity: 0.9;">🔥 ไปรษณียบัตรคงเหลือในแผนก:</div>
+          <div style="font-size: 1.8rem; font-weight: 900; margin-top: 0.1rem; line-height: 1;">${formatNum(totalStockRemaining)} <span style="font-size: 0.9rem; font-weight: normal;">ฉบับ</span></div>
+        </div>
+        <div style="font-size: 2.2rem; opacity: 0.8;">📦</div>
       </div>
-      <div style="font-size: 2.2rem; opacity: 0.8;">📦</div>
+      ${get3DStacksHtml(totalStockRemaining)}
     </div>
   `;
 
