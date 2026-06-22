@@ -1262,7 +1262,7 @@ input:focus, select:focus {
                   <th>เหลือค้าง (ฉบับ)</th>
                   <th>ของสมมนาคุณที่ได้รับ</th>
                   <th>เปอร์ที่ได้ (บาท)</th>
-                  <th style="text-align:center;">✅ จ่ายแล้ว</th>
+                  <th style="text-align:center;">💰 ยอดจ่ายเงิน (฿)</th>
                   <th>📝 หมายเหตุ</th>
                 </tr>
               </thead>
@@ -1297,7 +1297,7 @@ input:focus, select:focus {
                   <th>ยอดเงินนำส่ง (฿)</th>
                   <th>คอมมิชชัน (฿)</th>
                   <th style="text-align:center;">👑 หน.แผนก</th>
-                  <th style="text-align:center;">✅ จ่ายแล้ว</th>
+                  <th style="text-align:center;">💰 ยอดจ่ายเงิน (฿)</th>
                   <th>📝 หมายเหตุ</th>
                   <th>จัดการ</th>
                 </tr>
@@ -1731,14 +1731,33 @@ class Store {
   // --- Employees ---
   addEmployee(name, isManager = false) {
     const id = Date.now().toString();
-    this.data.employees.push({ id, name, paid: false, note: '', isManager });
+    this.data.employees.push({ id, name, paidAmount: 0, note: '', isManager });
     this.saveData();
     return id;
   }
 
   setEmployeePaid(empId, paid) {
     const emp = this.data.employees.find(e => e.id === empId);
-    if (emp) { emp.paid = paid; this.saveData(); }
+    if (emp) {
+      if (typeof paid === 'boolean') {
+        // Fallback for legacy calls or checkboxes
+        const requested = this.data.transactions
+          .filter(t => t.empId === empId && t.type === 'req')
+          .reduce((sum, t) => sum + t.qty, 0);
+        emp.paidAmount = paid ? (requested * this.data.pricePerTicket) : 0;
+      } else {
+        emp.paidAmount = parseFloat(paid) || 0;
+      }
+      this.saveData();
+    }
+  }
+
+  setEmployeePaidAmount(empId, paidAmount) {
+    const emp = this.data.employees.find(e => e.id === empId);
+    if (emp) {
+      emp.paidAmount = parseFloat(paidAmount) || 0;
+      this.saveData();
+    }
   }
 
   setEmployeeNote(empId, note) {
@@ -1771,6 +1790,9 @@ class Store {
       const outstanding = requested - remitted;
       const revenue = remitted * this.data.pricePerTicket;
       const commission = revenue * this.data.commissionRate;
+      
+      const paidAmount = typeof emp.paidAmount === 'number' ? emp.paidAmount : (emp.paid ? revenue : 0);
+      const isPaid = paidAmount >= revenue && revenue > 0;
 
       return {
         ...emp,
@@ -1779,7 +1801,8 @@ class Store {
         outstanding,
         revenue,
         commission,
-        paid: emp.paid || false,
+        paidAmount,
+        paid: isPaid,
         note: emp.note || '',
         isManager: emp.isManager || false
       };
@@ -2006,12 +2029,14 @@ function renderSummary() {
         <span>${formatNum(emp.commission)}</span>
         <span style="font-size: 0.8rem; color: var(--text-light); display: block; font-weight: normal;">(${(store.data.commissionRate * 100)}%)</span>
       </td>
-      <td style="text-align:center;">
-        <label class="paid-toggle" title="ติ๊กเมื่อจ่ายเงินครบแล้ว">
-          <input type="checkbox" class="paid-checkbox" ${emp.paid ? 'checked' : ''}
-            onchange="store.setEmployeePaid('${emp.id}', this.checked); renderSummary(); renderEmployees(); renderRanking();" />
-          <span class="paid-checkmark">${emp.paid ? '✅' : '⬜'}</span>
-        </label>
+      <td>
+        <div style="display:flex; align-items:center; gap:0.25rem;">
+          <input type="number" class="note-input" style="width: 80px; text-align: right;" value="${emp.paidAmount || 0}"
+            onchange="store.setEmployeePaidAmount('${emp.id}', this.value); renderSummary(); renderEmployees(); renderRanking();"
+            onclick="this.select()" />
+          <span style="font-size: 0.85rem; color: var(--text-light);">฿</span>
+          ${emp.paid ? '<span title="จ่ายครบแล้ว" style="font-size:1.1rem;">✅</span>' : ''}
+        </div>
       </td>
       <td>
         <input type="text" class="note-input" value="${emp.note.replace(/"/g,'&quot;')}"
@@ -2057,12 +2082,14 @@ function renderEmployees() {
           <span class="paid-checkmark">${emp.isManager ? '👑' : '⬜'}</span>
         </label>
       </td>
-      <td style="text-align:center;">
-        <label class="paid-toggle">
-          <input type="checkbox" class="paid-checkbox" ${emp.paid ? 'checked' : ''}
-            onchange="store.setEmployeePaid('${emp.id}', this.checked); renderEmployees(); renderSummary(); renderRanking();" />
-          <span class="paid-checkmark">${emp.paid ? '✅' : '⬜'}</span>
-        </label>
+      <td>
+        <div style="display:flex; align-items:center; gap:0.25rem; justify-content:center;">
+          <input type="number" class="note-input" style="width: 80px; text-align: right;" value="${emp.paidAmount || 0}"
+            onchange="store.setEmployeePaidAmount('${emp.id}', this.value); renderEmployees(); renderSummary(); renderRanking();"
+            onclick="this.select()" />
+          <span style="font-size: 0.85rem; color: var(--text-light);">฿</span>
+          ${emp.paid ? '<span title="จ่ายครบแล้ว" style="font-size:1.1rem;">✅</span>' : ''}
+        </div>
       </td>
       <td>
         <input type="text" class="note-input" value="${emp.note.replace(/"/g,'&quot;')}"
