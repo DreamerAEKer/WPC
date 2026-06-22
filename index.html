@@ -2311,84 +2311,188 @@ function renderRanking() {
     let packs = Math.floor(remainder / packCapacity);
     let singleSheets = remainder % packCapacity;
     
-    // Draw 3D Box (Isometric using CSS skew and transforms)
-    // Box dimensions: width 40px, height 30px, depth 20px
-    const drawBox = (xOffset, yOffset, zIndex) => `
-      <div style="
-        position: absolute;
-        left: ${xOffset}px;
-        bottom: ${yOffset}px;
-        width: 40px;
-        height: 25px;
-        z-index: ${zIndex};
-        transform-style: preserve-3d;
-      ">
-        <!-- Front side -->
-        <div style="position: absolute; width: 40px; height: 25px; background: #d97706; border: 1px solid #b45309; transform: rotateY(0deg) translateZ(10px); border-radius: 2px;">
-          <div style="font-size: 8px; color: #fff; font-weight: bold; text-align: center; line-height: 23px; transform: scale(0.85);">4,000</div>
+    // Draw 3D Box (Isometric using CSS 3D Transforms)
+    // Box dimensions: width 50px, depth 40px, height 35px
+    // Rendered using clean CSS isometric projection: rotateX(60deg) rotateZ(-45deg)
+    const drawBox = (x, y, z) => {
+      // Shaded colors for faces to give realistic 3D volume
+      const topColor = '#f59e0b';
+      const frontColor = '#d97706';
+      const sideColor = '#b45309';
+      return `
+        <div style="
+          position: absolute;
+          transform: translate3d(${x}px, ${y}px, ${z}px);
+          width: 50px;
+          height: 40px;
+          transform-style: preserve-3d;
+        ">
+          <!-- Top Face -->
+          <div style="
+            position: absolute;
+            width: 50px;
+            height: 40px;
+            background: ${topColor};
+            border: 1px solid rgba(255,255,255,0.4);
+            transform: translate3d(0, 0, 30px);
+            box-shadow: inset 0 0 10px rgba(255,255,255,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 2px;
+          ">
+            <span style="font-size: 8px; color: #78350f; font-weight: bold; transform: rotate(45deg);">4,000</span>
+          </div>
+          <!-- Front Face (Left Side) -->
+          <div style="
+            position: absolute;
+            width: 50px;
+            height: 30px;
+            background: ${frontColor};
+            border: 1px solid rgba(0,0,0,0.15);
+            transform: rotateX(-90deg) translate3d(0, -15px, 20px);
+            transform-origin: bottom center;
+          "></div>
+          <!-- Side Face (Right Side) -->
+          <div style="
+            position: absolute;
+            width: 40px;
+            height: 30px;
+            background: ${sideColor};
+            border: 1px solid rgba(0,0,0,0.2);
+            transform: rotateY(90deg) translate3d(20px, 0, 30px);
+            transform-origin: center right;
+          "></div>
         </div>
-        <!-- Right side -->
-        <div style="position: absolute; width: 20px; height: 25px; background: #b45309; border: 1px solid #78350f; left: 30px; transform: rotateY(90deg) translateZ(10px);"></div>
-        <!-- Top side -->
-        <div style="position: absolute; width: 40px; height: 20px; background: #f59e0b; border: 1px solid #d97706; top: -10px; transform: rotateX(90deg) translateZ(10px);"></div>
-      </div>
-    `;
+      `;
+    };
 
-    // Draw 3D Pack (Gohn - smaller pack of 100, thinner)
-    // Pack dimensions: width 24px, height 6px, depth 14px
-    const drawPack = (xOffset, yOffset, zIndex) => `
-      <div style="
-        position: absolute;
-        left: ${xOffset}px;
-        bottom: ${yOffset}px;
-        width: 28px;
-        height: 8px;
-        z-index: ${zIndex};
-        transform-style: preserve-3d;
-      ">
-        <!-- Front side -->
-        <div style="position: absolute; width: 28px; height: 8px; background: #3b82f6; border: 1px solid #1d4ed8; transform: rotateY(0deg) translateZ(5px); border-radius: 1px;">
-          <div style="font-size: 5px; color: #fff; text-align: center; line-height: 7px; font-weight: bold;">100</div>
+    // Draw 3D Pack (Gohn - pack of 100, thinner)
+    // Pack dimensions: width 35px, depth 25px, height 8px
+    const drawPack = (x, y, z) => {
+      const topColor = '#60a5fa';
+      const frontColor = '#3b82f6';
+      const sideColor = '#2563eb';
+      return `
+        <div style="
+          position: absolute;
+          transform: translate3d(${x}px, ${y}px, ${z}px);
+          width: 35px;
+          height: 25px;
+          transform-style: preserve-3d;
+        ">
+          <!-- Top Face -->
+          <div style="
+            position: absolute;
+            width: 35px;
+            height: 25px;
+            background: ${topColor};
+            border: 1px solid rgba(255,255,255,0.5);
+            transform: translate3d(0, 0, 8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 1px;
+          ">
+            <span style="font-size: 6px; color: #1e3a8a; font-weight: bold; transform: scale(0.85);">100</span>
+          </div>
+          <!-- Front Face -->
+          <div style="
+            position: absolute;
+            width: 35px;
+            height: 8px;
+            background: ${frontColor};
+            border: 1px solid rgba(0,0,0,0.15);
+            transform: rotateX(-90deg) translate3d(0, -4px, 21px);
+            transform-origin: bottom center;
+          "></div>
+          <!-- Side Face -->
+          <div style="
+            position: absolute;
+            width: 25px;
+            height: 8px;
+            background: ${sideColor};
+            border: 1px solid rgba(0,0,0,0.2);
+            transform: rotateY(90deg) translate3d(12.5px, 0, 22.5px);
+            transform-origin: center right;
+          "></div>
         </div>
-        <!-- Right side -->
-        <div style="position: absolute; width: 10px; height: 8px; background: #1d4ed8; border: 1px solid #1e3a8a; left: 23px; transform: rotateY(90deg) translateZ(5px);"></div>
-        <!-- Top side -->
-        <div style="position: absolute; width: 28px; height: 10px; background: #93c5fd; border: 1px solid #3b82f6; top: -5px; transform: rotateX(90deg) translateZ(5px);"></div>
-      </div>
-    `;
+      `;
+    };
 
-    // Stack configuration: stack boxes in grids (e.g. columns of max 4 boxes high)
+    // We stack them in an grid system.
+    // To prevent cluttering, let's stack boxes up to 5 high, arranged in columns.
     let boxesHtml = '';
-    let boxX = 0;
-    let boxY = 0;
-    let maxCols = 5;
+    let boxCols = 6;
     for (let i = 0; i < boxes; i++) {
-      const col = i % maxCols;
-      const row = Math.floor(i / maxCols) % 3; // depth offset
-      const stackHeight = Math.floor(i / (maxCols * 3));
+      const col = i % boxCols;
+      const row = Math.floor(i / boxCols) % 3; // depth rows
+      const h = Math.floor(i / (boxCols * 3)); // height stack level
       
-      const x = col * 46 + row * 10;
-      const y = stackHeight * 28 + row * 6;
-      boxesHtml += drawBox(x, y, i + stackHeight * 10);
+      // Calculate isometric spacing
+      const x = col * 75 - row * 15;
+      const y = row * 50;
+      const z = h * 32;
+      boxesHtml += drawBox(x, y, z);
     }
 
+    // Stacking Packs next to boxes
     let packsHtml = '';
-    let startX = (Math.min(boxes, maxCols) * 46) + 20 || 0;
-    if (boxes === 0) startX = 0;
+    let startX = (Math.min(boxes, boxCols) * 75) + 30;
+    if (boxes === 0) startX = 20;
     for (let i = 0; i < packs; i++) {
       const col = i % 4;
-      const stackHeight = Math.floor(i / 4);
-      const x = startX + col * 32;
-      const y = stackHeight * 10;
-      packsHtml += drawPack(x, y, 100 + i);
+      const row = Math.floor(i / 4) % 2;
+      const h = Math.floor(i / 8);
+      
+      const x = startX + col * 48 - row * 10;
+      const y = row * 32;
+      const z = h * 9;
+      packsHtml += drawPack(x, y, z);
     }
 
+    // Return the isometric view container with perspective settings
     return `
-      <div style="position: relative; width: 100%; min-height: 110px; margin-top: 1rem; background: rgba(0,0,0,0.15); border-radius: 12px; padding: 10px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end;">
-        <div style="position: absolute; top: 8px; left: 10px; font-size: 0.75rem; opacity: 0.85; font-weight: bold; z-index: 200;">📦 คลังของคงเหลือในแผนก: ${boxes} กล่อง (กล่องละ 4,000 ใบ) + ${packs} ก้อน (ก้อนละ 100 ใบ) ${singleSheets > 0 ? `+ ${singleSheets} ใบ` : ''}</div>
-        <div style="position: relative; width: 100%; height: 80px; transform: scale(0.9); transform-origin: left bottom;">
-          ${boxesHtml}
-          ${packsHtml}
+      <div style="
+        position: relative;
+        width: 100%;
+        min-height: 190px;
+        margin-top: 1rem;
+        background: rgba(0,0,0,0.2);
+        border-radius: 12px;
+        padding: 15px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        border: 1px solid rgba(255,255,255,0.1);
+      ">
+        <div style="font-size: 0.8rem; opacity: 0.95; font-weight: bold; margin-bottom: 5px; color: white; display: flex; align-items: center; gap: 0.5rem; z-index: 200;">
+          <span>📦 คลังของคงเหลือในแผนก:</span>
+          <span style="background: rgba(255,255,255,0.2); padding: 1px 8px; border-radius: 20px;">${boxes} กล่อง</span>
+          <span style="background: rgba(255,255,255,0.2); padding: 1px 8px; border-radius: 20px;">${packs} ก้อน</span>
+          ${singleSheets > 0 ? `<span style="background: rgba(255,255,255,0.2); padding: 1px 8px; border-radius: 20px;">${singleSheets} ใบ</span>` : ''}
+        </div>
+        
+        <!-- 3D Perspective Wrapper -->
+        <div style="
+          position: relative;
+          width: 100%;
+          height: 150px;
+          perspective: 800px;
+          perspective-origin: 50% 0%;
+        ">
+          <!-- Isometric coordinate spacer -->
+          <div style="
+            position: absolute;
+            left: 20px;
+            bottom: 20px;
+            transform: rotateX(55deg) rotateZ(-30deg);
+            transform-style: preserve-3d;
+          ">
+            ${boxesHtml}
+            ${packsHtml}
+          </div>
         </div>
       </div>
     `;
@@ -2400,8 +2504,8 @@ function renderRanking() {
       <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
         <div style="flex: 1; min-width: 250px;">
           <h3 style="margin: 0; font-size: 1.1rem; opacity: 0.9; color: white;">🔥 พลังขับเคลื่อนแผนก (ไปรษณียบัตรคงเหลือทั้งหมด)</h3>
-          <div style="font-size: 2.2rem; font-weight: 900; margin-top: 0.5rem; line-height: 1;">${formatNum(totalStockRemaining)} <span style="font-size: 1.1rem; font-weight: normal; opacity: 0.85;">ฉบับ</span></div>
-          <p style="margin: 0.5rem 0 0; font-size: 0.85rem; opacity: 0.85;">(จากโควต้าทั้งหมด ${formatNum(overview.quota)} ฉบับ | หัวหน้าแผนกมีในมืออีก ${formatNum(overview.remainingQuota)} ฉบับ)</p>
+          <div style="font-size: 2.2rem; font-weight: 900; margin-top: 0.5rem; line-height: 1;">${formatNum(totalStockRemaining)} <span style="font-size: 1.1rem; font-weight: normal; opacity: 0.85;">ใบ</span></div>
+          <p style="margin: 0.5rem 0 0; font-size: 0.85rem; opacity: 0.85;">(จากโควต้าทั้งหมด ${formatNum(overview.quota)} ใบ | หัวหน้าแผนกมีในมืออีก ${formatNum(overview.remainingQuota)} ใบ)</p>
         </div>
         <div style="font-size: 3rem; opacity: 0.9; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)); align-self: center;">📦</div>
       </div>
@@ -2425,7 +2529,7 @@ function renderRanking() {
           <span style="font-weight: 700; font-size: 1rem; color: var(--text-dark);">${mgr.name}</span>
           <div style="text-align: right;">
             <span style="font-size: 1.4rem; font-weight: 900; color: var(--primary);">${formatNum(mgr.requested)}</span>
-            <span style="font-size: 0.8rem; opacity: 0.8; color: var(--text-light);"> ฉบับ</span>
+            <span style="font-size: 0.8rem; opacity: 0.8; color: var(--text-light);"> ใบ</span>
           </div>
         </div>
       `;
@@ -2446,8 +2550,10 @@ function renderRanking() {
     const displayIndices = top3.length === 3 ? [1, 0, 2] : top3.map((_, i) => i);
     displayIndices.filter(idx => idx < top3.length).forEach(idx => {
       const emp = top3[idx];
+      // idx 0 -> rank-1 (Gold), idx 1 -> rank-2 (Silver), idx 2 -> rank-3 (Bronze)
+      const rankClassNum = idx + 1; 
       podiumHtml += `
-        <div class="rank-podium-card rank-${idx+1}">
+        <div class="rank-podium-card rank-${rankClassNum}">
           <div class="rank-badge">${rankLabels[idx]}</div>
           <span class="rank-medal">${rankMedals[idx]}</span>
           <div class="rank-podium-name">${emp.name}</div>
@@ -2601,10 +2707,11 @@ async function shareAsImage() {
   snapEl.style.border = '1px solid #cbd5e1';
 
   // Podium backgrounds and sizing for premium look
+  // Index 0 represents top3[0] (Gold/1st place), Index 1 represents top3[1] (Silver/2nd place), Index 2 represents top3[2] (Bronze/3rd place)
   const podiumSizes = [
-    { height: '160px', numSize: '2.6rem', bg: 'linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%)', border: '#94a3b8', nameColor: '#334155', numColor: '#1e2937', labelColor: '#64748b' }, // silver
-    { height: '220px', numSize: '4rem',   bg: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)', border: '#f59e0b', nameColor: '#78350f', numColor: '#92400e', labelColor: '#b45309' }, // gold
-    { height: '130px', numSize: '2.2rem', bg: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)', border: '#fdba74', nameColor: '#9a3412', numColor: '#c2410c', labelColor: '#ea580c' }, // bronze
+    { height: '220px', numSize: '4rem',   bg: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)', border: '#f59e0b', nameColor: '#78350f', numColor: '#92400e', labelColor: '#b45309' }, // gold (1st)
+    { height: '160px', numSize: '2.6rem', bg: 'linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%)', border: '#94a3b8', nameColor: '#334155', numColor: '#1e2937', labelColor: '#64748b' }, // silver (2nd)
+    { height: '130px', numSize: '2.2rem', bg: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)', border: '#fdba74', nameColor: '#9a3412', numColor: '#c2410c', labelColor: '#ea580c' }, // bronze (3rd)
   ];
 
   const top3 = emps.slice(0, 3);
@@ -2635,7 +2742,7 @@ async function shareAsImage() {
         <div style="font-size: 1.6rem; margin-bottom: 0.3rem;">${rankMedals[idx]}</div>
         <div style="font-size: 0.9rem; font-weight: 700; color: ${sz.nameColor}; margin-bottom: 0.4rem; line-height: 1.2;">${emp.name}</div>
         <div style="font-size: ${sz.numSize}; font-weight: 900; color: ${sz.numColor}; line-height: 1; letter-spacing: -2px;">${formatNum(emp.requested)}</div>
-        <div style="font-size: 0.65rem; color: ${sz.labelColor}; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 0.2rem;">ฉบับ</div>
+        <div style="font-size: 0.65rem; color: ${sz.labelColor}; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 0.2rem;">ใบ</div>
       </div>`;
   });
 
@@ -2659,7 +2766,7 @@ async function shareAsImage() {
         </div>
         <div style="text-align: right;">
           <div style="font-size: 1.5rem; font-weight: 900; line-height: 1; color: #4f46e5;">${formatNum(emp.requested)}</div>
-          <div style="font-size: 0.6rem; opacity: 0.6; text-transform: uppercase; color: #64748b;">ฉบับ</div>
+          <div style="font-size: 0.6rem; opacity: 0.6; text-transform: uppercase; color: #64748b;">ใบ</div>
         </div>
       </div>`;
   });
@@ -2685,7 +2792,7 @@ async function shareAsImage() {
           </div>
           <div style="text-align: right;">
             <div style="font-size: 1.5rem; font-weight: 900; line-height: 1; color: #64748b;">${formatNum(mgr.requested)}</div>
-            <div style="font-size: 0.6rem; opacity: 0.6; text-transform: uppercase; color: #64748b;">ฉบับ</div>
+            <div style="font-size: 0.6rem; opacity: 0.6; text-transform: uppercase; color: #64748b;">ใบ</div>
           </div>
         </div>`;
     });
@@ -2776,7 +2883,7 @@ async function shareAsImage() {
       <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
         <div>
           <div style="font-size: 0.75rem; font-weight: bold; opacity: 0.9;">🔥 ไปรษณียบัตรคงเหลือในแผนก:</div>
-          <div style="font-size: 1.8rem; font-weight: 900; margin-top: 0.1rem; line-height: 1;">${formatNum(totalStockRemaining)} <span style="font-size: 0.9rem; font-weight: normal;">ฉบับ</span></div>
+          <div style="font-size: 1.8rem; font-weight: 900; margin-top: 0.1rem; line-height: 1;">${formatNum(totalStockRemaining)} <span style="font-size: 0.9rem; font-weight: normal;">ใบ</span></div>
         </div>
         <div style="font-size: 2.2rem; opacity: 0.8;">📦</div>
       </div>
