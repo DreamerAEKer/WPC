@@ -782,72 +782,104 @@ input:focus, select:focus {
 }
 .rank-podium-card {
   border-radius: 20px;
-  padding: 1.5rem 1.25rem;
   text-align: center;
   position: relative;
   flex: 1;
-  max-width: 220px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.12);
   transition: transform 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 1.5rem;
 }
 .rank-podium-card:hover { transform: translateY(-4px); }
-.rank-podium-card.rank-1 {
-  background: linear-gradient(145deg, #fffbeb, #fef3c7);
-  border: 2px solid #f59e0b;
-  order: 2;
-  flex: 1.15;
-}
+/* อันดับ 2 — ซ้าย */
 .rank-podium-card.rank-2 {
-  background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+  background: linear-gradient(160deg, #c8d6e5 0%, #e8eef5 60%, #f8fafc 100%);
   border: 2px solid #94a3b8;
   order: 1;
+  min-height: 200px;
+  padding-top: 2rem;
+  max-width: 180px;
 }
+/* อันดับ 1 — กลาง ใหญ่ที่สุด */
+.rank-podium-card.rank-1 {
+  background: linear-gradient(160deg, #f59e0b 0%, #fbbf24 40%, #fef3c7 100%);
+  border: 3px solid #d97706;
+  order: 2;
+  min-height: 280px;
+  padding-top: 2.5rem;
+  flex: 1.3;
+  box-shadow: 0 12px 40px rgba(245, 158, 11, 0.4), 0 4px 12px rgba(0,0,0,0.15);
+}
+/* อันดับ 3 — ขวา */
 .rank-podium-card.rank-3 {
-  background: linear-gradient(145deg, #fff7ed, #ffedd5);
+  background: linear-gradient(160deg, #d4a574 0%, #e8c4a0 60%, #fff7ed 100%);
   border: 2px solid #c2785e;
   order: 3;
+  min-height: 160px;
+  padding-top: 1.5rem;
+  max-width: 160px;
 }
 .rank-medal {
-  font-size: 2.5rem;
+  font-size: 2rem;
   display: block;
   margin-bottom: 0.5rem;
 }
+.rank-1 .rank-medal { font-size: 2.8rem; }
 .rank-podium-name {
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: #1f2937;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
 }
+.rank-1 .rank-podium-name { font-size: 1.1rem; color: #78350f; }
+.rank-2 .rank-podium-name { color: #334155; }
+.rank-3 .rank-podium-name { color: #7c3b1e; }
+/* ตัวเลขหลัก — ใหญ่แตกต่างกันมาก */
 .rank-podium-score {
-  font-size: 1.8rem;
-  font-weight: 800;
-  color: var(--primary);
+  font-size: 2.2rem;
+  font-weight: 900;
   line-height: 1;
+  letter-spacing: -1px;
+}
+.rank-1 .rank-podium-score {
+  font-size: 3.6rem;
+  color: #78350f;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.rank-2 .rank-podium-score {
+  font-size: 2.6rem;
+  color: #1e3a5f;
+}
+.rank-3 .rank-podium-score {
+  font-size: 2rem;
+  color: #7c3b1e;
 }
 .rank-podium-label {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 600;
   color: #6b7280;
-  margin-top: 0.25rem;
+  margin-top: 0.2rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
-.rank-podium-sub {
-  font-size: 0.8rem;
-  color: #4b5563;
-  margin-top: 0.5rem;
-}
+.rank-1 .rank-podium-label { color: #92400e; font-size: 0.75rem; }
 .rank-badge {
   position: absolute;
   top: -12px;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
   padding: 3px 12px;
   border-radius: 20px;
   white-space: nowrap;
 }
-.rank-1 .rank-badge { background: #f59e0b; color: white; }
-.rank-2 .rank-badge { background: #94a3b8; color: white; }
-.rank-3 .rank-badge { background: #c2785e; color: white; }
+.rank-1 .rank-badge { background: #d97706; color: white; font-size: 0.8rem; padding: 4px 16px; }
+.rank-2 .rank-badge { background: #64748b; color: white; }
+.rank-3 .rank-badge { background: #9a6048; color: white; }
 
 /* Other ranks list */
 .ranking-cards-container {
@@ -2181,9 +2213,7 @@ function renderRanking() {
           <span class="rank-medal">${rankMedals[i]}</span>
           <div class="rank-podium-name">${emp.name}</div>
           <div class="rank-podium-score">${formatNum(emp.remitted)}</div>
-          <div class="rank-podium-label">ฉบับนำส่ง</div>
-          <div class="rank-podium-sub">เงิน ${formatNum(emp.remitted * store.data.pricePerTicket)} ฿</div>
-          ${emp.outstanding > 0 ? `<div style="margin-top:0.5rem; font-size:0.78rem; color:#ef4444; background:#fee2e2; border-radius:8px; padding:2px 8px; display:inline-block;">ค้าง ${formatNum(emp.outstanding)} ฉบับ</div>` : `<div style="margin-top:0.5rem; font-size:0.78rem; color:#10b981; background:#d1fae5; border-radius:8px; padding:2px 8px; display:inline-block;">✓ ส่งครบแล้ว</div>`}
+          <div class="rank-podium-label">ฉบับ</div>
         </div>`;
     });
     podiumHtml += '</div>';
@@ -2202,7 +2232,7 @@ function renderRanking() {
           </div>
           <div class="rank-list-right">
             <div class="rank-list-score">${formatNum(emp.remitted)}</div>
-            <div class="rank-list-score-label">ฉบับ | ${formatNum(emp.remitted * store.data.pricePerTicket)} ฿</div>
+            <div class="rank-list-score-label">ฉบับ</div>
           </div>
         </div>`;
     });
@@ -2285,7 +2315,8 @@ async function shareAsImage() {
   const emps = getRankingData();
   const now = new Date().toLocaleDateString('th-TH', {day:'numeric', month:'long', year:'numeric'});
 
-  // Build snapshot DOM
+  // Build snapshot DOM with TRUE PODIUM HEIGHTS
+  // Order shown: Silver (left) | Gold (center, tallest) | Bronze (right)
   let snapEl = document.getElementById('ranking-snapshot');
   if (!snapEl) {
     snapEl = document.createElement('div');
@@ -2293,44 +2324,74 @@ async function shareAsImage() {
     document.body.appendChild(snapEl);
   }
 
+  const podiumSizes = [
+    { order: 1, height: '160px', numSize: '2.6rem', bg: 'rgba(148,163,184,0.25)', border: 'rgba(148,163,184,0.5)', nameSize: '0.85rem' }, // silver
+    { order: 0, height: '220px', numSize: '4.2rem', bg: 'rgba(245,158,11,0.25)', border: 'rgba(245,158,11,0.7)', nameSize: '1rem' },      // gold
+    { order: 2, height: '120px', numSize: '2rem',   bg: 'rgba(194,120,94,0.2)',  border: 'rgba(194,120,94,0.5)',  nameSize: '0.8rem' },   // bronze
+  ];
+
   const top3 = emps.slice(0, 3);
   const rest = emps.slice(3);
 
-  let topRowHtml = '';
-  const podiumOrder = top3.length === 3 ? [1, 0, 2] : top3.map((_, i) => i);
-  podiumOrder.filter(i => i < top3.length).forEach(i => {
-    const emp = top3[i];
-    topRowHtml += `
-      <div class="snap-top-card">
-        <span class="snap-top-medal">${rankMedals[i]}</span>
-        <div class="snap-top-name">${emp.name}</div>
-        <div class="snap-top-score">${formatNum(emp.remitted)}</div>
-        <div class="snap-top-label">ฉบับนำส่ง</div>
+  // Build ordered display: Silver, Gold, Bronze  
+  let podiumCardsHtml = '';
+  const displayOrder = top3.length === 3 ? [1, 0, 2] : top3.map((_, i) => i);
+  displayOrder.filter(i => i < top3.length).forEach(idx => {
+    const emp = top3[idx];
+    const sz = podiumSizes[idx];
+    podiumCardsHtml += `
+      <div style="
+        background: ${sz.bg};
+        border: 2px solid ${sz.border};
+        border-radius: 18px;
+        padding: 1.25rem 0.75rem 1rem;
+        text-align: center;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        min-height: ${sz.height};
+        position: relative;
+      ">
+        <div style="font-size: 1.6rem; margin-bottom: 0.3rem;">${rankMedals[idx]}</div>
+        <div style="font-size: ${sz.nameSize}; font-weight: 700; color: white; margin-bottom: 0.4rem; line-height: 1.2;">${emp.name}</div>
+        <div style="font-size: ${sz.numSize}; font-weight: 900; color: white; line-height: 1; letter-spacing: -2px;">${formatNum(emp.remitted)}</div>
+        <div style="font-size: 0.65rem; color: rgba(255,255,255,0.7); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 0.2rem;">ฉบับ</div>
       </div>`;
   });
 
   let restHtml = '';
   rest.forEach((emp, i) => {
     restHtml += `
-      <div class="snap-row">
-        <div class="snap-rank">${i+4}</div>
-        <div class="snap-info">
-          <div class="snap-name">${emp.name}</div>
-          <div class="snap-detail">ค้าง ${formatNum(emp.outstanding)} ฉบับ</div>
+      <div style="
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: rgba(255,255,255,0.1);
+        border-radius: 12px;
+        padding: 0.7rem 1rem;
+        margin-bottom: 0.5rem;
+      ">
+        <div style="font-size: 1.1rem; font-weight: 800; width: 28px; text-align: center; color: rgba(255,255,255,0.6);">${i+4}</div>
+        <div style="flex: 1;">
+          <div style="font-weight: 700; font-size: 0.9rem;">${emp.name}</div>
         </div>
-        <div>
-          <div class="snap-score">${formatNum(emp.remitted)}</div>
-          <div class="snap-score-label">ฉบับ</div>
+        <div style="text-align: right;">
+          <div style="font-size: 1.5rem; font-weight: 900; line-height: 1;">${formatNum(emp.remitted)}</div>
+          <div style="font-size: 0.6rem; opacity: 0.6; text-transform: uppercase;">ฉบับ</div>
         </div>
       </div>`;
   });
 
   snapEl.innerHTML = `
-    <h2>🏆 อันดับยอดขายไปรษณียบัตร</h2>
-    <div class="snap-subtitle">World Cup 2026 — อัพเดท ${now}</div>
-    <div class="snap-top-row">${topRowHtml}</div>
+    <div style="text-align:center; margin-bottom: 1.25rem;">
+      <div style="font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px;">🏆 อันดับยอดขาย</div>
+      <div style="font-size: 0.8rem; opacity: 0.65; margin-top: 0.2rem;">World Cup 2026 — ${now}</div>
+    </div>
+    <div style="display: flex; gap: 0.75rem; align-items: flex-end; margin-bottom: 1.25rem;">${podiumCardsHtml}</div>
     ${restHtml}
-    <div class="snap-footer">แผนกลูกค้าธุรกิจ ปณฝ.กลาง 10501</div>
+    <div style="text-align:center; margin-top: 1.25rem; font-size: 0.7rem; opacity: 0.5;">แผนกลูกค้าธุรกิจ ปณฝ.กลาง 10501</div>
   `;
 
   const btn = document.getElementById('btn-share-img');
