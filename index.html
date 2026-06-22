@@ -649,10 +649,39 @@ input:focus, select:focus {
     grid-template-columns: 1fr;
   }
 
+  /* Podium - keep horizontal, scale down for mobile */
   .rank-podium-row {
-    flex-direction: column;
-    align-items: center;
+    gap: 0.5rem;
+    align-items: flex-end;
   }
+  .rank-podium-card {
+    padding-bottom: 0.75rem;
+    border-radius: 14px;
+  }
+  .rank-podium-card.rank-1 {
+    min-height: 150px;
+    padding-top: 1.25rem;
+    flex: 1.2;
+    max-width: none;
+  }
+  .rank-podium-card.rank-2 {
+    min-height: 110px;
+    padding-top: 1rem;
+    max-width: none;
+  }
+  .rank-podium-card.rank-3 {
+    min-height: 90px;
+    padding-top: 0.75rem;
+    max-width: none;
+  }
+  .rank-medal { font-size: 1.4rem; margin-bottom: 0.25rem; }
+  .rank-1 .rank-medal { font-size: 1.8rem; }
+  .rank-podium-name { font-size: 0.78rem; margin-bottom: 0.2rem; }
+  .rank-1 .rank-podium-name { font-size: 0.88rem; }
+  .rank-1 .rank-podium-score { font-size: 2.2rem; }
+  .rank-2 .rank-podium-score { font-size: 1.7rem; }
+  .rank-3 .rank-podium-score { font-size: 1.4rem; }
+  .rank-podium-label { font-size: 0.6rem; }
 }
 
 @media print {
