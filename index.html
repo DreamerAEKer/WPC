@@ -2085,7 +2085,7 @@ function renderMasterHistory() {
     let valStr = '';
     
     if (tx.type === 'req') {
-      typeBadge = '<span style="color: var(--text-dark); font-weight: 600;">รับโควต้าเพิ่ม</span>';
+      typeBadge = '<span style="color: var(--text-dark); font-weight: 600;">เบิกจาก โควต้า</span>';
       valStr = `<span style="color: var(--text-dark)">${formatNum(tx.qty)}</span>`;
     } else {
       typeBadge = '<span style="color: var(--secondary); font-weight: 600;">นำส่งเงิน</span>';
@@ -2650,6 +2650,13 @@ function deleteTx(txId) {
   if(confirm('คุณแน่ใจหรือไม่ที่จะลบรายการนี้? (การลบจะดึงยอดกลับคืนอัตโนมัติ)')) {
     store.data.transactions = store.data.transactions.filter(t => t.id !== txId);
     store.saveData();
+    renderAll();
+  }
+}
+
+function deleteMasterTx(txId) {
+  if(confirm('คุณแน่ใจหรือไม่ที่จะลบรายการประวัตินี้?')) {
+    store.deleteMasterTx(txId);
     renderAll();
   }
 }
