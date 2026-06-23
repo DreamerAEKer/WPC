@@ -2555,8 +2555,8 @@ function calcForm() {
   
   document.getElementById('c-remit-amt').textContent = remitAmt ? formatNum(remitAmt) : '';
   
-  document.getElementById('c-remain-remit-qty').textContent = outQty ? formatNum(outQty) : '';
-  document.getElementById('c-remain-remit-amt').textContent = outAmt ? formatNum(outAmt) : '';
+  document.getElementById('c-out-qty').textContent = outQty ? formatNum(outQty) : '';
+  document.getElementById('c-out-amt').textContent = outAmt ? formatNum(outAmt) : '';
   
   // Update Remaining
   const overview = store.getOverview();
