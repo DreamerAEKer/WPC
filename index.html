@@ -306,6 +306,10 @@ body {
   border: 1px solid var(--border);
 }
 
+.print-card {
+  padding: 2rem;
+}
+
 .card-header {
   margin-bottom: 1.5rem;
   padding-bottom: 1rem;
@@ -626,7 +630,26 @@ input:focus, select:focus {
   /* Print View on mobile container */
   .print-container {
     padding: 1rem !important;
-    overflow-x: auto;
+    overflow-x: auto !important;
+    max-width: 100% !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .print-card {
+    padding: 1rem !important;
+    max-width: 100% !important;
+  }
+
+  .print-tabs {
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+  }
+
+  .print-tabs button {
+    flex: 1 1 calc(50% - 0.25rem) !important;
+    min-width: 140px !important;
+    font-size: 0.8rem !important;
+    padding: 0.5rem 0.5rem !important;
   }
 
   .top-header {
@@ -1296,6 +1319,7 @@ input:focus, select:focus {
               <thead>
                 <tr>
                   <th>ชื่อพนักงาน</th>
+                  <th style="text-align: center; width: 100px;">หน.แผนก</th>
                   <th>เบิก (ฉบับ)</th>
                   <th>นำส่งแล้ว (ฉบับ)</th>
                   <th>ค้างส่ง (ฉบับ)</th>
@@ -1311,8 +1335,8 @@ input:focus, select:focus {
 
       <!-- Print Form View -->
       <div id="view-print" class="view-section">
-        <div class="card" style="max-width: 950px; margin: 0 auto; background: white; padding: 2rem;">
-          <div style="display: flex; gap: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem;" class="no-print">
+        <div class="card print-card" style="max-width: 950px; margin: 0 auto; background: white;">
+          <div style="display: flex; gap: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem;" class="no-print print-tabs">
             <button class="btn btn-primary" id="btn-tab-type1" onclick="switchPrintTab('1')">📄 ใบเบิกโควต้า (หน.แผนก)</button>
             <button class="btn btn-secondary" style="background: white; color: var(--text-dark); border: 1px solid var(--border);" id="btn-tab-type2" onclick="switchPrintTab('2')">📑 ทะเบียนคุม (แม่แบบ A4)</button>
           </div>
@@ -1332,7 +1356,7 @@ input:focus, select:focus {
                   <table style="width: 100%; border-collapse: collapse; text-align: center; border: 2px solid black; color: black; font-size: 0.95rem;">
                   <tr>
                     <td style="border: 1px solid black; padding: 0.75rem; font-weight: bold; width: 25%;">โควต้าที่ได้รับ</td>
-                    <td style="border: 1px solid black; padding: 0.75rem; font-size: 1.25rem; font-weight: bold; width: 25%;" contenteditable="true" id="c-quota">32,500</td>
+                    <td style="border: 1px solid black; padding: 0.75rem; font-size: 1.25rem; font-weight: bold; width: 25%; background: #fffbe6;" contenteditable="true" id="c-quota" oninput="calcForm()">32,500</td>
                     <td style="border: 1px solid black; padding: 0.75rem; width: 10%;">ฉบับ</td>
                     <td style="border: 1px solid black; padding: 0.75rem; font-weight: bold; width: 20%;">ปัจจุบันคงเหลือ</td>
                     <td style="border: 1px solid black; padding: 0.75rem; width: 10%; font-weight: bold;" contenteditable="true" id="c-remain"></td>
@@ -1354,7 +1378,7 @@ input:focus, select:focus {
                     <td style="border: 1px solid black; background: #fffbe6;" contenteditable="true" id="c-date1" oninput="syncDates('c-date1')"></td>
                     <td style="border: 1px solid black; background: #fffbe6;" contenteditable="true" id="c-req-qty" oninput="calcForm()"></td>
                     <td style="border: 1px solid black; background: #f8f9fa;" id="c-req-amt"></td>
-                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-prev-qty"></td>
+                    <td style="border: 1px solid black; background: #fffbe6;" contenteditable="true" id="c-prev-qty" oninput="calcForm()"></td>
                     <td style="border: 1px solid black; background: #f8f9fa;" id="c-prev-amt"></td>
                     <td style="border: 1px solid black; background: #f8f9fa;" id="c-total-qty"></td>
                     <td style="border: 1px solid black; background: #f8f9fa;" id="c-total-amt"></td>
@@ -1396,7 +1420,7 @@ input:focus, select:focus {
                   <h3 style="color: var(--text-dark); font-size: 1.2rem; margin: 0;">ประวัติการรับโควต้า / นำส่งเงิน (Master History)</h3>
                   <button class="btn btn-primary" onclick="saveMasterTx()">💾 บันทึกประวัติ (จากแบบฟอร์มด้านบน)</button>
                 </div>
-                <div class="table-container">
+                <div class="table-responsive">
                   <table class="data-table" id="master-history-table">
                     <thead>
                       <tr>
@@ -1508,6 +1532,21 @@ input:focus, select:focus {
 
 
     </main>
+  </div>
+
+  <!-- Share Text Modal -->
+  <div id="share-text-modal" class="share-modal">
+    <div class="share-modal-inner">
+      <div class="share-modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 style="margin: 0; font-size: 1.25rem;">คัดลอกข้อความแชร์อันดับ</h3>
+        <button class="share-modal-close" onclick="document.getElementById('share-text-modal').style.display = 'none'" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.25rem 0.5rem; border-radius: 4px;">&times;</button>
+      </div>
+      <textarea id="share-text-content" style="width: 100%; height: 250px; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 0.9rem; resize: none; margin-bottom: 1.5rem; outline: none; color: black;"></textarea>
+      <div class="share-modal-actions" style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+        <button class="btn btn-secondary" onclick="copyShareText()" style="background: var(--primary); color: white;">📋 คัดลอกข้อความ</button>
+        <a id="line-share-link" href="#" target="_blank" class="btn btn-primary" style="background: #06c755; color: white; display: flex; align-items: center; gap: 0.5rem; text-decoration: none;">💬 ส่งเข้า LINE</a>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -1936,7 +1975,7 @@ function renderEmployees() {
   tbody.innerHTML = '';
   
   if (emps.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-light);">ยังไม่มีข้อมูลพนักงาน</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-light);">ยังไม่มีข้อมูลพนักงาน</td></tr>';
   }
 
   emps.forEach(emp => {
@@ -1944,6 +1983,9 @@ function renderEmployees() {
     tr.innerHTML = `
       <td style="font-weight:600;">
         ${emp.name}
+      </td>
+      <td style="text-align: center;">
+        <input type="checkbox" ${emp.isManager ? 'checked' : ''} onchange="toggleManager('${emp.id}', this.checked)" style="width: 18px; height: 18px; cursor: pointer;" />
       </td>
       <td>${formatNum(emp.requested)}</td>
       <td>${formatNum(emp.remitted)}</td>
@@ -1957,6 +1999,10 @@ function renderEmployees() {
     `;
     tbody.appendChild(tr);
   });
+}
+
+function toggleManager(empId, isChecked) {
+  store.setEmployeeManager(empId, isChecked);
 }
 
 function deleteEmployee(empId, empName) {
@@ -2044,27 +2090,31 @@ function renderGifts() {
   // Update dropdown
   const gifts = store.getGiftsData();
   const allocGiftSelect = document.getElementById('alloc-gift');
-  allocGiftSelect.innerHTML = '<option value="">-- เลือกของสมมนาคุณ --</option>';
-  gifts.forEach(gift => {
-    allocGiftSelect.innerHTML += `<option value="${gift.id}">${gift.name} (เหลือ: ${gift.remaining})</option>`;
-  });
+  if (allocGiftSelect) {
+    allocGiftSelect.innerHTML = '<option value="">-- เลือกของสมมนาคุณ --</option>';
+    gifts.forEach(gift => {
+      allocGiftSelect.innerHTML += `<option value="${gift.id}">${gift.name} (เหลือ: ${gift.remaining})</option>`;
+    });
+  }
 
   // Table
   const tbody = document.querySelector('#gifts-table tbody');
-  tbody.innerHTML = '';
-  if (gifts.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-light);">ยังไม่มีของสมมนาคุณในระบบ</td></tr>';
+  if (tbody) {
+    tbody.innerHTML = '';
+    if (gifts.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-light);">ยังไม่มีของสมมนาคุณในระบบ</td></tr>';
+    }
+    gifts.forEach(gift => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${gift.name}</td>
+        <td>${formatNum(gift.totalStock)}</td>
+        <td>${formatNum(gift.allocated)}</td>
+        <td style="font-weight: 600; color: ${gift.remaining <= 0 ? 'var(--danger)' : 'var(--secondary)'}">${formatNum(gift.remaining)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
   }
-  gifts.forEach(gift => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${gift.name}</td>
-      <td>${formatNum(gift.totalStock)}</td>
-      <td>${formatNum(gift.allocated)}</td>
-      <td style="font-weight: 600; color: ${gift.remaining <= 0 ? 'var(--danger)' : 'var(--secondary)'}">${formatNum(gift.remaining)}</td>
-    `;
-    tbody.appendChild(tr);
-  });
 }
 
 function renderMasterHistory() {
@@ -2559,8 +2609,7 @@ function calcForm() {
   document.getElementById('c-out-amt').textContent = outAmt ? formatNum(outAmt) : '';
   
   // Update Remaining
-  const overview = store.getOverview();
-  const remain = overview.quota - (overview.masterRequested + reqQty);
+  const remain = quota - (prevQty + reqQty);
   document.getElementById('c-remain').textContent = formatNum(remain);
 }
 
@@ -2591,14 +2640,25 @@ function saveMasterTx() {
     return;
   }
   
-  // Parse Thai date back to standard Date (DD/MM/YYYY where YYYY > 2500)
   const parseThaiDateStr = (dateStr) => {
     if (!dateStr) return new Date().toISOString();
-    const parts = dateStr.split('/');
+    const cleanStr = dateStr.replace(/-/g, '/');
+    const parts = cleanStr.split('/');
     if (parts.length === 3) {
       const day = parseInt(parts[0]);
       const month = parseInt(parts[1]) - 1;
       let year = parseInt(parts[2]);
+      if (year < 100) {
+        if (year === 69) {
+          year = 2569;
+        } else if (year === 26) {
+          year = 2026;
+        } else if (year > 50) {
+          year += 2500;
+        } else {
+          year += 2000;
+        }
+      }
       if (year >= 2500) year -= 543;
       return new Date(year, month, day).toISOString();
     }
@@ -2627,23 +2687,48 @@ function syncDates(sourceId) {
 
 function renderA4Logbook() {
   const tbody = document.getElementById('p-a4-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
   
-  const rowCount = 20;
-  let html = '';
+  // Get all 'req' and 'request' transactions
+  const requests = store.data.transactions.filter(t => t.type === 'req' || t.type === 'request');
+  requests.sort((a, b) => new Date(a.date) - new Date(b.date)); // Chronological order
   
-  for(let i=0; i<rowCount; i++) {
-    html += `
-      <tr style="height: 40px;">
-        <td style="border: 1px solid black;">${i+1}</td>
-        <td style="border: 1px solid black;">&nbsp;</td>
-        <td style="border: 1px solid black;">&nbsp;</td>
-        <td style="border: 1px solid black;">&nbsp;</td>
-        <td style="border: 1px solid black;">&nbsp;</td>
-        <td style="border: 1px solid black;">&nbsp;</td>
-      </tr>
-    `;
+  const minRows = 20;
+  const rowCount = Math.max(requests.length + 5, minRows); // Render at least 20 rows, or total requests + 5 extra empty rows
+  
+  for (let i = 0; i < rowCount; i++) {
+    const tx = requests[i];
+    const tr = document.createElement('tr');
+    tr.style.height = '40px';
+
+    if (tx) {
+      const empId = tx.empId || tx.employeeId;
+      const emp = store.data.employees.find(e => e.id === empId);
+      const dStr = formatThaiDate(tx.date);
+      const qty = tx.qty || tx.quantity;
+      const qtyStr = `-${formatNum(qty)}-`;
+      
+      tr.innerHTML = `
+          <td style="border: 1px solid black; text-align: center;">${i + 1}</td>
+          <td style="border: 1px solid black; text-align: center;" contenteditable="true">${dStr}</td>
+          <td style="border: 1px solid black; text-align: center; font-weight: 500;" contenteditable="true">${emp ? emp.name : ''}</td>
+          <td style="border: 1px solid black; text-align: center; font-weight: 600;" contenteditable="true">${qtyStr}</td>
+          <td style="border: 1px solid black;" contenteditable="true"></td>
+          <td style="border: 1px solid black; font-size: 0.85rem; color: #333;" contenteditable="true"></td>
+      `;
+    } else {
+      tr.innerHTML = `
+          <td style="border: 1px solid black; text-align: center;">${i + 1}</td>
+          <td style="border: 1px solid black; text-align: center;" contenteditable="true"></td>
+          <td style="border: 1px solid black; text-align: center; font-weight: 500;" contenteditable="true"></td>
+          <td style="border: 1px solid black; text-align: center; font-weight: 600;" contenteditable="true"></td>
+          <td style="border: 1px solid black;" contenteditable="true"></td>
+          <td style="border: 1px solid black; font-size: 0.85rem; color: #333;" contenteditable="true"></td>
+      `;
+    }
+    tbody.appendChild(tr);
   }
-  tbody.innerHTML = html;
 }
 
 // Transaction Deletion
@@ -2775,8 +2860,8 @@ function editTx(txId) {
   document.getElementById('tx-type').value = tx.type === 'request' ? 'req' : tx.type;
   document.getElementById('tx-qty').value = tx.qty || tx.quantity;
   
-  const d = new Date(tx.date);
-  document.getElementById('tx-date').value = d.toISOString().split('T')[0];
+  const dStr = tx.date || '';
+  document.getElementById('tx-date').value = dStr.includes('T') ? dStr.split('T')[0] : dStr;
   document.getElementById('tx-require-sign').checked = !!tx.requireSign;
   document.getElementById('tx-value-calc').textContent = formatNum((tx.qty || tx.quantity) * store.data.pricePerTicket);
   
@@ -2802,6 +2887,7 @@ function editTx(txId) {
 function cancelEdit() {
   editingTxId = null;
   document.getElementById('form-add-tx').reset();
+  document.getElementById('tx-date').valueAsDate = new Date();
   document.getElementById('tx-value-calc').textContent = '0';
   
   const submitBtn = document.querySelector('#form-add-tx button[type="submit"]');
@@ -2843,6 +2929,7 @@ document.getElementById('form-add-tx').addEventListener('submit', (e) => {
       } else {
         store.addTransaction(type, empId, qty, date, evidenceUrl || null, requireSign);
         document.getElementById('form-add-tx').reset();
+        document.getElementById('tx-date').valueAsDate = new Date();
         document.getElementById('tx-value-calc').textContent = '0';
       }
     };
@@ -2859,30 +2946,36 @@ document.getElementById('form-add-tx').addEventListener('submit', (e) => {
   }
 });
 
-// Add Gift
-document.getElementById('form-add-gift').addEventListener('submit', (e) => {
-  e.preventDefault();
-  const name = document.getElementById('gift-name').value.trim();
-  const stock = parseInt(document.getElementById('gift-stock').value);
+// Add Gift (Optional premium gifts management)
+const formAddGift = document.getElementById('form-add-gift');
+if (formAddGift) {
+  formAddGift.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = document.getElementById('gift-name').value.trim();
+    const stock = parseInt(document.getElementById('gift-stock').value);
 
-  if (name && stock > 0) {
-    store.addGift(name, stock);
-    document.getElementById('form-add-gift').reset();
-  }
-});
+    if (name && stock > 0) {
+      store.addGift(name, stock);
+      formAddGift.reset();
+    }
+  });
+}
 
-// Allocate Gift
-document.getElementById('form-allocate-gift').addEventListener('submit', (e) => {
-  e.preventDefault();
-  const empId = document.getElementById('alloc-emp').value;
-  const giftId = document.getElementById('alloc-gift').value;
-  const qty = parseInt(document.getElementById('alloc-qty').value);
+// Allocate Gift (Optional premium gifts management)
+const formAllocateGift = document.getElementById('form-allocate-gift');
+if (formAllocateGift) {
+  formAllocateGift.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const empId = document.getElementById('alloc-emp').value;
+    const giftId = document.getElementById('alloc-gift').value;
+    const qty = parseInt(document.getElementById('alloc-qty').value);
 
-  if (empId && giftId && qty > 0) {
-    store.allocateGift(empId, giftId, qty);
-    document.getElementById('form-allocate-gift').reset();
-  }
-});
+    if (empId && giftId && qty > 0) {
+      store.allocateGift(empId, giftId, qty);
+      formAllocateGift.reset();
+    }
+  });
+}
 
 // Initialize Date Pickers to today
 document.getElementById('tx-date').valueAsDate = new Date();
