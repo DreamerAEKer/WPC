@@ -2587,9 +2587,26 @@ function saveMasterTx() {
     return;
   }
   
+  // Parse Thai date back to standard Date (DD/MM/YYYY where YYYY > 2500)
+  const parseThaiDateStr = (dateStr) => {
+    if (!dateStr) return new Date().toISOString();
+    const parts = dateStr.split('/');
+    if (parts.length === 3) {
+      const day = parseInt(parts[0]);
+      const month = parseInt(parts[1]) - 1;
+      let year = parseInt(parts[2]);
+      if (year >= 2500) year -= 543;
+      return new Date(year, month, day).toISOString();
+    }
+    return new Date().toISOString();
+  };
+  
+  const date1Str = document.getElementById('c-date1').textContent.trim();
+  const date2Str = document.getElementById('c-date2').textContent.trim();
+  
   if(confirm('ยืนยันการบันทึกประวัติ (แผนก) เข้าสู่ระบบ?')) {
-    if (reqQty > 0) store.addMasterTx('req', reqQty, new Date().toISOString());
-    if (remitQty > 0) store.addMasterTx('remit', remitQty, new Date().toISOString());
+    if (reqQty > 0) store.addMasterTx('req', reqQty, parseThaiDateStr(date1Str));
+    if (remitQty > 0) store.addMasterTx('remit', remitQty, parseThaiDateStr(date2Str));
     
     alert('บันทึกข้อมูลเรียบร้อยแล้ว');
     renderAll();
