@@ -442,10 +442,10 @@ input:focus, select:focus {
     justify-content: space-between;
     background: var(--surface);
     border-bottom: 1px solid var(--border);
-    padding: 0.75rem 1rem;
+    padding: calc(env(safe-area-inset-top, 0px) + 0.75rem) 1rem 0.75rem;
     position: sticky;
     top: 0;
-    z-index: 40;
+    z-index: 110;
     box-shadow: var(--shadow-sm);
   }
   
@@ -1256,6 +1256,23 @@ input:focus, select:focus {
             </div>
           </div>
         </div>
+
+        <!-- Mobile Data Backup Section (Shown mainly for mobile but fine on desktop too) -->
+        <div class="card" style="margin-top: 1.5rem; background: var(--surface); border: 1px solid var(--border);">
+          <div class="card-header">
+            <h3 style="display: flex; align-items: center; gap: 0.5rem;">💾 จัดการข้อมูล (Backup / Restore)</h3>
+          </div>
+          <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+            <button class="btn btn-primary" onclick="exportData()" style="flex: 1; justify-content: center;">
+              <span>📤</span> ส่งออกข้อมูล (Export)
+            </button>
+            <label class="btn btn-secondary" style="flex: 1; justify-content: center; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; border: 1px solid var(--border);">
+              <span>📥</span> นำเข้าข้อมูล (Import)
+              <input type="file" id="import-file-mobile" accept=".json" style="display:none" onchange="importData(this)" />
+            </label>
+          </div>
+          <p style="font-size: 0.8rem; color: var(--text-light); margin-top: 0.75rem; text-align: center;">* แนะนำให้ส่งออก (Export) ข้อมูลเก็บไว้เป็นระยะ</p>
+        </div>
       </div>
 
 
@@ -1973,8 +1990,7 @@ function renderRanking() {
   const managers = getManagersData();
   const maxRequested = emps.length > 0 ? (emps[0].requested || 1) : 1;
   const cardsContainer = document.getElementById('ranking-cards');
-  const tbody = document.querySelector('#ranking-table tbody');
-  if (!cardsContainer || !tbody) return;
+  if (!cardsContainer) return;
 
   // Let's calculate remaining stock of postcards
   const overview = store.getOverview();
