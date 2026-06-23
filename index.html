@@ -1392,7 +1392,10 @@ input:focus, select:focus {
               </div>
               
               <div class="no-print" style="margin-top: 3rem; border-top: 1px solid var(--border); padding-top: 2rem;">
-                <h3 style="margin-bottom: 1rem; color: var(--text-dark); font-size: 1.2rem;">ประวัติการรับโควต้า / นำส่งเงิน (Master History)</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+                  <h3 style="color: var(--text-dark); font-size: 1.2rem; margin: 0;">ประวัติการรับโควต้า / นำส่งเงิน (Master History)</h3>
+                  <button class="btn btn-primary" onclick="saveMasterTx()">💾 บันทึกประวัติ (จากแบบฟอร์มด้านบน)</button>
+                </div>
                 <div class="table-container">
                   <table class="data-table" id="master-history-table">
                     <thead>
