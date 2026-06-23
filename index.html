@@ -1180,23 +1180,11 @@ input:focus, select:focus {
         <button class="nav-btn active" data-view="dashboard">
           <span>📊</span> ภาพรวมแผนก
         </button>
-        <button class="nav-btn" data-view="summary">
-          <span>📋</span> สรุปยอดพนักงาน
+        <button class="nav-btn" data-view="transactions">
+          <span>📝</span> บันทึกรายการ
         </button>
         <button class="nav-btn" data-view="individuals">
-          <span>👥</span> รายชื่อพนักงาน
-        </button>
-        <button class="nav-btn" data-view="transactions">
-          <span>📝</span> บันทึกเบิก/นำส่ง
-        </button>
-        <button class="nav-btn" data-view="gifts">
-          <span>🎁</span> ของสมมนาคุณ
-        </button>
-        <button class="nav-btn" data-view="ranking">
-          <span>🏅</span> อันดับยอดขาย
-        </button>
-        <button class="nav-btn" data-view="print">
-          <span>🖨️</span> พิมพ์แบบฟอร์มเบิก
+          <span>👥</span> ทีมงานพนักงาน
         </button>
       </nav>
       <div class="sidebar-footer">
@@ -1225,12 +1213,33 @@ input:focus, select:focus {
       </header>
 
       <div id="view-dashboard" class="view-section active">
+        <!-- Ranking Header & Share Buttons -->
+        <div class="ranking-header-card no-print">
+          <div class="ranking-trophy">🏆</div>
+          <div>
+            <h2 class="ranking-title">อันดับยอดขายไปรษณียบัตร</h2>
+            <p class="ranking-subtitle">ฟุตบอลระดับโลก 2026 — เรียงตามยอดเบิกสูงสุด</p>
+          </div>
+          <div class="ranking-share-btns">
+            <button class="btn btn-share-text" id="btn-share-text" onclick="shareAsText()">
+              <span>💬</span> คัดลอกส่ง LINE
+            </button>
+            <button class="btn btn-share-img" id="btn-share-img" onclick="shareAsImage()">
+              <span>🖼️</span> แชร์รูปภาพ
+            </button>
+          </div>
+        </div>
+
         <div class="kpi-grid" id="dashboard-kpi">
           <!-- Populated by JS -->
         </div>
+
+        <!-- Leaderboard Cards (Podium) -->
+        <div id="ranking-cards" class="ranking-cards-container"></div>
+
         <div class="dashboard-cards">
           <div class="card">
-            <h3>สรุปยอดขายพนักงาน (Top Sales)</h3>
+            <h3>ตารางรายละเอียดทั้งหมด</h3>
             <div class="table-responsive">
               <table class="data-table" id="dashboard-emp-table">
                 <thead>
@@ -1249,61 +1258,28 @@ input:focus, select:focus {
         </div>
       </div>
 
-      <div id="view-summary" class="view-section">
-        <div class="card">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;" class="no-print">
-            <h3 style="margin: 0; font-size: 1.3rem;">ตารางสรุปรายบุคคล (ข้อมูล ณ ปัจจุบัน)</h3>
-            <button class="btn btn-primary" onclick="window.print()" style="font-size: 0.9rem; padding: 0.5rem 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
-              <span>🖨️</span> พิมพ์หน้ารายงาน
-            </button>
-          </div>
-          <div class="table-responsive">
-            <table class="data-table" id="summary-emp-table">
-              <thead>
-                <tr>
-                  <th>พนักงาน</th>
-                  <th>เบิก (ฉบับ)</th>
-                  <th>ส่งเงิน (บาท)</th>
-                  <th>เหลือค้าง (ฉบับ)</th>
-                  <th>ของสมมนาคุณที่ได้รับ</th>
-                  <th>เปอร์ที่ได้ (บาท)</th>
-                  <th style="text-align:center;">💰 ยอดจ่ายเงิน (฿)</th>
-                  <th>📝 หมายเหตุ</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
 
       <div id="view-individuals" class="view-section">
         <div class="card">
-          <div class="card-header">
-            <h3>จัดการรายชื่อพนักงาน</h3>
+          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <h3>จัดการทีมงานพนักงาน</h3>
+            <button class="btn btn-primary" onclick="window.print()" style="font-size: 0.9rem; padding: 0.5rem 1.25rem; display: flex; align-items: center; gap: 0.5rem;" class="no-print">
+              <span>🖨️</span> พิมพ์รายงาน
+            </button>
           </div>
           <form id="form-add-emp" class="inline-form">
-            <input type="text" id="input-emp-name" placeholder="ชื่อพนักงาน" required />
-            <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--text-dark); margin: 0 1rem 0 0.5rem;">
-              <input type="checkbox" id="input-emp-manager" style="width:16px; height:16px; cursor:pointer;" />
-              <label for="input-emp-manager" style="font-weight:normal; cursor:pointer; font-size:0.9rem;">เป็นหัวหน้าแผนก</label>
-            </div>
+            <input type="text" id="input-emp-name" placeholder="ชื่อพนักงานใหม่" required />
             <button type="submit" class="btn btn-primary">เพิ่มพนักงาน</button>
           </form>
-          <div class="table-responsive" style="margin-top: 1rem;">
+          <div class="table-responsive" style="margin-top: 1.5rem;">
             <table class="data-table" id="emp-manage-table">
               <thead>
                 <tr>
-                  <th>รหัส</th>
                   <th>ชื่อพนักงาน</th>
-                  <th>เบิกรวม (ฉบับ)</th>
-                  <th>นำส่งรวม (ฉบับ)</th>
+                  <th>เบิก (ฉบับ)</th>
+                  <th>นำส่งแล้ว (ฉบับ)</th>
                   <th>ค้างส่ง (ฉบับ)</th>
-                  <th>ยอดเงินนำส่ง (฿)</th>
                   <th>คอมมิชชัน (฿)</th>
-                  <th style="text-align:center;">👑 หน.แผนก</th>
-                  <th style="text-align:center;">💰 ยอดจ่ายเงิน (฿)</th>
-                  <th>📝 หมายเหตุ</th>
                   <th>จัดการ</th>
                 </tr>
               </thead>
@@ -1370,261 +1346,7 @@ input:focus, select:focus {
         </div>
       </div>
 
-      <div id="view-gifts" class="view-section">
-        <div class="grid-2">
-          <!-- Add Gift -->
-          <div class="card">
-            <div class="card-header">
-              <h3>เพิ่มของสมมนาคุณ (เข้าสต็อก)</h3>
-            </div>
-            <form id="form-add-gift" class="standard-form">
-              <div class="form-group">
-                <label>ชื่อของสมมนาคุณ</label>
-                <input type="text" id="gift-name" required />
-              </div>
-              <div class="form-group">
-                <label>จำนวนทั้งหมด</label>
-                <input type="number" id="gift-stock" min="1" required />
-              </div>
-              <button type="submit" class="btn btn-primary">เพิ่มเข้าคลัง</button>
-            </form>
-          </div>
 
-          <!-- Allocate Gift -->
-          <div class="card">
-            <div class="card-header">
-              <h3>บันทึกการเบิก/แจก ของสมมนาคุณ</h3>
-            </div>
-            <form id="form-allocate-gift" class="standard-form">
-              <div class="form-group">
-                <label>พนักงาน</label>
-                <select id="alloc-emp" required></select>
-              </div>
-              <div class="form-group">
-                <label>ของสมมนาคุณ</label>
-                <select id="alloc-gift" required></select>
-              </div>
-              <div class="form-group">
-                <label>จำนวนที่แจก</label>
-                <input type="number" id="alloc-qty" min="1" required />
-              </div>
-              <button type="submit" class="btn btn-secondary">บันทึกการแจก</button>
-            </form>
-          </div>
-        </div>
-
-        <div class="card" style="margin-top: 1.5rem;">
-          <div class="card-header">
-            <h3>สต็อกของสมมนาคุณ</h3>
-          </div>
-          <div class="table-responsive">
-            <table class="data-table" id="gifts-table">
-              <thead>
-                <tr>
-                  <th>ของสมมนาคุณ</th>
-                  <th>จำนวนทั้งหมด</th>
-                  <th>แจกไปแล้ว</th>
-                  <th>คงเหลือในคลัง</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- Ranking View -->
-      <div id="view-ranking" class="view-section">
-        <!-- Header card -->
-        <div class="ranking-header-card no-print">
-          <div class="ranking-trophy">🏆</div>
-          <div>
-            <h2 class="ranking-title">อันดับยอดขายไปรษณียบัตร</h2>
-            <p class="ranking-subtitle">ฟุตบอลระดับโลก 2026 — เรียงตามยอดเบิกสูงสุด</p>
-          </div>
-          <div class="ranking-share-btns">
-            <button class="btn btn-share-text" id="btn-share-text" onclick="shareAsText()">
-              <span>💬</span> แชร์ข้อความ
-            </button>
-            <button class="btn btn-share-img" id="btn-share-img" onclick="shareAsImage()">
-              <span>🖼️</span> แชร์รูปภาพ
-            </button>
-          </div>
-        </div>
-
-        <!-- Share text preview modal -->
-        <div id="share-text-modal" class="share-modal" style="display:none;">
-          <div class="share-modal-inner">
-            <div class="share-modal-header">
-              <h3>📋 ข้อความสำหรับแชร์</h3>
-              <button onclick="document.getElementById('share-text-modal').style.display='none'" class="share-modal-close">✕</button>
-            </div>
-            <textarea id="share-text-content" class="share-textarea" readonly></textarea>
-            <div class="share-modal-actions">
-              <button class="btn btn-primary" onclick="copyShareText()" id="btn-copy-text">📋 คัดลอก</button>
-              <a id="line-share-link" href="#" target="_blank" class="btn btn-line">💚 แชร์ใน LINE</a>
-            </div>
-          </div>
-        </div>
-
-        <!-- Leaderboard Cards -->
-        <div id="ranking-cards" class="ranking-cards-container"></div>
-
-        <!-- Full table -->
-        <div class="card" style="margin-top: 1.5rem;">
-          <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
-            <h3>📊 ตารางรายละเอียดทั้งหมด</h3>
-          </div>
-          <div class="table-responsive">
-            <table class="data-table" id="ranking-table">
-              <thead>
-                <tr>
-                  <th style="text-align:center;">#</th>
-                  <th>ชื่อพนักงาน</th>
-                  <th>ยอดเบิก (ฉบับ)</th>
-                  <th>นำส่งแล้ว (ฉบับ)</th>
-                  <th>ค้างส่ง (ฉบับ)</th>
-                  <th>ยอดเงินนำส่ง (฿)</th>
-                  <th>ความคืบหน้า</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- Print Form View -->
-      <div id="view-print" class="view-section">
-        <div class="card" style="max-width: 950px; margin: 0 auto; background: white; padding: 2rem;">
-          <div style="display: flex; gap: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem;" class="no-print">
-            <button class="btn btn-primary" id="btn-tab-type1" onclick="switchPrintTab('1')">📄 ใบเบิกโควต้า (หน.แผนก)</button>
-            <button class="btn btn-secondary" style="background: white; color: var(--text-dark); border: 1px solid var(--border);" id="btn-tab-type2" onclick="switchPrintTab('2')">📑 ทะเบียนคุม (แม่แบบ A4)</button>
-          </div>
-          
-          <div id="printable-area">
-            
-            <!-- Type 1: Individual Form -->
-            <div id="print-type-1" class="print-layout">
-              <div class="no-print" style="background: var(--bg-color); padding: 1rem; border-radius: var(--radius); margin-bottom: 1.5rem; display: flex; justify-content: flex-end;">
-                <button class="btn btn-secondary" onclick="window.print()">🖨️ กดพิมพ์ใบเบิก</button>
-              </div>
-              <div style="font-family: 'Kanit', sans-serif; border: 1px dashed #ccc; padding: 2rem; background: white;" class="print-container">
-                <h2 style="text-align: center; margin-bottom: 0.5rem; color: black; font-size: 1.5rem;">ใบเบิกไปรษณียบัตรทายผลการแข่งขันฟุตบอลระดับโลก 2026</h2>
-                <h3 style="text-align: center; margin-bottom: 2rem; font-weight: normal; color: black; font-size: 1.2rem;">แผนกลูกค้าธุรกิจ ปณฝ.กลาง 10501</h3>
-                
-                <table style="width: 100%; border-collapse: collapse; text-align: center; border: 2px solid black; color: black; font-size: 0.95rem;">
-                  <tr>
-                    <td style="border: 1px solid black; padding: 0.75rem; font-weight: bold; width: 25%;">โควต้าที่ได้รับ</td>
-                    <td style="border: 1px solid black; padding: 0.75rem; font-size: 1.25rem; font-weight: bold; width: 25%;" contenteditable="true" id="c-quota">32,500</td>
-                    <td style="border: 1px solid black; padding: 0.75rem; width: 10%;">ฉบับ</td>
-                    <td style="border: 1px solid black; padding: 0.75rem; font-weight: bold; width: 20%;">ปัจจุบันคงเหลือ</td>
-                    <td style="border: 1px solid black; padding: 0.75rem; width: 10%; font-weight: bold;" contenteditable="true" id="c-remain"></td>
-                    <td style="border: 1px solid black; padding: 0.75rem; width: 10%;">ฉบับ</td>
-                  </tr>
-                </table>
-
-                <table style="width: 100%; border-collapse: collapse; text-align: center; border: 2px solid black; border-top: none; color: black; font-size: 0.95rem;">
-                  <tr style="background: #f3f4f6;">
-                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">ว/ด/ป</th>
-                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">จำนวนที่ขอเบิก<br>ฉบับ</th>
-                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">คิดเป็นเงิน<br>บาท</th>
-                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">เบิกครั้งก่อน<br>ฉบับ</th>
-                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">คิดเป็นเงิน<br>บาท</th>
-                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">รวมเบิก<br>ฉบับ</th>
-                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">คิดเป็นเงิน<br>บาท</th>
-                  </tr>
-                  <tr style="height: 60px;">
-                    <td style="border: 1px solid black; background: #fffbe6;" contenteditable="true" id="c-date1" oninput="syncDates('c-date1')"></td>
-                    <td style="border: 1px solid black; background: #fffbe6;" contenteditable="true" id="c-req-qty" oninput="calcForm()"></td>
-                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-req-amt"></td>
-                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-prev-qty"></td>
-                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-prev-amt"></td>
-                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-total-qty"></td>
-                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-total-amt"></td>
-                  </tr>
-                </table>
-
-                <table style="width: 100%; border-collapse: collapse; text-align: center; border: 2px solid black; border-top: none; margin-bottom: 3rem; color: black; font-size: 0.95rem;">
-                  <tr style="background: #f3f4f6;">
-                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">ว/ด/ป</th>
-                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">นำส่งเงิน (ครั้งนี้)<br>ฉบับ<br><span class="no-print" style="font-weight:normal; font-size:0.75rem; color:#666;">(สะสม: <span id="c-remit-accum">0</span>)</span></th>
-                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">คิดเป็นเงิน<br>บาท</th>
-                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">ยอดค้างนำส่ง<br>ฉบับ</th>
-                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">คิดเป็นเงิน<br>บาท</th>
-                    <td style="border: 1px solid black; padding: 0.75rem; width: 28.56%;" colspan="2" rowspan="2"></td>
-                  </tr>
-                  <tr style="height: 60px;">
-                    <td style="border: 1px solid black; background: #fffbe6;" contenteditable="true" id="c-date2" oninput="syncDates('c-date2')"></td>
-                    <td style="border: 1px solid black; background: #fffbe6;" contenteditable="true" id="c-remit-qty" oninput="calcForm()"></td>
-                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-remit-amt"></td>
-                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-out-qty"></td>
-                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-out-amt"></td>
-                  </tr>
-                </table>
-
-                <div style="display: flex; justify-content: flex-end; margin-bottom: 2rem; color: black;">
-                  <div style="text-align: center; width: 300px;">
-                    <p style="margin-bottom: 0.5rem;" contenteditable="true" id="p-sign-name">(...........................................................)</p>
-                    <p style="margin-top: 0.5rem;">(ผู้เบิก)</p>
-                    <p style="margin-top: 1rem; text-align: left; margin-left: 20px;">วันที่เบิก <span contenteditable="true" id="p-sign-date" oninput="syncDates('p-sign-date')">...................................................</span></p>
-                  </div>
-                </div>
-
-                <p style="font-weight: bold; font-size: 0.9rem; color: black;"><u>หมายเหตุ</u> : ยอดของ หน.ปณ. และ ผช.หน.ปณ. รวมอยู่กับ แผนกธุรการ ปณฝ.กลาง</p>
-              </div>
-              
-              <div class="no-print" style="margin-top: 3rem; border-top: 1px solid var(--border); padding-top: 2rem;">
-                <h3 style="margin-bottom: 1rem; color: var(--text-dark); font-size: 1.2rem;">ประวัติการรับโควต้า / นำส่งเงิน (Master History)</h3>
-                <div class="table-container">
-                  <table class="data-table" id="master-history-table">
-                    <thead>
-                      <tr>
-                        <th>ว/ด/ป</th>
-                        <th>รายการ</th>
-                        <th>จำนวน (ฉบับ)</th>
-                        <th>จำนวนเงิน (บาท)</th>
-                        <th>จัดการ</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <!-- Populated by JS -->
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-
-            <!-- Type 2: Log Book Form -->
-            <div id="print-type-2" class="print-layout" style="display: none;">
-              <div class="no-print" style="text-align: right; margin-bottom: 1rem;">
-                <button class="btn btn-primary" onclick="window.print()">🖨️ พิมพ์ตารางลงชื่อ</button>
-              </div>
-              <div style="font-family: 'Kanit', sans-serif; border: 1px dashed #ccc; padding: 2rem;" class="print-container">
-                <h2 style="text-align: center; margin-bottom: 0.5rem; color: black; font-size: 1.5rem;">ทะเบียนคุมการขอเบิกไปรษณียบัตรทายผลฟุตบอลระดับโลก 2026</h2>
-                <h3 style="text-align: center; margin-bottom: 1.5rem; font-weight: normal; color: black; font-size: 1.2rem;">แผนกลูกค้าธุรกิจ ปณฝ.กลาง 10501</h3>
-                
-                <table style="width: 100%; border-collapse: collapse; text-align: center; border: 1px solid black; color: black; font-size: 0.95rem;">
-                  <thead>
-                    <tr style="background: #f3f4f6;">
-                      <th style="border: 1px solid black; padding: 0.75rem; width: 8%;">ลำดับ</th>
-                      <th style="border: 1px solid black; padding: 0.75rem; width: 15%;">ว/ด/ป</th>
-                      <th style="border: 1px solid black; padding: 0.75rem; width: 25%;">ชื่อผู้ขอเบิก</th>
-                      <th style="border: 1px solid black; padding: 0.75rem; width: 15%;">จำนวน (ฉบับ)</th>
-                      <th style="border: 1px solid black; padding: 0.75rem; width: 20%;">ลายมือชื่อ</th>
-                      <th style="border: 1px solid black; padding: 0.75rem; width: 17%;">หมายเหตุ</th>
-                    </tr>
-                  </thead>
-                  <tbody id="p-a4-tbody">
-                    <!-- Populated by JS -->
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
 
     </main>
   </div>
@@ -2055,52 +1777,22 @@ function renderEmployees() {
   tbody.innerHTML = '';
   
   if (emps.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; color: var(--text-light);">ยังไม่มีข้อมูลพนักงาน</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-light);">ยังไม่มีข้อมูลพนักงาน</td></tr>';
   }
 
   emps.forEach(emp => {
     const tr = document.createElement('tr');
-    tr.style.background = emp.paid ? 'linear-gradient(90deg, #f0fdf4, #ffffff)' : '';
-    if (emp.isManager) {
-      tr.style.borderLeft = '4px solid var(--primary)';
-    }
     tr.innerHTML = `
-      <td>${emp.id.slice(-4)}</td>
       <td style="font-weight:600;">
         ${emp.name}
-        ${emp.isManager ? '<span style="display:inline-block; font-size:0.75rem; background:var(--primary); color:white; padding:1px 6px; border-radius:4px; margin-left:4px;">หน.แผนก</span>' : ''}
       </td>
       <td>${formatNum(emp.requested)}</td>
       <td>${formatNum(emp.remitted)}</td>
       <td style="${emp.outstanding > 0 ? 'color: var(--danger); font-weight:600;' : ''}">${formatNum(emp.outstanding)}</td>
-      <td>${formatNum(emp.revenue)}</td>
       <td style="color: var(--secondary); font-weight: 600;">${formatNum(emp.commission)}</td>
-      <td style="text-align:center;">
-        <label class="paid-toggle" title="ตั้งค่าหัวหน้าแผนก (ไม่อยู่ในอันดับ)">
-          <input type="checkbox" class="paid-checkbox" ${emp.isManager ? 'checked' : ''}
-            onchange="store.setEmployeeManager('${emp.id}', this.checked); renderEmployees(); renderSummary(); renderRanking();" />
-          <span class="paid-checkmark">${emp.isManager ? '👑' : '⬜'}</span>
-        </label>
-      </td>
-      <td>
-        <div style="display:flex; align-items:center; gap:0.25rem; justify-content:center;">
-          <input type="number" class="note-input" style="width: 70px; text-align: right; border-color: ${emp.paidAmount >= emp.commission && emp.commission > 0 ? '#10b981' : 'var(--border)'};" value="${emp.paidAmount || 0}"
-            onchange="store.setEmployeePaidAmount('${emp.id}', this.value); renderEmployees(); renderSummary(); renderRanking();"
-            onclick="this.select()" />
-          <span style="font-size: 0.85rem; color: var(--text-light);">฿</span>
-          ${emp.paidAmount >= emp.commission && emp.commission > 0 ? '<span title="จ่ายครบแล้ว" style="font-size:1.1rem;">✅</span>' : ''}
-        </div>
-        ${emp.commission > emp.paidAmount && emp.commission > 0 ? `<div style="font-size:0.7rem; color:var(--danger); text-align:center; margin-top:2px;">ค้างจ่าย ${formatNum(emp.commission - emp.paidAmount)} ฿</div>` : ''}
-      </td>
-      <td>
-        <input type="text" class="note-input" value="${emp.note.replace(/"/g,'&quot;')}"
-          placeholder="หมายเหตุ..."
-          onchange="store.setEmployeeNote('${emp.id}', this.value); renderEmployees(); renderSummary();"
-          onclick="this.select()" />
-      </td>
       <td>
         <button class="btn-delete-emp" onclick="deleteEmployee('${emp.id}', '${emp.name}')" title="ลบพนักงาน">
-          🗑️
+          🗑️ ลบ
         </button>
       </td>
     `;
@@ -2255,11 +1947,8 @@ function renderMasterHistory() {
 
 function renderAll() {
   renderDashboard();
-  renderSummary();
   renderEmployees();
   renderTransactions();
-  renderGifts();
-  renderMasterHistory();
   renderRanking();
 }
 
@@ -2407,52 +2096,7 @@ function renderRanking() {
 
   cardsContainer.innerHTML = motivatorHtml + podiumHtml + listHtml + managerHtml;
 
-  // Full table
-  tbody.innerHTML = '';
-  if (emps.length === 0 && managers.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-light);">ยังไม่มีข้อมูล</td></tr>';
-    return;
-  }
-  
-  // Render managers first in table with crown and special badge
-  managers.forEach(emp => {
-    const tr = document.createElement('tr');
-    tr.style.background = 'rgba(79, 70, 229, 0.05)';
-    tr.style.borderLeft = '4px solid var(--primary)';
-    tr.innerHTML = `
-      <td style="text-align:center; font-weight:700; color:var(--primary)">👑</td>
-      <td style="font-weight:600;">${emp.name} <span style="font-size:0.75rem; background:var(--primary); color:white; padding:1px 6px; border-radius:4px; margin-left:4px; font-weight:normal;">หน.แผนก</span></td>
-      <td style="color:var(--secondary); font-weight:700;">${formatNum(emp.requested)}</td>
-      <td>${formatNum(emp.remitted)}</td>
-      <td style="${emp.outstanding>0?'color:var(--danger);font-weight:600;':''};">${formatNum(emp.outstanding)}</td>
-      <td style="color:var(--primary);">${formatNum(emp.remitted * store.data.pricePerTicket)}</td>
-      <td><span style="font-size:0.85rem; color:var(--text-light);">ไม่ได้จัดอันดับ</span></td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  emps.forEach((emp, i) => {
-    const rank = i + 1;
-    const medal = rankMedals[i] || '';
-    const maxR = emps[0].requested || 1;
-    const pct = Math.round((emp.requested / maxR) * 100);
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td style="text-align:center; font-weight:700; color:${rank<=3?'var(--primary)':'var(--text-light)'}">${medal}${rank<=3?'':rank}</td>
-      <td style="font-weight:600;">${emp.name}</td>
-      <td style="color:var(--secondary); font-weight:700;">${formatNum(emp.requested)}</td>
-      <td>${formatNum(emp.remitted)}</td>
-      <td style="${emp.outstanding>0?'color:var(--danger);font-weight:600;':''};">${formatNum(emp.outstanding)}</td>
-      <td style="color:var(--primary);">${formatNum(emp.remitted * store.data.pricePerTicket)}</td>
-      <td>
-        <div style="display:flex;align-items:center;gap:0.5rem;">
-          <div class="progress-bar-outer" style="width:80px;"><div class="progress-bar-inner" style="width:${pct}%"></div></div>
-          <span style="font-size:0.8rem;color:var(--text-light);">${pct}%</span>
-        </div>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
+  cardsContainer.innerHTML = motivatorHtml + podiumHtml + listHtml + managerHtml;
 }
 
 // ===== SHARE LOGIC =====
@@ -2921,15 +2565,12 @@ document.getElementById('tx-qty').addEventListener('input', (e) => {
   document.getElementById('tx-value-calc').textContent = formatNum(val * store.data.pricePerTicket);
 });
 
-// Add Employee
 document.getElementById('form-add-emp').addEventListener('submit', (e) => {
   e.preventDefault();
   const nameInput = document.getElementById('input-emp-name');
-  const managerInput = document.getElementById('input-emp-manager');
   if (nameInput.value.trim()) {
-    store.addEmployee(nameInput.value.trim(), managerInput.checked);
+    store.addEmployee(nameInput.value.trim(), false);
     nameInput.value = '';
-    managerInput.checked = false;
   }
 });
 
