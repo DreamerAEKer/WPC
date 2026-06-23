@@ -1186,6 +1186,9 @@ input:focus, select:focus {
         <button class="nav-btn" data-view="individuals">
           <span>👥</span> ทีมงานพนักงาน
         </button>
+        <button class="nav-btn" data-view="print">
+          <span>🖨️</span> พิมพ์เอกสาร
+        </button>
       </nav>
       <div class="sidebar-footer">
         <div class="price-info">
@@ -1261,8 +1264,6 @@ input:focus, select:focus {
         <div class="card" style="margin-top: 1.5rem; background: var(--surface); border: 1px solid var(--border);">
           <div class="card-header">
             <h3 style="display: flex; align-items: center; gap: 0.5rem;">💾 จัดการข้อมูล (Backup / Restore)</h3>
-          </div>
-          <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
             <button class="btn btn-primary" onclick="exportData()" style="flex: 1; justify-content: center;">
               <span>📤</span> ส่งออกข้อมูล (Export)
             </button>
@@ -1278,11 +1279,8 @@ input:focus, select:focus {
 
       <div id="view-individuals" class="view-section">
         <div class="card">
-          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-            <h3>จัดการทีมงานพนักงาน</h3>
-            <button class="btn btn-primary" onclick="window.print()" style="font-size: 0.9rem; padding: 0.5rem 1.25rem; display: flex; align-items: center; gap: 0.5rem;" class="no-print">
-              <span>🖨️</span> พิมพ์รายงาน
-            </button>
+          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <h3>จัดการพนักงาน และตารางยอดค้าง</h3>
           </div>
           <form id="form-add-emp" class="inline-form">
             <input type="text" id="input-emp-name" placeholder="ชื่อพนักงานใหม่" required />
@@ -1302,6 +1300,138 @@ input:focus, select:focus {
               </thead>
               <tbody></tbody>
             </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Print Form View -->
+      <div id="view-print" class="view-section">
+        <div class="card" style="max-width: 950px; margin: 0 auto; background: white; padding: 2rem;">
+          <div style="display: flex; gap: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem;" class="no-print">
+            <button class="btn btn-primary" id="btn-tab-type1" onclick="switchPrintTab('1')">📄 ใบเบิกโควต้า (หน.แผนก)</button>
+            <button class="btn btn-secondary" style="background: white; color: var(--text-dark); border: 1px solid var(--border);" id="btn-tab-type2" onclick="switchPrintTab('2')">📑 ทะเบียนคุม (แม่แบบ A4)</button>
+          </div>
+          
+          <div id="printable-area">
+            
+            <!-- Type 1: Individual Form -->
+            <div id="print-type-1" class="print-layout">
+              <div class="no-print" style="background: var(--bg-color); padding: 1rem; border-radius: var(--radius); margin-bottom: 1.5rem; display: flex; justify-content: flex-end;">
+                <button class="btn btn-secondary" onclick="window.print()">🖨️ กดพิมพ์ใบเบิก</button>
+              </div>
+              <div style="font-family: 'Kanit', sans-serif; border: 1px dashed #ccc; padding: 2rem; background: white;" class="print-container">
+                <h2 style="text-align: center; margin-bottom: 0.5rem; color: black; font-size: 1.5rem;">ใบเบิกไปรษณียบัตรทายผลการแข่งขันฟุตบอลระดับโลก 2026</h2>
+                <h3 style="text-align: center; margin-bottom: 2rem; font-weight: normal; color: black; font-size: 1.2rem;">แผนกลูกค้าธุรกิจ ปณฝ.กลาง 10501</h3>
+                
+                <table style="width: 100%; border-collapse: collapse; text-align: center; border: 2px solid black; color: black; font-size: 0.95rem;">
+                  <tr>
+                    <td style="border: 1px solid black; padding: 0.75rem; font-weight: bold; width: 25%;">โควต้าที่ได้รับ</td>
+                    <td style="border: 1px solid black; padding: 0.75rem; font-size: 1.25rem; font-weight: bold; width: 25%;" contenteditable="true" id="c-quota">32,500</td>
+                    <td style="border: 1px solid black; padding: 0.75rem; width: 10%;">ฉบับ</td>
+                    <td style="border: 1px solid black; padding: 0.75rem; font-weight: bold; width: 20%;">ปัจจุบันคงเหลือ</td>
+                    <td style="border: 1px solid black; padding: 0.75rem; width: 10%; font-weight: bold;" contenteditable="true" id="c-remain"></td>
+                    <td style="border: 1px solid black; padding: 0.75rem; width: 10%;">ฉบับ</td>
+                  </tr>
+                </table>
+
+                <table style="width: 100%; border-collapse: collapse; text-align: center; border: 2px solid black; border-top: none; color: black; font-size: 0.95rem;">
+                  <tr style="background: #f3f4f6;">
+                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">ว/ด/ป</th>
+                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">จำนวนที่ขอเบิก<br>ฉบับ</th>
+                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">คิดเป็นเงิน<br>บาท</th>
+                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">เบิกครั้งก่อน<br>ฉบับ</th>
+                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">คิดเป็นเงิน<br>บาท</th>
+                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">รวมเบิก<br>ฉบับ</th>
+                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">คิดเป็นเงิน<br>บาท</th>
+                  </tr>
+                  <tr style="height: 60px;">
+                    <td style="border: 1px solid black; background: #fffbe6;" contenteditable="true" id="c-date1" oninput="syncDates('c-date1')"></td>
+                    <td style="border: 1px solid black; background: #fffbe6;" contenteditable="true" id="c-req-qty" oninput="calcForm()"></td>
+                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-req-amt"></td>
+                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-prev-qty"></td>
+                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-prev-amt"></td>
+                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-total-qty"></td>
+                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-total-amt"></td>
+                  </tr>
+                </table>
+
+                <table style="width: 100%; border-collapse: collapse; text-align: center; border: 2px solid black; border-top: none; margin-bottom: 3rem; color: black; font-size: 0.95rem;">
+                  <tr style="background: #f3f4f6;">
+                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">ว/ด/ป</th>
+                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">นำส่งเงิน (ครั้งนี้)<br>ฉบับ<br><span class="no-print" style="font-weight:normal; font-size:0.75rem; color:#666;">(สะสม: <span id="c-remit-accum">0</span>)</span></th>
+                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">คิดเป็นเงิน<br>บาท</th>
+                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">ยอดค้างนำส่ง<br>ฉบับ</th>
+                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">คิดเป็นเงิน<br>บาท</th>
+                    <td style="border: 1px solid black; padding: 0.75rem; width: 28.56%;" colspan="2" rowspan="2"></td>
+                  </tr>
+                  <tr style="height: 60px;">
+                    <td style="border: 1px solid black; background: #fffbe6;" contenteditable="true" id="c-date2" oninput="syncDates('c-date2')"></td>
+                    <td style="border: 1px solid black; background: #fffbe6;" contenteditable="true" id="c-remit-qty" oninput="calcForm()"></td>
+                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-remit-amt"></td>
+                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-out-qty"></td>
+                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-out-amt"></td>
+                  </tr>
+                </table>
+
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 2rem; color: black;">
+                  <div style="text-align: center; width: 300px;">
+                    <p style="margin-bottom: 0.5rem;" contenteditable="true" id="p-sign-name">(...........................................................)</p>
+                    <p style="margin-top: 0.5rem;">(ผู้เบิก)</p>
+                    <p style="margin-top: 1rem; text-align: left; margin-left: 20px;">วันที่เบิก <span contenteditable="true" id="p-sign-date" oninput="syncDates('p-sign-date')">...................................................</span></p>
+                  </div>
+                </div>
+
+                <p style="font-weight: bold; font-size: 0.9rem; color: black;"><u>หมายเหตุ</u> : ยอดของ หน.ปณ. และ ผช.หน.ปณ. รวมอยู่กับ แผนกธุรการ ปณฝ.กลาง</p>
+              </div>
+              
+              <div class="no-print" style="margin-top: 3rem; border-top: 1px solid var(--border); padding-top: 2rem;">
+                <h3 style="margin-bottom: 1rem; color: var(--text-dark); font-size: 1.2rem;">ประวัติการรับโควต้า / นำส่งเงิน (Master History)</h3>
+                <div class="table-container">
+                  <table class="data-table" id="master-history-table">
+                    <thead>
+                      <tr>
+                        <th>ว/ด/ป</th>
+                        <th>รายการ</th>
+                        <th>จำนวน (ฉบับ)</th>
+                        <th>จำนวนเงิน (บาท)</th>
+                        <th>จัดการ</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <!-- Populated by JS -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Type 2: Log Book Form -->
+            <div id="print-type-2" class="print-layout" style="display: none;">
+              <div class="no-print" style="text-align: right; margin-bottom: 1rem;">
+                <button class="btn btn-primary" onclick="window.print()">🖨️ พิมพ์ตารางลงชื่อ</button>
+              </div>
+              <div style="font-family: 'Kanit', sans-serif; border: 1px dashed #ccc; padding: 2rem;" class="print-container">
+                <h2 style="text-align: center; margin-bottom: 0.5rem; color: black; font-size: 1.5rem;">ทะเบียนคุมการขอเบิกไปรษณียบัตรทายผลฟุตบอลระดับโลก 2026</h2>
+                <h3 style="text-align: center; margin-bottom: 1.5rem; font-weight: normal; color: black; font-size: 1.2rem;">แผนกลูกค้าธุรกิจ ปณฝ.กลาง 10501</h3>
+                
+                <table style="width: 100%; border-collapse: collapse; text-align: center; border: 1px solid black; color: black; font-size: 0.95rem;">
+                  <thead>
+                    <tr style="background: #f3f4f6;">
+                      <th style="border: 1px solid black; padding: 0.75rem; width: 8%;">ลำดับ</th>
+                      <th style="border: 1px solid black; padding: 0.75rem; width: 15%;">ว/ด/ป</th>
+                      <th style="border: 1px solid black; padding: 0.75rem; width: 25%;">ชื่อผู้ขอเบิก</th>
+                      <th style="border: 1px solid black; padding: 0.75rem; width: 15%;">จำนวน (ฉบับ)</th>
+                      <th style="border: 1px solid black; padding: 0.75rem; width: 20%;">ลายมือชื่อ</th>
+                      <th style="border: 1px solid black; padding: 0.75rem; width: 17%;">หมายเหตุ</th>
+                    </tr>
+                  </thead>
+                  <tbody id="p-a4-tbody">
+                    <!-- Populated by JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -1967,6 +2097,9 @@ function renderAll() {
   renderEmployees();
   renderTransactions();
   renderRanking();
+  renderMasterHistory();
+  renderA4Logbook();
+  initPrintForm();
 }
 
 // ===== RANKING RENDER =====
