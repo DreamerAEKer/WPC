@@ -1407,7 +1407,7 @@ input:focus, select:focus {
                   <div style="text-align: center; width: 300px;">
                     <p style="margin-bottom: 0.5rem;" contenteditable="true" id="p-sign-name">(...........................................................)</p>
                     <p style="margin-top: 0.5rem;">(ผู้เบิก)</p>
-                    <p style="margin-top: 1rem; text-align: left; margin-left: 20px;">วันที่เบิก <span contenteditable="true" id="p-sign-date" oninput="syncDates('p-sign-date')">...................................................</span></p>
+                    <p style="margin-top: 1rem; text-align: center;">วันที่เบิก <span contenteditable="true" id="p-sign-date" oninput="syncDates('p-sign-date')">...................................................</span></p>
                   </div>
                 </div>
 
@@ -2151,6 +2151,7 @@ function renderMasterHistory() {
       <td>${valStr}</td>
       <td>${amountStr}</td>
       <td>
+        <button class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-right: 0.5rem;" onclick="printMasterTx('${tx.id}')">🖨️ พิมพ์</button>
         <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;" onclick="deleteMasterTx('${tx.id}')">ลบ</button>
       </td>
     `;
@@ -2738,6 +2739,46 @@ function deleteTx(txId) {
     store.saveData();
     renderAll();
   }
+}
+function printMasterTx(txId) {
+  const tx = store.data.masterTransactions.find(t => t.id === txId);
+  if (!tx) return;
+  
+  // Find and click the "พิมพ์เอกสาร" nav button to switch tab
+  const printBtn = document.querySelector('.nav-btn[data-view="print"]');
+  if (printBtn) printBtn.click();
+  
+  switchPrintTab('1');
+  
+  // Populate the form fields manually
+  const dateStr = formatThaiDate(tx.date);
+  document.getElementById('c-date1').textContent = dateStr;
+  document.getElementById('c-date2').textContent = dateStr;
+  document.getElementById('p-sign-date').textContent = dateStr;
+  
+  if (tx.type === 'req') {
+    document.getElementById('c-req-qty').textContent = tx.qty;
+    document.getElementById('c-remit-qty').textContent = '';
+  } else {
+    document.getElementById('c-req-qty').textContent = '';
+    document.getElementById('c-remit-qty').textContent = tx.qty;
+  }
+  
+  // Trigger calculation
+  calcForm();
+  
+  // Scroll to the form and highlight briefly
+  setTimeout(() => {
+    const el = document.getElementById('print-type-1');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+    const container = document.querySelector('#print-type-1 .print-container');
+    if (container) {
+      const oldBg = container.style.background || 'white';
+      container.style.transition = 'background 0.5s';
+      container.style.background = '#e0f2fe';
+      setTimeout(() => { container.style.background = oldBg; }, 1000);
+    }
+  }, 100);
 }
 
 function deleteMasterTx(txId) {
