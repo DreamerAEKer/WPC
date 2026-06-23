@@ -1970,16 +1970,20 @@ function renderTransactions() {
   // Update Dropdowns
   const emps = store.getEmployeesData().sort((a, b) => a.name.localeCompare(b.name, 'th'));
   const txEmpSelect = document.getElementById('tx-emp');
-  txEmpSelect.innerHTML = '<option value="">-- เลือกพนักงาน --</option>';
-  emps.forEach(emp => {
-    txEmpSelect.innerHTML += `<option value="${emp.id}">${emp.name} (ค้างส่ง: ${emp.outstanding})</option>`;
-  });
+  if (txEmpSelect) {
+    txEmpSelect.innerHTML = '<option value="">-- เลือกพนักงาน --</option>';
+    emps.forEach(emp => {
+      txEmpSelect.innerHTML += `<option value="${emp.id}">${emp.name} (ค้างส่ง: ${emp.outstanding})</option>`;
+    });
+  }
 
   const allocEmpSelect = document.getElementById('alloc-emp');
-  allocEmpSelect.innerHTML = '<option value="">-- เลือกพนักงาน --</option>';
-  emps.forEach(emp => {
-    allocEmpSelect.innerHTML += `<option value="${emp.id}">${emp.name}</option>`;
-  });
+  if (allocEmpSelect) {
+    allocEmpSelect.innerHTML = '<option value="">-- เลือกพนักงาน --</option>';
+    emps.forEach(emp => {
+      allocEmpSelect.innerHTML += `<option value="${emp.id}">${emp.name}</option>`;
+    });
+  }
 
   // History Table
   const tbody = document.querySelector('#tx-history-table tbody');
