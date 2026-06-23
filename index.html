@@ -713,6 +713,11 @@ input:focus, select:focus {
   .print-container {
     border: none !important;
     padding: 0 !important;
+    overflow: visible !important;
+  }
+  .print-container > div {
+    min-width: 0 !important;
+    width: 100% !important;
   }
 }
 
