@@ -5,6 +5,49 @@ import { store } from './store.js';
 const formatNum = (num) => new Intl.NumberFormat('th-TH').format(num);
 const formatMoney = (num) => new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(num);
 
+// --- TOAST NOTIFICATIONS ---
+function showToast(message, type = 'error') {
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    document.body.appendChild(container);
+  }
+  
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  
+  let icon = '❌';
+  if (type === 'success') icon = '✅';
+  if (type === 'warning') icon = '⚠️';
+  
+  toast.innerHTML = `
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <span style="font-size: 1.25rem;">${icon}</span>
+      <span>${message}</span>
+    </div>
+    <span style="cursor: pointer; font-weight: bold; font-size: 1.2rem; opacity: 0.7; transition: opacity 0.2s;" onclick="this.parentElement.remove()" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">&times;</span>
+  `;
+  
+  container.appendChild(toast);
+  
+  // Trigger animation
+  setTimeout(() => {
+    toast.style.opacity = '1';
+    toast.style.transform = 'translateY(0)';
+  }, 10);
+  
+  // Auto remove
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(-20px)';
+    setTimeout(() => {
+      if (toast.parentNode) toast.remove();
+    }, 300);
+  }, 4000);
+}
+
+
 // --- Navigation ---
 const navButtons = document.querySelectorAll('.nav-btn');
 const views = document.querySelectorAll('.view-section');
@@ -236,9 +279,15 @@ document.getElementById('tx-qty').addEventListener('input', (e) => {
 document.getElementById('form-add-emp').addEventListener('submit', (e) => {
   e.preventDefault();
   const nameInput = document.getElementById('input-emp-name');
-  if (nameInput.value.trim()) {
-    store.addEmployee(nameInput.value.trim());
-    nameInput.value = '';
+  const nameVal = nameInput.value.trim();
+  if (nameVal) {
+    try {
+      store.addEmployee(nameVal, false);
+      nameInput.value = '';
+      showToast('เพิ่มพนักงานเรียบร้อยแล้ว', 'success');
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
   }
 });
 
@@ -251,9 +300,17 @@ document.getElementById('form-add-tx').addEventListener('submit', (e) => {
   const date = document.getElementById('tx-date').value;
 
   if (empId && qty > 0) {
-    store.addTransaction(type, empId, qty, date);
-    document.getElementById('form-add-tx').reset();
-    document.getElementById('tx-value-calc').textContent = '0';
+    try {
+      store.addTransaction(type, empId, qty, date);
+      document.getElementById('form-add-tx').reset();
+      document.getElementById('tx-date').valueAsDate = new Date();
+      document.getElementById('tx-value-calc').textContent = '0';
+      showToast('บันทึกรายการเรียบร้อยแล้ว', 'success');
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  } else {
+    showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning');
   }
 });
 
@@ -264,8 +321,15 @@ document.getElementById('form-add-gift').addEventListener('submit', (e) => {
   const stock = parseInt(document.getElementById('gift-stock').value);
 
   if (name && stock > 0) {
-    store.addGift(name, stock);
-    document.getElementById('form-add-gift').reset();
+    try {
+      store.addGift(name, stock);
+      document.getElementById('form-add-gift').reset();
+      showToast('เพิ่มของสมมนาคุณเรียบร้อยแล้ว', 'success');
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  } else {
+    showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning');
   }
 });
 
@@ -277,8 +341,15 @@ document.getElementById('form-allocate-gift').addEventListener('submit', (e) => 
   const qty = parseInt(document.getElementById('alloc-qty').value);
 
   if (empId && giftId && qty > 0) {
-    store.allocateGift(empId, giftId, qty);
-    document.getElementById('form-allocate-gift').reset();
+    try {
+      store.allocateGift(empId, giftId, qty);
+      document.getElementById('form-allocate-gift').reset();
+      showToast('จัดสรรของสมมนาคุณเรียบร้อยแล้ว', 'success');
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  } else {
+    showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning');
   }
 });
 
