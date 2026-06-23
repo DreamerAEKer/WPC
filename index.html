@@ -2627,12 +2627,12 @@ function syncDates(sourceId) {
 
 function renderA4Logbook() {
   const tbody = document.getElementById('p-a4-tbody');
-  tbody.innerHTML = '';
   
   const rowCount = 20;
+  let html = '';
   
   for(let i=0; i<rowCount; i++) {
-    tbody.innerHTML += `
+    html += `
       <tr style="height: 40px;">
         <td style="border: 1px solid black;">${i+1}</td>
         <td style="border: 1px solid black;">&nbsp;</td>
@@ -2643,6 +2643,7 @@ function renderA4Logbook() {
       </tr>
     `;
   }
+  tbody.innerHTML = html;
 }
 
 // Transaction Deletion
