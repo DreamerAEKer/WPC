@@ -2742,8 +2742,17 @@ function deleteTx(txId) {
   }
 }
 function printMasterTx(txId) {
-  const tx = store.data.masterTransactions.find(t => t.id === txId);
-  if (!tx) return;
+  const txIndex = store.data.masterTransactions.findIndex(t => t.id === txId);
+  if (txIndex === -1) return;
+  const tx = store.data.masterTransactions[txIndex];
+  
+  let prevReq = 0;
+  let prevRemit = 0;
+  for (let i = 0; i < txIndex; i++) {
+    const pastTx = store.data.masterTransactions[i];
+    if (pastTx.type === 'req') prevReq += pastTx.qty;
+    if (pastTx.type === 'remit') prevRemit += pastTx.qty;
+  }
   
   // Find and click the "พิมพ์เอกสาร" nav button to switch tab
   const printBtn = document.querySelector('.nav-btn[data-view="print"]');
@@ -2756,6 +2765,9 @@ function printMasterTx(txId) {
   document.getElementById('c-date1').textContent = dateStr;
   document.getElementById('c-date2').textContent = dateStr;
   document.getElementById('p-sign-date').textContent = dateStr;
+  
+  document.getElementById('c-prev-qty').textContent = prevReq || '';
+  document.getElementById('c-remit-accum').textContent = prevRemit || '0';
   
   if (tx.type === 'req') {
     document.getElementById('c-req-qty').textContent = tx.qty;
