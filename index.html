@@ -1691,6 +1691,7 @@ input:focus, select:focus {
                   <th>จำนวน (ฉบับ)</th>
                   <th>เป็นเงิน (฿)</th>
                   <th>หลักฐาน/หมายเหตุ</th>
+                  <th>สถานะ</th>
                   <th>จัดการ</th>
                 </tr>
               </thead>
@@ -2619,6 +2620,12 @@ function renderTransactions() {
       <td>${valStr}</td>
       <td>${amountStr}</td>
       <td>${evidenceHtml || '-'}</td>
+      <td style="text-align: center;">
+        <label style="display: flex; align-items: center; justify-content: center; gap: 4px; cursor: pointer; font-size: 0.8rem; color: ${tx.verified ? '#16a34a' : 'var(--text-light)'}">
+          <input type="checkbox" ${tx.verified ? 'checked' : ''} onchange="toggleTxVerified('${tx.id}', this.checked)" style="width: 16px; height: 16px; cursor: pointer;">
+          ${tx.verified ? 'ตรวจแล้ว' : 'รอตรวจ'}
+        </label>
+      </td>
       <td>
         <button class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-right: 4px;" onclick="editTx('${tx.id}')">แก้ไข</button>
         <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;" onclick="deleteTx('${tx.id}')">ลบ</button>
@@ -2700,6 +2707,15 @@ function renderMasterHistory() {
     tbody.appendChild(tr);
   });
 }
+
+window.toggleTxVerified = function(txId, verified) {
+  const tx = store.data.transactions.find(t => t.id === txId);
+  if (tx) {
+    tx.verified = verified;
+    store.saveData();
+    renderTransactions(); // Refresh only the transactions table
+  }
+};
 
 function renderCommissionTable() {
   const tbody = document.querySelector('#commission-table tbody');
