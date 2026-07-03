@@ -2645,7 +2645,7 @@ function renderTransactions() {
       <td style="text-align: center;">
         <label style="display: flex; align-items: center; justify-content: center; gap: 4px; cursor: pointer; font-size: 0.8rem; color: ${tx.verified ? '#16a34a' : 'var(--text-light)'}">
           <input type="checkbox" ${tx.verified ? 'checked' : ''} onchange="toggleTxVerified('${tx.id}', this.checked)" style="width: 16px; height: 16px; cursor: pointer;">
-          ${tx.verified ? 'ตรวจแล้ว' : 'รอตรวจ'}
+          ${tx.verified ? 'ตรวจแล้ว' : ''}
         </label>
       </td>
       <td>${dateStr}</td>
