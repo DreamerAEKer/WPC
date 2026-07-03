@@ -2955,13 +2955,13 @@ function shareAsText() {
   text += `👥 อันดับพนักงาน:\n`;
   emps.forEach((emp, i) => {
     const medal = rankMedals[i] || `${i+1}.`;
-    text += `${medal} ${emp.name} — เบิก ${formatNum(emp.requested)} | ส่ง ${formatNum(emp.remitted)}\n`;
+    text += `${medal} ${emp.name} — ยอดเบิก ${formatNum(emp.requested)} ใบ | ยอดนำส่ง ${formatNum(emp.remitted)} ใบ\n`;
   });
   
   if (managers.length > 0) {
     text += `${'─'.repeat(30)}\n`;
     managers.forEach(mgr => {
-      text += `• ${mgr.name} — เบิก ${formatNum(mgr.requested)} | ส่ง ${formatNum(mgr.remitted)}\n`;
+      text += `• ${mgr.name} — ยอดเบิก ${formatNum(mgr.requested)} ใบ | ยอดนำส่ง ${formatNum(mgr.remitted)} ใบ\n`;
     });
   }
   
