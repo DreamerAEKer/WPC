@@ -2873,8 +2873,11 @@ function renderRanking() {
         <div style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid var(--border);">
           <span style="font-weight: 700; font-size: 1rem; color: var(--text-dark);">${mgr.name}</span>
           <div style="text-align: right;">
-            <span style="font-size: 1.4rem; font-weight: 900; color: var(--primary);">${formatNum(mgr.requested)}</span>
-            <span style="font-size: 0.8rem; opacity: 0.8; color: var(--text-light);"> ใบ</span>
+            <div>
+              <span style="font-size: 1.4rem; font-weight: 900; color: var(--primary);">${formatNum(mgr.requested)}</span>
+              <span style="font-size: 0.8rem; opacity: 0.8; color: var(--text-light);"> ใบ</span>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--secondary); font-weight: 600;">ส่ง ${formatNum(mgr.remitted)}</div>
           </div>
         </div>
       `;
@@ -2904,6 +2907,7 @@ function renderRanking() {
           <div class="rank-podium-name">${emp.name}</div>
           <div class="rank-podium-score">${formatNum(emp.requested)}</div>
           <div class="rank-podium-label">ใบ</div>
+          <div style="font-size: 0.8rem; color: var(--secondary); margin-top: 4px; font-weight: 600;">ส่ง ${formatNum(emp.remitted)}</div>
         </div>`;
     });
     podiumHtml += '</div>';
@@ -2920,8 +2924,11 @@ function renderRanking() {
             <div class="progress-bar-outer"><div class="progress-bar-inner" style="width:${pct}%"></div></div>
           </div>
           <div class="rank-list-right">
-            <div class="rank-list-score">${formatNum(emp.requested)}</div>
-            <div class="rank-list-score-label">ใบ</div>
+            <div style="display: flex; align-items: baseline; justify-content: flex-end; gap: 4px;">
+              <div class="rank-list-score">${formatNum(emp.requested)}</div>
+              <div class="rank-list-score-label">ใบ</div>
+            </div>
+            <div style="font-size: 0.85rem; color: var(--secondary); font-weight: 600; text-align: right;">ส่ง ${formatNum(emp.remitted)}</div>
           </div>
         </div>`;
     });
@@ -2947,13 +2954,13 @@ function shareAsText() {
   text += `👥 อันดับพนักงาน:\n`;
   emps.forEach((emp, i) => {
     const medal = rankMedals[i] || `${i+1}.`;
-    text += `${medal} ${emp.name} — ยอดเบิก ${formatNum(emp.requested)} ใบ\n`;
+    text += `${medal} ${emp.name} — เบิก ${formatNum(emp.requested)} | ส่ง ${formatNum(emp.remitted)}\n`;
   });
   
   if (managers.length > 0) {
     text += `${'─'.repeat(30)}\n`;
     managers.forEach(mgr => {
-      text += `• ${mgr.name} — ยอดเบิก ${formatNum(mgr.requested)} ใบ\n`;
+      text += `• ${mgr.name} — เบิก ${formatNum(mgr.requested)} | ส่ง ${formatNum(mgr.remitted)}\n`;
     });
   }
   
