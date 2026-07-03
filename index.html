@@ -609,7 +609,11 @@ input:focus, select:focus {
   }
 
   .data-table {
-    min-width: 650px; /* Enable clean horizontal scroll for all tables on mobile */
+    min-width: unset; /* Remove min-width to allow compact layout */
+  }
+
+  .hide-mobile {
+    display: none !important;
   }
 
   /* Specifically make the employee management table a card layout */
@@ -1714,12 +1718,12 @@ input:focus, select:focus {
               <thead>
                 <tr>
                   <th>สถานะ</th>
-                  <th>วันที่</th>
+                  <th class="hide-mobile">วันที่</th>
                   <th>พนักงาน</th>
                   <th>ประเภท</th>
                   <th>จำนวน (ฉบับ)</th>
-                  <th>เป็นเงิน (฿)</th>
-                  <th>หลักฐาน/หมายเหตุ</th>
+                  <th class="hide-mobile">เป็นเงิน (฿)</th>
+                  <th class="hide-mobile">หลักฐาน</th>
                   <th>จัดการ</th>
                 </tr>
               </thead>
@@ -2648,12 +2652,12 @@ function renderTransactions() {
           ${tx.verified ? 'ตรวจแล้ว' : ''}
         </label>
       </td>
-      <td>${dateStr}</td>
+      <td class="hide-mobile">${dateStr}</td>
       <td>${emp ? emp.name : 'ไม่ทราบชื่อ'}</td>
       <td>${typeBadge}</td>
       <td>${valStr}</td>
-      <td>${amountStr}</td>
-      <td>${evidenceHtml || '-'}</td>
+      <td class="hide-mobile">${amountStr}</td>
+      <td class="hide-mobile">${evidenceHtml || '-'}</td>
       <td>
         <button class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-right: 4px;" onclick="editTx('${tx.id}')">แก้ไข</button>
         <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;" onclick="deleteTx('${tx.id}')">ลบ</button>
