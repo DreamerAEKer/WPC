@@ -1968,8 +1968,8 @@ class Store {
       const revenue = remitted * this.data.pricePerTicket;
       const commission = revenue * this.data.commissionRate;
       
-      const paidAmount = typeof emp.paidAmount === 'number' ? emp.paidAmount : (emp.paid ? revenue : 0);
-      const isPaid = paidAmount >= revenue && revenue > 0;
+      const paidAmount = typeof emp.paidAmount === 'number' ? emp.paidAmount : (emp.paid ? commission : 0);
+      const isPaid = paidAmount >= commission && commission > 0;
 
       return {
         ...emp,
