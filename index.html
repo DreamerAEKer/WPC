@@ -1338,6 +1338,9 @@ input:focus, select:focus {
         <button class="nav-btn" data-view="individuals">
           <span>👥</span> ทีมงานพนักงาน
         </button>
+        <button class="nav-btn" data-view="commission">
+          <span>💰</span> สรุปคอมมิชชัน
+        </button>
         <button class="nav-btn" data-view="print">
           <span>🖨️</span> พิมพ์เอกสาร
         </button>
@@ -1458,6 +1461,34 @@ input:focus, select:focus {
       </div>
 
       <!-- Print Form View -->
+      <!-- Commission Summary View -->
+      <div id="view-commission" class="view-section">
+        <div class="card">
+          <div class="card-header" style="justify-content: space-between; align-items: center; display: flex;">
+            <div>
+              <h3>สรุปยอดจ่ายค่าส่งเสริมการขาย (Incentive)</h3>
+              <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 4px;">คิดจาก 10% ของยอดรวมจำนวนเงินที่นำส่งจริง</p>
+            </div>
+            <button class="btn btn-secondary" style="background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd;" onclick="renderCommissionTable()">🔄 รีเฟรช</button>
+          </div>
+          
+          <div class="table-responsive">
+            <table class="data-table" id="commission-table">
+              <thead>
+                <tr>
+                  <th>ชื่อพนักงาน</th>
+                  <th style="text-align: right;">นำส่งเงิน (ฉบับ)</th>
+                  <th style="text-align: right;">ยอดเงินที่ส่ง (฿)</th>
+                  <th style="text-align: right;">ค่าคอมมิชชัน 10% (฿)</th>
+                  <th style="text-align: center;">สถานะการจ่ายเงิน</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
       <div id="view-print" class="view-section">
         <div class="card print-card" style="max-width: 950px; margin: 0 auto; background: white;">
           <div style="display: flex; gap: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem;" class="no-print print-tabs">
@@ -1626,6 +1657,7 @@ input:focus, select:focus {
               <select id="tx-type" required>
                 <option value="req">ขอเบิกไปรษณียบัตร</option>
                 <option value="remit">นำส่งเงิน (ขายได้)</option>
+                <option value="return">คืนเข้าสต็อก</option>
               </select>
             </div>
             <div class="form-group">
@@ -1687,6 +1719,45 @@ input:focus, select:focus {
       </div>
     </div>
   </div>
+  
+  <!-- Employee Details Modal -->
+  <div id="emp-details-modal" class="share-modal">
+    <div class="share-modal-inner" style="max-width: 600px;">
+      <div class="share-modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 id="emp-details-title" style="margin: 0; font-size: 1.25rem;">ประวัติรายการ</h3>
+        <button class="share-modal-close" onclick="document.getElementById('emp-details-modal').style.display = 'none'" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.25rem 0.5rem; border-radius: 4px;">&times;</button>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+        <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; text-align: center;">
+          <div style="font-size: 0.8rem; color: var(--text-light);">เบิกไปทั้งหมด</div>
+          <div id="emp-details-req" style="font-size: 1.25rem; font-weight: 700; color: var(--text-dark);">0</div>
+        </div>
+        <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; text-align: center;">
+          <div style="font-size: 0.8rem; color: var(--text-light);">นำส่งเงินแล้ว</div>
+          <div id="emp-details-remit" style="font-size: 1.25rem; font-weight: 700; color: var(--secondary);">0</div>
+        </div>
+        <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; text-align: center;">
+          <div style="font-size: 0.8rem; color: var(--text-light);">ค้างนำส่ง</div>
+          <div id="emp-details-outstanding" style="font-size: 1.25rem; font-weight: 700; color: var(--danger);">0</div>
+        </div>
+      </div>
+      
+      <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+        <table class="data-table" id="emp-details-tx-table">
+          <thead>
+            <tr>
+              <th>วันที่</th>
+              <th>ประเภท</th>
+              <th>จำนวน</th>
+              <th>จัดการ</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
   <script>
 // --- STORE LOGIC ---
@@ -1733,10 +1804,12 @@ class Store {
   getOverview() {
     let totalRequested = 0;
     let totalRemitted = 0;
+    let totalReturned = 0;
 
     this.data.transactions.forEach(t => {
       if (t.type === 'req') totalRequested += t.qty;
       if (t.type === 'remit') totalRemitted += t.qty;
+      if (t.type === 'return') totalReturned += t.qty;
     });
     
     let masterRequested = 0;
@@ -1749,10 +1822,10 @@ class Store {
     const masterRemainingQuota = this.data.quota - masterRequested;
     const masterOutstanding = masterRequested - masterRemitted;
     
-    // Remaining quota for employees is what the Head requested minus what employees requested
-    const remainingQuota = masterRequested - totalRequested;
+    // Remaining quota for employees is what the Head requested minus what employees requested, PLUS what they returned
+    const remainingQuota = masterRequested - totalRequested + totalReturned;
 
-    const outstandingRemittance = totalRequested - totalRemitted;
+    const outstandingRemittance = totalRequested - totalRemitted - totalReturned;
     
     // Revenue = remitted tickets * price
     const totalRevenue = totalRemitted * this.data.pricePerTicket;
@@ -1882,13 +1955,15 @@ class Store {
     return this.data.employees.map(emp => {
       let requested = 0;
       let remitted = 0;
+      let returned = 0;
 
       this.data.transactions.filter(t => t.empId === emp.id).forEach(t => {
         if (t.type === 'req') requested += t.qty;
         if (t.type === 'remit') remitted += t.qty;
+        if (t.type === 'return') returned += t.qty;
       });
 
-      const outstanding = requested - remitted;
+      const outstanding = requested - remitted - returned;
       const revenue = remitted * this.data.pricePerTicket;
       const commission = revenue * this.data.commissionRate;
       
@@ -1918,11 +1993,12 @@ class Store {
       if (qty > overview.remainingQuota) {
         throw new Error(`ยอดไปรษณียบัตรในมือหัวหน้าแผนกไม่เพียงพอ (เบิกได้อีกไม่เกิน ${overview.remainingQuota} ฉบับ) กรุณาบันทึกรายการรับเข้าของระดับหัวหน้าก่อน`);
       }
-    } else if (type === 'remit') {
+    } else if (type === 'remit' || type === 'return') {
       const empData = this.getEmployeesData().find(e => e.id === empId);
       const outstanding = empData ? empData.outstanding : 0;
       if (qty > outstanding) {
-        throw new Error(`จำนวนนำส่ง (${qty} ฉบับ) เกินกว่ายอดค้างส่งของพนักงานคนนี้ (ค้างส่งอยู่ ${outstanding} ฉบับ)`);
+        const typeName = type === 'remit' ? 'นำส่งเงิน' : 'คืนเข้าสต็อก';
+        throw new Error(`จำนวน${typeName} (${qty} ฉบับ) เกินกว่ายอดค้างส่งของพนักงานคนนี้ (ค้างส่งอยู่ ${outstanding} ฉบับ)`);
       }
     }
 
@@ -1954,19 +2030,22 @@ class Store {
       if (qty > remainingQuotaEx) {
         throw new Error(`ยอดไปรษณียบัตรในมือหัวหน้าแผนกไม่เพียงพอ (คงเหลือในมือหัวหน้าแผนก ${remainingQuotaEx} ฉบับ)`);
       }
-    } else if (type === 'remit') {
-      // Get target employee's outstanding excluding this transaction's remit/req qty
+    } else if (type === 'remit' || type === 'return') {
+      // Get target employee's outstanding excluding this transaction's qty
       let empReq = 0;
       let empRemit = 0;
+      let empReturn = 0;
       this.data.transactions.forEach(t => {
         if (t.empId === empId && t.id !== txId) {
           if (t.type === 'req') empReq += t.qty;
           if (t.type === 'remit') empRemit += t.qty;
+          if (t.type === 'return') empReturn += t.qty;
         }
       });
-      const outstandingEx = empReq - empRemit;
+      const outstandingEx = empReq - empRemit - empReturn;
       if (qty > outstandingEx) {
-        throw new Error(`จำนวนที่นำส่ง (${qty} ฉบับ) เกินกว่ายอดค้างส่งของพนักงานคนนี้ (ค้างส่งอยู่ ${outstandingEx} ฉบับ)`);
+        const typeName = type === 'remit' ? 'นำส่งเงิน' : 'คืนเข้าสต็อก';
+        throw new Error(`จำนวน${typeName} (${qty} ฉบับ) เกินกว่ายอดค้างส่งของพนักงานคนนี้ (ค้างส่งอยู่ ${outstandingEx} ฉบับ)`);
       }
     }
 
@@ -2388,6 +2467,7 @@ function renderEmployees() {
       <td style="${emp.outstanding > 0 ? 'color: var(--danger); font-weight:600;' : ''}">${formatNum(emp.outstanding)}</td>
       <td style="color: var(--secondary); font-weight: 600;">${formatNum(emp.commission)}</td>
       <td>
+        <button class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-right: 4px;" onclick="openEmployeeDetails('${emp.id}')">🔍 ประวัติ</button>
         <button class="btn-delete-emp" onclick="deleteEmployee('${emp.id}', '${emp.name}')" title="ลบพนักงาน">
           🗑️ ลบ
         </button>
@@ -2396,6 +2476,66 @@ function renderEmployees() {
     tbody.appendChild(tr);
   });
 }
+
+window.openEmployeeDetails = function(empId) {
+  const emp = store.getEmployeesData().find(e => e.id === empId);
+  if (!emp) return;
+  
+  document.getElementById('emp-details-title').textContent = `ประวัติรายการ: ${emp.name}`;
+  document.getElementById('emp-details-req').textContent = formatNum(emp.requested);
+  document.getElementById('emp-details-remit').textContent = formatNum(emp.remitted);
+  document.getElementById('emp-details-outstanding').textContent = formatNum(emp.outstanding);
+  
+  const tbody = document.querySelector('#emp-details-tx-table tbody');
+  tbody.innerHTML = '';
+  
+  const txs = store.data.transactions.filter(t => t.empId === emp.id).sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  if (txs.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-light);">ยังไม่มีรายการ</td></tr>';
+  } else {
+    txs.forEach(tx => {
+      const dateStr = formatThaiDate(tx.date);
+      let typeBadge = '';
+      const qty = tx.qty;
+      const isReq = tx.type === 'req' || tx.type === 'request';
+      
+      if (isReq) {
+        typeBadge = '<span style="color: var(--text-dark); font-weight: 600;">เบิก</span>';
+      } else if (tx.type === 'remit') {
+        typeBadge = '<span style="color: var(--secondary); font-weight: 600;">นำส่งเงิน</span>';
+      } else if (tx.type === 'return') {
+        typeBadge = '<span style="color: #ea580c; font-weight: 600;">คืนเข้าสต็อก</span>';
+      }
+      
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${dateStr}</td>
+        <td>${typeBadge}</td>
+        <td>${formatNum(qty)}</td>
+        <td>
+          <button class="btn btn-primary" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; margin-right: 4px;" onclick="editTx('${tx.id}')">แก้ไข</button>
+          <button class="btn btn-secondary" style="padding: 0.2rem 0.4rem; font-size: 0.75rem; background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;" onclick="deleteEmpTx('${tx.id}', '${emp.id}')">ลบ</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+  
+  document.getElementById('emp-details-modal').style.display = 'flex';
+};
+
+window.deleteEmpTx = async function(txId, empId) {
+  if (await showConfirm('ต้องการลบรายการนี้ใช่หรือไม่?', 'ยืนยันการลบ')) {
+    try {
+      store.deleteTransaction(txId);
+      renderAll();
+      openEmployeeDetails(empId); // Refresh modal
+    } catch (e) {
+      alert(e.message);
+    }
+  }
+};
 
 function toggleManager(empId, isChecked) {
   store.setEmployeeManager(empId, isChecked);
@@ -2450,9 +2590,15 @@ function renderTransactions() {
     if (isReq) {
       typeBadge = '<span style="color: var(--text-dark); font-weight: 600;">เบิกไปรษณียบัตร</span>';
       valStr = `<span style="color: var(--text-dark)">${formatNum(qty)}</span>`;
-    } else {
+    } else if (tx.type === 'remit') {
       typeBadge = '<span style="color: var(--secondary); font-weight: 600;">นำส่งเงิน</span>';
       valStr = `<span style="color: var(--secondary)">${formatNum(qty)}</span>`;
+    } else if (tx.type === 'return') {
+      typeBadge = '<span style="color: #ea580c; font-weight: 600;">คืนเข้าสต็อก</span>';
+      valStr = `<span style="color: #ea580c">${formatNum(qty)}</span>`;
+    } else {
+      typeBadge = tx.type;
+      valStr = formatNum(qty);
     }
     
     const amountStr = formatNum(qty * store.data.pricePerTicket);
@@ -2555,6 +2701,64 @@ function renderMasterHistory() {
   });
 }
 
+function renderCommissionTable() {
+  const tbody = document.querySelector('#commission-table tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  
+  // Get all employees except managers
+  const emps = store.getEmployeesData().filter(e => !e.isManager).sort((a, b) => b.remitted - a.remitted);
+  
+  if (emps.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-light);">ยังไม่มีข้อมูลพนักงาน</td></tr>';
+    return;
+  }
+  
+  let totalRemitted = 0;
+  let totalRevenue = 0;
+  let totalCommission = 0;
+  
+  emps.forEach(emp => {
+    if (emp.remitted > 0) {
+      totalRemitted += emp.remitted;
+      totalRevenue += emp.revenue;
+      totalCommission += emp.commission;
+      
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="font-weight: 600;">${emp.name}</td>
+        <td style="text-align: right;">${formatNum(emp.remitted)}</td>
+        <td style="text-align: right; color: var(--secondary);">${formatNum(emp.revenue)}</td>
+        <td style="text-align: right; font-weight: 700; color: #16a34a;">${formatNum(emp.commission)}</td>
+        <td style="text-align: center;">
+          <input type="checkbox" style="width: 20px; height: 20px; cursor: pointer;" 
+                 ${emp.paid ? 'checked' : ''} 
+                 onchange="toggleCommissionPaid('${emp.id}', this.checked)">
+        </td>
+      `;
+      tbody.appendChild(tr);
+    }
+  });
+  
+  // Add total row
+  const totalTr = document.createElement('tr');
+  totalTr.style.background = '#f8fafc';
+  totalTr.style.fontWeight = '700';
+  totalTr.innerHTML = `
+    <td>รวมทั้งหมด</td>
+    <td style="text-align: right;">${formatNum(totalRemitted)}</td>
+    <td style="text-align: right; color: var(--secondary);">${formatNum(totalRevenue)}</td>
+    <td style="text-align: right; color: #16a34a; font-size: 1.1rem;">${formatNum(totalCommission)}</td>
+    <td></td>
+  `;
+  tbody.appendChild(totalTr);
+}
+
+window.toggleCommissionPaid = function(empId, isPaid) {
+  store.setEmployeePaid(empId, isPaid);
+  renderCommissionTable();
+};
+
 function renderAll() {
   renderDashboard();
   renderEmployees();
@@ -2562,6 +2766,7 @@ function renderAll() {
   renderRanking();
   renderMasterHistory();
   renderA4Logbook();
+  renderCommissionTable();
   initPrintForm();
 }
 
@@ -3109,43 +3314,21 @@ function renderA4Logbook() {
   if (!tbody) return;
   tbody.innerHTML = '';
   
-  // Get all 'req' and 'request' transactions
-  const requests = store.data.transactions.filter(t => t.type === 'req' || t.type === 'request');
-  requests.sort((a, b) => new Date(a.date) - new Date(b.date)); // Chronological order
-  
-  const minRows = 20;
-  const rowCount = Math.max(requests.length + 5, minRows); // Render at least 20 rows, or total requests + 5 extra empty rows
+  // Render exactly 20 blank rows for manual printing and writing
+  const rowCount = 20;
   
   for (let i = 0; i < rowCount; i++) {
-    const tx = requests[i];
     const tr = document.createElement('tr');
     tr.style.height = '40px';
 
-    if (tx) {
-      const empId = tx.empId || tx.employeeId;
-      const emp = store.data.employees.find(e => e.id === empId);
-      const dStr = formatThaiDate(tx.date);
-      const qty = tx.qty || tx.quantity;
-      const qtyStr = `-${formatNum(qty)}-`;
-      
-      tr.innerHTML = `
-          <td style="border: 1px solid black; text-align: center;">${i + 1}</td>
-          <td style="border: 1px solid black; text-align: center;" contenteditable="true">${dStr}</td>
-          <td style="border: 1px solid black; text-align: center; font-weight: 500;" contenteditable="true">${emp ? emp.name : ''}</td>
-          <td style="border: 1px solid black; text-align: center; font-weight: 600;" contenteditable="true">${qtyStr}</td>
-          <td style="border: 1px solid black;" contenteditable="true"></td>
-          <td style="border: 1px solid black; font-size: 0.85rem; color: #333;" contenteditable="true"></td>
-      `;
-    } else {
-      tr.innerHTML = `
-          <td style="border: 1px solid black; text-align: center;">${i + 1}</td>
-          <td style="border: 1px solid black; text-align: center;" contenteditable="true"></td>
-          <td style="border: 1px solid black; text-align: center; font-weight: 500;" contenteditable="true"></td>
-          <td style="border: 1px solid black; text-align: center; font-weight: 600;" contenteditable="true"></td>
-          <td style="border: 1px solid black;" contenteditable="true"></td>
-          <td style="border: 1px solid black; font-size: 0.85rem; color: #333;" contenteditable="true"></td>
-      `;
-    }
+    tr.innerHTML = `
+        <td style="border: 1px solid black; text-align: center;">${i + 1}</td>
+        <td style="border: 1px solid black; text-align: center;" contenteditable="true"></td>
+        <td style="border: 1px solid black; text-align: center; font-weight: 500;" contenteditable="true"></td>
+        <td style="border: 1px solid black; text-align: center; font-weight: 600;" contenteditable="true"></td>
+        <td style="border: 1px solid black;" contenteditable="true"></td>
+        <td style="border: 1px solid black; font-size: 0.85rem; color: #333;" contenteditable="true"></td>
+    `;
     tbody.appendChild(tr);
   }
 }
