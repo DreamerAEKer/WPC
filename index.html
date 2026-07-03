@@ -3751,32 +3751,48 @@ function loadLogbookImage() {
       img.style.borderRadius = '4px';
       img.style.cursor = 'pointer';
       img.style.border = '1px solid #ccc';
-      img.onclick = () => {
+      img.style.userSelect = 'none';
+      img.style.webkitUserSelect = 'none';
+      img.style.webkitTouchCallout = 'none'; // Prevent iOS context menu
+      
+      let pressTimer;
+      let isLongPress = false;
+      
+      const startPress = () => {
+        isLongPress = false;
+        pressTimer = setTimeout(async () => {
+          isLongPress = true;
+          if (await showConfirm('ต้องการลบรูปภาพนี้ใช่หรือไม่?', 'ยืนยันการลบรูปภาพ')) {
+            removeLogbookImage(index);
+          }
+        }, 3000);
+      };
+      
+      const cancelPress = () => {
+        clearTimeout(pressTimer);
+      };
+      
+      img.addEventListener('mousedown', startPress);
+      img.addEventListener('touchstart', startPress, {passive: true});
+      img.addEventListener('mouseup', cancelPress);
+      img.addEventListener('mouseleave', cancelPress);
+      img.addEventListener('touchend', cancelPress);
+      img.addEventListener('touchcancel', cancelPress);
+      
+      // Prevent default context menu
+      img.oncontextmenu = (e) => e.preventDefault();
+
+      img.onclick = (e) => {
+        if (isLongPress) {
+          e.preventDefault();
+          return;
+        }
         // Simple zoom view
         const w = window.open('');
         w.document.write(`<img src="${src}" style="max-width:100%;"><br><button onclick="window.close()">ปิด</button>`);
       };
       
-      const delBtn = document.createElement('button');
-      delBtn.innerHTML = '✕';
-      delBtn.style.position = 'absolute';
-      delBtn.style.top = '-5px';
-      delBtn.style.right = '-5px';
-      delBtn.style.background = '#dc2626';
-      delBtn.style.color = 'white';
-      delBtn.style.border = 'none';
-      delBtn.style.borderRadius = '50%';
-      delBtn.style.width = '20px';
-      delBtn.style.height = '20px';
-      delBtn.style.fontSize = '12px';
-      delBtn.style.cursor = 'pointer';
-      delBtn.onclick = (e) => {
-        e.stopPropagation();
-        removeLogbookImage(index);
-      };
-      
       wrapper.appendChild(img);
-      wrapper.appendChild(delBtn);
       logbookGallery.appendChild(wrapper);
     });
     logbookPreviewCont.style.display = 'block';
