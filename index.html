@@ -3750,19 +3750,16 @@ function switchPrintTab(type) {
   document.getElementById('print-type-' + type).style.display = 'block';
   
   // Update active state on tab buttons
-  const btn1 = document.getElementById('btn-tab-type1');
-  const btn2 = document.getElementById('btn-tab-type2');
-  
-  if (type === '1') {
-    btn1.className = 'btn btn-primary';
-    btn1.style = '';
-    btn2.className = 'btn btn-secondary';
-    btn2.style = 'background: white; color: var(--text-dark); border: 1px solid var(--border);';
-  } else {
-    btn2.className = 'btn btn-primary';
-    btn2.style = '';
-    btn1.className = 'btn btn-secondary';
-    btn1.style = 'background: white; color: var(--text-dark); border: 1px solid var(--border);';
+  for (let i = 1; i <= 3; i++) {
+    const btn = document.getElementById('btn-tab-type' + i);
+    if (!btn) continue;
+    if (i.toString() === type) {
+      btn.className = 'btn btn-primary';
+      btn.style = '';
+    } else {
+      btn.className = 'btn btn-secondary';
+      btn.style = 'background: white; color: var(--text-dark); border: 1px solid var(--border);';
+    }
   }
 }
 // --- LOGBOOK IMAGE LOGIC ---
