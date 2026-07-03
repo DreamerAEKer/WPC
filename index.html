@@ -1717,13 +1717,12 @@ input:focus, select:focus {
             <table class="data-table" id="tx-history-table">
               <thead>
                 <tr>
-                  <th>สถานะ</th>
-                  <th class="hide-mobile">วันที่</th>
+                  <th>วันที่</th>
                   <th>พนักงาน</th>
                   <th>ประเภท</th>
                   <th>จำนวน (ฉบับ)</th>
-                  <th class="hide-mobile">เป็นเงิน (฿)</th>
-                  <th class="hide-mobile">หลักฐาน</th>
+                  <th>เป็นเงิน (฿)</th>
+                  <th>หลักฐาน/หมายเหตุ</th>
                   <th>จัดการ</th>
                 </tr>
               </thead>
@@ -2646,18 +2645,17 @@ function renderTransactions() {
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td style="text-align: center;">
-        <label style="display: flex; align-items: center; justify-content: center; gap: 4px; cursor: pointer; font-size: 0.8rem; color: ${tx.verified ? '#16a34a' : 'var(--text-light)'}">
-          <input type="checkbox" ${tx.verified ? 'checked' : ''} onchange="toggleTxVerified('${tx.id}', this.checked)" style="width: 16px; height: 16px; cursor: pointer;">
-          ${tx.verified ? 'ตรวจแล้ว' : ''}
-        </label>
-      </td>
-      <td class="hide-mobile">${dateStr}</td>
+      <td>${dateStr}</td>
       <td>${emp ? emp.name : 'ไม่ทราบชื่อ'}</td>
       <td>${typeBadge}</td>
-      <td>${valStr}</td>
-      <td class="hide-mobile">${amountStr}</td>
-      <td class="hide-mobile">${evidenceHtml || '-'}</td>
+      <td>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <input type="checkbox" ${tx.verified ? 'checked' : ''} onchange="toggleTxVerified('${tx.id}', this.checked)" style="width: 16px; height: 16px; cursor: pointer; accent-color: #16a34a;">
+          ${valStr}
+        </div>
+      </td>
+      <td>${amountStr}</td>
+      <td>${evidenceHtml || '-'}</td>
       <td>
         <button class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-right: 4px;" onclick="editTx('${tx.id}')">แก้ไข</button>
         <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;" onclick="deleteTx('${tx.id}')">ลบ</button>
