@@ -1494,6 +1494,7 @@ input:focus, select:focus {
           <div style="display: flex; gap: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem;" class="no-print print-tabs">
             <button class="btn btn-primary" id="btn-tab-type1" onclick="switchPrintTab('1')">📄 ใบเบิกโควต้า (หน.แผนก)</button>
             <button class="btn btn-secondary" style="background: white; color: var(--text-dark); border: 1px solid var(--border);" id="btn-tab-type2" onclick="switchPrintTab('2')">📑 ทะเบียนคุม (แม่แบบ A4)</button>
+            <button class="btn btn-secondary" style="background: white; color: var(--text-dark); border: 1px solid var(--border);" id="btn-tab-type3" onclick="switchPrintTab('3')">💰 ใบสรุปจ่ายคอมมิชชัน (A4)</button>
           </div>
           
           <div id="printable-area">
@@ -3237,6 +3238,56 @@ function calcForm() {
   // Update Remaining
   const remain = quota - (prevQty + reqQty);
   document.getElementById('c-remain').textContent = formatNum(remain);
+}
+
+
+function renderA4Commission() {
+  const tbody = document.getElementById('p-commission-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  
+  const emps = store.getEmployeesData().filter(e => !e.isManager).sort((a, b) => b.remitted - a.remitted);
+  const now = new Date().toLocaleDateString('th-TH', {day:'numeric', month:'long', year:'numeric'});
+  const subtitle = document.getElementById('p-commission-subtitle');
+  if (subtitle) subtitle.textContent = `แผนกลูกค้าธุรกิจ ปณฝ.กลาง 10501 — อัพเดท ณ วันที่ ${now}`;
+  
+  if (emps.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-light); border: 1px solid black; padding: 2rem;">ยังไม่มีข้อมูลพนักงาน</td></tr>';
+    return;
+  }
+  
+  let totalRemitted = 0;
+  let totalCommission = 0;
+  
+  emps.forEach(emp => {
+    if (emp.remitted > 0) {
+      totalRemitted += emp.remitted;
+      totalCommission += emp.commission;
+      
+      const tr = document.createElement('tr');
+      tr.style.height = '40px';
+      tr.innerHTML = `
+        <td style="border: 1px solid black; text-align: left; padding-left: 1rem;">${emp.name}</td>
+        <td style="border: 1px solid black; text-align: right; padding-right: 1rem;">${formatNum(emp.remitted)}</td>
+        <td style="border: 1px solid black; text-align: right; padding-right: 1rem; font-weight: bold;">${formatNum(emp.commission)}</td>
+        <td style="border: 1px solid black; text-align: center;"></td>
+      `;
+      tbody.appendChild(tr);
+    }
+  });
+  
+  // Add total row
+  const totalTr = document.createElement('tr');
+  totalTr.style.background = '#e5e7eb';
+  totalTr.style.fontWeight = 'bold';
+  totalTr.style.height = '45px';
+  totalTr.innerHTML = `
+    <td style="border: 1px solid black; text-align: center;">รวมทั้งหมด</td>
+    <td style="border: 1px solid black; text-align: right; padding-right: 1rem;">${formatNum(totalRemitted)}</td>
+    <td style="border: 1px solid black; text-align: right; padding-right: 1rem; font-size: 1.1rem;">${formatNum(totalCommission)}</td>
+    <td style="border: 1px solid black; text-align: center;"></td>
+  `;
+  tbody.appendChild(totalTr);
 }
 
 function initPrintForm() {
