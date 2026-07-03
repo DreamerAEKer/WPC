@@ -1624,6 +1624,33 @@ input:focus, select:focus {
               </div>
             </div>
 
+            <!-- Type 3: Commission Summary -->
+            <div id="print-type-3" class="print-layout" style="display: none;">
+              <div class="no-print" style="text-align: right; margin-bottom: 1rem;">
+                <button class="btn btn-primary" onclick="window.print()">🖨️ พิมพ์ใบสรุปจ่ายคอมมิชชัน</button>
+              </div>
+              <div style="font-family: 'Kanit', sans-serif; border: 1px dashed #ccc; padding: 2rem; background: white;" class="print-container">
+                <div style="min-width: 750px;">
+                  <h2 style="text-align: center; margin-bottom: 0.5rem; color: black; font-size: 1.5rem;">สรุปจ่ายค่าส่งเสริมการขาย (Incentive) ไปรษณียบัตรทายผลฯ</h2>
+                  <h3 style="text-align: center; margin-bottom: 1.5rem; font-weight: normal; color: black; font-size: 1.1rem;" id="p-commission-subtitle">แผนกลูกค้าธุรกิจ ปณฝ.กลาง 10501</h3>
+                  
+                  <table style="width: 100%; border-collapse: collapse; text-align: center; border: 1px solid black; color: black; font-size: 1rem;">
+                  <thead>
+                    <tr style="background: #f3f4f6;">
+                      <th style="border: 1px solid black; padding: 0.75rem; width: 30%;">ชื่อพนักงาน</th>
+                      <th style="border: 1px solid black; padding: 0.75rem; width: 20%;">ยอดนำส่ง (ฉบับ)</th>
+                      <th style="border: 1px solid black; padding: 0.75rem; width: 25%;">ค่าคอมมิชชัน 10% (บาท)</th>
+                      <th style="border: 1px solid black; padding: 0.75rem; width: 25%;">ลายมือชื่อผู้รับเงิน</th>
+                    </tr>
+                  </thead>
+                  <tbody id="p-commission-tbody">
+                    <!-- Populated by JS -->
+                  </tbody>
+                </table>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -2783,6 +2810,7 @@ function renderAll() {
   renderRanking();
   renderMasterHistory();
   renderA4Logbook();
+  renderA4Commission();
   renderCommissionTable();
   initPrintForm();
 }
@@ -3240,6 +3268,55 @@ function calcForm() {
   document.getElementById('c-remain').textContent = formatNum(remain);
 }
 
+
+function renderA4Commission() {
+  const tbody = document.getElementById('p-commission-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  
+  const emps = store.getEmployeesData().filter(e => !e.isManager).sort((a, b) => b.remitted - a.remitted);
+  const now = new Date().toLocaleDateString('th-TH', {day:'numeric', month:'long', year:'numeric'});
+  const subtitle = document.getElementById('p-commission-subtitle');
+  if (subtitle) subtitle.textContent = `แผนกลูกค้าธุรกิจ ปณฝ.กลาง 10501 — อัพเดท ณ วันที่ ${now}`;
+  
+  if (emps.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-light); border: 1px solid black; padding: 2rem;">ยังไม่มีข้อมูลพนักงาน</td></tr>';
+    return;
+  }
+  
+  let totalRemitted = 0;
+  let totalCommission = 0;
+  
+  emps.forEach(emp => {
+    if (emp.remitted > 0) {
+      totalRemitted += emp.remitted;
+      totalCommission += emp.commission;
+      
+      const tr = document.createElement('tr');
+      tr.style.height = '40px';
+      tr.innerHTML = `
+        <td style="border: 1px solid black; text-align: left; padding-left: 1rem;">${emp.name}</td>
+        <td style="border: 1px solid black; text-align: right; padding-right: 1rem;">${formatNum(emp.remitted)}</td>
+        <td style="border: 1px solid black; text-align: right; padding-right: 1rem; font-weight: bold;">${formatNum(emp.commission)}</td>
+        <td style="border: 1px solid black; text-align: center;"></td>
+      `;
+      tbody.appendChild(tr);
+    }
+  });
+  
+  // Add total row
+  const totalTr = document.createElement('tr');
+  totalTr.style.background = '#e5e7eb';
+  totalTr.style.fontWeight = 'bold';
+  totalTr.style.height = '45px';
+  totalTr.innerHTML = `
+    <td style="border: 1px solid black; text-align: center;">รวมทั้งหมด</td>
+    <td style="border: 1px solid black; text-align: right; padding-right: 1rem;">${formatNum(totalRemitted)}</td>
+    <td style="border: 1px solid black; text-align: right; padding-right: 1rem; font-size: 1.1rem;">${formatNum(totalCommission)}</td>
+    <td style="border: 1px solid black; text-align: center;"></td>
+  `;
+  tbody.appendChild(totalTr);
+}
 
 function renderA4Commission() {
   const tbody = document.getElementById('p-commission-tbody');
