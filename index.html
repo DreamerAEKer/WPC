@@ -1713,13 +1713,13 @@ input:focus, select:focus {
             <table class="data-table" id="tx-history-table">
               <thead>
                 <tr>
+                  <th>สถานะ</th>
                   <th>วันที่</th>
                   <th>พนักงาน</th>
                   <th>ประเภท</th>
                   <th>จำนวน (ฉบับ)</th>
                   <th>เป็นเงิน (฿)</th>
                   <th>หลักฐาน/หมายเหตุ</th>
-                  <th>สถานะ</th>
                   <th>จัดการ</th>
                 </tr>
               </thead>
@@ -2642,18 +2642,18 @@ function renderTransactions() {
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${dateStr}</td>
-      <td>${emp ? emp.name : 'ไม่ทราบชื่อ'}</td>
-      <td>${typeBadge}</td>
-      <td>${valStr}</td>
-      <td>${amountStr}</td>
-      <td>${evidenceHtml || '-'}</td>
       <td style="text-align: center;">
         <label style="display: flex; align-items: center; justify-content: center; gap: 4px; cursor: pointer; font-size: 0.8rem; color: ${tx.verified ? '#16a34a' : 'var(--text-light)'}">
           <input type="checkbox" ${tx.verified ? 'checked' : ''} onchange="toggleTxVerified('${tx.id}', this.checked)" style="width: 16px; height: 16px; cursor: pointer;">
           ${tx.verified ? 'ตรวจแล้ว' : 'รอตรวจ'}
         </label>
       </td>
+      <td>${dateStr}</td>
+      <td>${emp ? emp.name : 'ไม่ทราบชื่อ'}</td>
+      <td>${typeBadge}</td>
+      <td>${valStr}</td>
+      <td>${amountStr}</td>
+      <td>${evidenceHtml || '-'}</td>
       <td>
         <button class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-right: 4px;" onclick="editTx('${tx.id}')">แก้ไข</button>
         <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;" onclick="deleteTx('${tx.id}')">ลบ</button>
