@@ -612,6 +612,69 @@ input:focus, select:focus {
     min-width: 650px; /* Enable clean horizontal scroll for all tables on mobile */
   }
 
+  /* Specifically make the employee management table a card layout */
+  #emp-manage-table, #emp-manage-table thead, #emp-manage-table tbody, #emp-manage-table th, #emp-manage-table td, #emp-manage-table tr { 
+    display: block; 
+  }
+  
+  #emp-manage-table {
+    min-width: unset;
+  }
+
+  #emp-manage-table thead tr { 
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+  }
+  
+  #emp-manage-table tr {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    background: white;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    padding: 0.5rem;
+  }
+  
+  #emp-manage-table td { 
+    border: none;
+    border-bottom: 1px solid #f1f5f9; 
+    position: relative;
+    padding-left: 50% !important; 
+    text-align: right;
+    font-size: 0.85rem;
+    min-height: 2rem;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    white-space: normal;
+  }
+
+  #emp-manage-table td:last-child {
+    border-bottom: 0;
+  }
+  
+  #emp-manage-table td:before { 
+    position: absolute;
+    top: 50%;
+    left: 0.75rem;
+    transform: translateY(-50%);
+    width: 45%; 
+    padding-right: 10px; 
+    white-space: nowrap;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-light);
+  }
+
+  #emp-manage-table td:nth-of-type(1):before { content: "ชื่อพนักงาน"; }
+  #emp-manage-table td:nth-of-type(2):before { content: "หน.แผนก"; }
+  #emp-manage-table td:nth-of-type(3):before { content: "เบิก (ฉบับ)"; }
+  #emp-manage-table td:nth-of-type(4):before { content: "นำส่งแล้ว"; }
+  #emp-manage-table td:nth-of-type(5):before { content: "ค้างนำส่ง"; }
+  #emp-manage-table td:nth-of-type(6):before { content: "คอมมิชชัน"; }
+  #emp-manage-table td:nth-of-type(7):before { content: "จัดการ"; }
+
   .grid-2 {
     grid-template-columns: 1fr;
     gap: 1rem;
