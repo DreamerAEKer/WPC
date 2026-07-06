@@ -787,6 +787,10 @@ input:focus, select:focus {
 }
 
 @media print {
+  @page {
+    size: A4 portrait;
+    margin: 15mm;
+  }
   body {
     background: white;
   }
@@ -1330,7 +1334,7 @@ input:focus, select:focus {
       <div class="sidebar-header">
         <div class="logo-icon">🏆</div>
         <h2>ฟุตบอลระดับโลก 2026</h2>
-        <p class="subtitle">Postcard Tracker <span style="font-size: 0.75rem; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 12px; margin-left: 4px;">v1.6</span></p>
+        <p class="subtitle">Postcard Tracker <span style="font-size: 0.75rem; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 12px; margin-left: 4px;">v1.6.1</span></p>
       </div>
       <nav class="sidebar-nav">
         <button class="nav-btn active" data-view="dashboard">
@@ -1634,17 +1638,17 @@ input:focus, select:focus {
                 <button class="btn btn-primary" onclick="window.print()">🖨️ พิมพ์ใบสรุปจ่ายคอมมิชชัน</button>
               </div>
               <div style="font-family: 'Kanit', sans-serif; border: 1px dashed #ccc; padding: 2rem; background: white;" class="print-container">
-                <div style="min-width: 750px;">
-                  <h2 style="text-align: center; margin-bottom: 0.5rem; color: black; font-size: 1.5rem;">สรุปจ่ายค่าส่งเสริมการขาย (Incentive) ไปรษณียบัตรทายผลฯ</h2>
+                <div style="width: 100%; max-width: 800px; margin: 0 auto;">
+                  <h2 style="text-align: center; margin-bottom: 0.5rem; color: black; font-size: 1.3rem;">สรุปจ่ายค่าส่งเสริมการขาย (Incentive) ไปรษณียบัตรทายผลฯ</h2>
                   <h3 style="text-align: center; margin-bottom: 1.5rem; font-weight: normal; color: black; font-size: 1.1rem;" id="p-commission-subtitle">แผนกลูกค้าธุรกิจ ปณฝ.กลาง 10501</h3>
                   
                   <table style="width: 100%; border-collapse: collapse; text-align: center; border: 1px solid black; color: black; font-size: 1rem;">
                   <thead>
                     <tr style="background: #f3f4f6;">
-                      <th style="border: 1px solid black; padding: 0.75rem; width: 30%;">ชื่อพนักงาน</th>
-                      <th style="border: 1px solid black; padding: 0.75rem; width: 20%;">ยอดนำส่ง (ฉบับ)</th>
-                      <th style="border: 1px solid black; padding: 0.75rem; width: 25%;">ค่าคอมมิชชัน 10% (บาท)</th>
-                      <th style="border: 1px solid black; padding: 0.75rem; width: 25%;">ลายมือชื่อผู้รับเงิน</th>
+                      <th style="border: 1px solid black; padding: 0.75rem; width: 25%;">ชื่อพนักงาน</th>
+                      <th style="border: 1px solid black; padding: 0.75rem; width: 15%;">ยอดนำส่ง<br>(ฉบับ)</th>
+                      <th style="border: 1px solid black; padding: 0.75rem; width: 25%;">ค่าคอมมิชชัน 10%<br>(บาท)</th>
+                      <th style="border: 1px solid black; padding: 0.75rem; width: 35%;">ลายมือชื่อผู้รับเงิน</th>
                     </tr>
                   </thead>
                   <tbody id="p-commission-tbody">
