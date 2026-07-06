@@ -1330,7 +1330,7 @@ input:focus, select:focus {
       <div class="sidebar-header">
         <div class="logo-icon">🏆</div>
         <h2>ฟุตบอลระดับโลก 2026</h2>
-        <p class="subtitle">Postcard Tracker <span style="font-size: 0.75rem; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 12px; margin-left: 4px;">v1.3</span></p>
+        <p class="subtitle">Postcard Tracker <span style="font-size: 0.75rem; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 12px; margin-left: 4px;">v1.4</span></p>
       </div>
       <nav class="sidebar-nav">
         <button class="nav-btn active" data-view="dashboard">
@@ -2673,7 +2673,8 @@ function renderTransactions() {
       if (status && status.isPaid) {
         paidIndicatorHtml = '<span title="จ่ายครบแล้ว" style="color: #16a34a; display: flex; align-items: center;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>';
       } else if (status && status.remaining > 0 && status.remaining < qty) {
-        paidIndicatorHtml = `<span title="ค้างยอด ${formatNum(status.remaining)} ฉบับ" style="color: #ea580c; font-size: 0.75rem; background: #ffedd5; padding: 2px 6px; border-radius: 4px; white-space: nowrap;">ค้าง ${formatNum(status.remaining)}</span>`;
+        const paidQty = qty - status.remaining;
+        paidIndicatorHtml = `<span title="จ่ายแล้ว ${formatNum(paidQty)} ค้างยอด ${formatNum(status.remaining)} ฉบับ" style="color: #ea580c; font-size: 0.75rem; background: #ffedd5; padding: 2px 6px; border-radius: 4px; white-space: nowrap;">จ่าย ${formatNum(paidQty)} ค้าง ${formatNum(status.remaining)}</span>`;
       }
     }
     
