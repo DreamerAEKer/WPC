@@ -1334,7 +1334,7 @@ input:focus, select:focus {
       <div class="sidebar-header">
         <div class="logo-icon">🏆</div>
         <h2>ฟุตบอลระดับโลก 2026</h2>
-        <p class="subtitle">Postcard Tracker <span style="font-size: 0.75rem; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 12px; margin-left: 4px;">v1.6.2</span></p>
+        <p class="subtitle">Postcard Tracker <span style="font-size: 0.75rem; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 12px; margin-left: 4px;">v1.6.3</span></p>
       </div>
       <nav class="sidebar-nav">
         <button class="nav-btn active" data-view="dashboard">
@@ -2627,7 +2627,7 @@ function renderTransactions() {
       empTxs.forEach(t => {
         if (t.type === 'req' || t.type === 'request') {
           const reqQty = t.quantity || t.qty;
-          if (t.verified) {
+          if (t.isPaidDirectly) {
             reqPaidStatus[t.id] = { isPaid: true, remaining: 0, byTick: true };
           } else {
             if (totalCredit >= reqQty) {
@@ -2701,12 +2701,13 @@ function renderTransactions() {
       <td>${typeBadge}</td>
       <td>
         <div style="display: flex; align-items: center; gap: 6px;">
-          <input type="checkbox" ${tx.verified ? 'checked' : ''} onchange="toggleTxVerified('${tx.id}', this.checked)" style="width: 16px; height: 16px; cursor: pointer; accent-color: #2563eb;" title="${isReq ? 'ทำเครื่องหมายว่าจ่ายแล้ว' : 'ตรวจสอบ/รับยอดแล้ว'}">
+          <input type="checkbox" ${tx.verified ? 'checked' : ''} onchange="toggleTxVerified('${tx.id}', this.checked)" style="width: 16px; height: 16px; cursor: pointer; accent-color: #2563eb;" title="ตรวจสอบแล้ว">
           ${valStr}
         </div>
       </td>
       <td>
         <div style="display: flex; align-items: center; justify-content: flex-start; gap: 8px;">
+          ${isReq ? `<input type="checkbox" ${tx.isPaidDirectly ? 'checked' : ''} onchange="toggleTxPaidDirectly('${tx.id}', this.checked)" style="width: 16px; height: 16px; cursor: pointer; accent-color: #16a34a;" title="รับยอดแล้ว (จ่ายตรงบิล)">` : ''}
           <span>${amountStr}</span>
           ${paidIndicatorHtml}
         </div>
@@ -2800,6 +2801,15 @@ window.toggleTxVerified = function(txId, verified) {
     tx.verified = verified;
     store.saveData();
     renderTransactions(); // Refresh only the transactions table
+  }
+};
+
+window.toggleTxPaidDirectly = function(txId, isPaidDirectly) {
+  const tx = store.data.transactions.find(t => t.id === txId);
+  if (tx) {
+    tx.isPaidDirectly = isPaidDirectly;
+    store.saveData();
+    renderTransactions();
   }
 };
 

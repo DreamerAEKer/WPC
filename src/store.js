@@ -194,7 +194,7 @@ class Store {
         const qty = t.qty || t.quantity;
         if (t.type === 'req' || t.type === 'request') {
           requested += qty;
-          if (t.verified) {
+          if (t.isPaidDirectly) {
             tickedReqQty += qty;
           }
         }
