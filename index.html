@@ -2800,10 +2800,12 @@ function renderCommissionTable() {
   if (!tbody) return;
   tbody.innerHTML = '';
   
-  // Get all employees except managers
-  const emps = store.getEmployeesData().filter(e => !e.isManager).sort((a, b) => b.remitted - a.remitted);
+  // Get all employees
+  const allEmps = store.getEmployeesData().sort((a, b) => b.remitted - a.remitted);
+  const emps = allEmps.filter(e => !e.isManager);
+  const managers = allEmps.filter(e => e.isManager);
   
-  if (emps.length === 0) {
+  if (allEmps.length === 0) {
     tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-light);">ยังไม่มีข้อมูลพนักงาน</td></tr>';
     return;
   }
@@ -2812,7 +2814,7 @@ function renderCommissionTable() {
   let totalRevenue = 0;
   let totalCommission = 0;
   
-  emps.forEach(emp => {
+  const renderRow = (emp) => {
     if (emp.remitted > 0) {
       totalRemitted += emp.remitted;
       totalRevenue += emp.revenue;
@@ -2820,7 +2822,7 @@ function renderCommissionTable() {
       
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td style="font-weight: 600;">${emp.name}</td>
+        <td style="font-weight: 600;">${emp.name} ${emp.isManager ? '<span class="badge" style="background:#e2e8f0;color:#475569;font-size:0.7rem;margin-left:4px;">หัวหน้า</span>' : ''}</td>
         <td style="text-align: right;">${formatNum(emp.remitted)}</td>
         <td style="text-align: right; color: var(--secondary);">${formatNum(emp.revenue)}</td>
         <td style="text-align: right; font-weight: 700; color: #16a34a;">${formatNum(emp.commission)}</td>
@@ -2832,14 +2834,39 @@ function renderCommissionTable() {
       `;
       tbody.appendChild(tr);
     }
-  });
+  };
+
+  // Render Subordinates
+  emps.forEach(renderRow);
+  
+  // Add Subordinate Total Row if there are managers too
+  if (managers.some(m => m.remitted > 0) && emps.some(e => e.remitted > 0)) {
+     const subTr = document.createElement('tr');
+     subTr.style.background = '#f8fafc';
+     subTr.innerHTML = `
+      <td style="color:var(--text-light);">รวมเฉพาะทีมงาน</td>
+      <td style="text-align: right; color:var(--text-light);">${formatNum(emps.reduce((s, e) => s + e.remitted, 0))}</td>
+      <td style="text-align: right; color:var(--text-light);">${formatNum(emps.reduce((s, e) => s + e.revenue, 0))}</td>
+      <td style="text-align: right; color:var(--text-light);">${formatNum(emps.reduce((s, e) => s + e.commission, 0))}</td>
+      <td></td>
+     `;
+     tbody.appendChild(subTr);
+  }
+
+  // Render Managers
+  if (managers.some(m => m.remitted > 0)) {
+    const mgrHeader = document.createElement('tr');
+    mgrHeader.innerHTML = `<td colspan="5" style="background:#f1f5f9; font-size:0.85rem; font-weight:bold; color:var(--text-dark);">ส่วนของระดับหัวหน้า</td>`;
+    tbody.appendChild(mgrHeader);
+    managers.forEach(renderRow);
+  }
   
   // Add total row
   const totalTr = document.createElement('tr');
-  totalTr.style.background = '#f8fafc';
+  totalTr.style.background = '#e0f2fe';
   totalTr.style.fontWeight = '700';
   totalTr.innerHTML = `
-    <td>รวมทั้งหมด</td>
+    <td>ยอดรวมทั้งหมด</td>
     <td style="text-align: right;">${formatNum(totalRemitted)}</td>
     <td style="text-align: right; color: var(--secondary);">${formatNum(totalRevenue)}</td>
     <td style="text-align: right; color: #16a34a; font-size: 1.1rem;">${formatNum(totalCommission)}</td>
@@ -3324,61 +3351,15 @@ function renderA4Commission() {
   if (!tbody) return;
   tbody.innerHTML = '';
   
-  const emps = store.getEmployeesData().filter(e => !e.isManager).sort((a, b) => b.remitted - a.remitted);
-  const now = new Date().toLocaleDateString('th-TH', {day:'numeric', month:'long', year:'numeric'});
-  const subtitle = document.getElementById('p-commission-subtitle');
-  if (subtitle) subtitle.textContent = `แผนกลูกค้าธุรกิจ ปณฝ.กลาง 10501 — อัพเดท ณ วันที่ ${now}`;
-  
-  if (emps.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-light); border: 1px solid black; padding: 2rem;">ยังไม่มีข้อมูลพนักงาน</td></tr>';
-    return;
-  }
-  
-  let totalRemitted = 0;
-  let totalCommission = 0;
-  
-  emps.forEach(emp => {
-    if (emp.remitted > 0) {
-      totalRemitted += emp.remitted;
-      totalCommission += emp.commission;
-      
-      const tr = document.createElement('tr');
-      tr.style.height = '40px';
-      tr.innerHTML = `
-        <td style="border: 1px solid black; text-align: left; padding-left: 1rem;">${emp.name}</td>
-        <td style="border: 1px solid black; text-align: right; padding-right: 1rem;">${formatNum(emp.remitted)}</td>
-        <td style="border: 1px solid black; text-align: right; padding-right: 1rem; font-weight: bold;">${formatNum(emp.commission)}</td>
-        <td style="border: 1px solid black; text-align: center;"></td>
-      `;
-      tbody.appendChild(tr);
-    }
-  });
-  
-  // Add total row
-  const totalTr = document.createElement('tr');
-  totalTr.style.background = '#e5e7eb';
-  totalTr.style.fontWeight = 'bold';
-  totalTr.style.height = '45px';
-  totalTr.innerHTML = `
-    <td style="border: 1px solid black; text-align: center;">รวมทั้งหมด</td>
-    <td style="border: 1px solid black; text-align: right; padding-right: 1rem;">${formatNum(totalRemitted)}</td>
-    <td style="border: 1px solid black; text-align: right; padding-right: 1rem; font-size: 1.1rem;">${formatNum(totalCommission)}</td>
-    <td style="border: 1px solid black; text-align: center;"></td>
-  `;
-  tbody.appendChild(totalTr);
-}
+  const allEmps = store.getEmployeesData().sort((a, b) => b.remitted - a.remitted);
+  const emps = allEmps.filter(e => !e.isManager);
+  const managers = allEmps.filter(e => e.isManager);
 
-function renderA4Commission() {
-  const tbody = document.getElementById('p-commission-tbody');
-  if (!tbody) return;
-  tbody.innerHTML = '';
-  
-  const emps = store.getEmployeesData().filter(e => !e.isManager).sort((a, b) => b.remitted - a.remitted);
   const now = new Date().toLocaleDateString('th-TH', {day:'numeric', month:'long', year:'numeric'});
   const subtitle = document.getElementById('p-commission-subtitle');
   if (subtitle) subtitle.textContent = `แผนกลูกค้าธุรกิจ ปณฝ.กลาง 10501 — อัพเดท ณ วันที่ ${now}`;
   
-  if (emps.length === 0) {
+  if (allEmps.length === 0) {
     tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-light); border: 1px solid black; padding: 2rem;">ยังไม่มีข้อมูลพนักงาน</td></tr>';
     return;
   }
@@ -3386,7 +3367,7 @@ function renderA4Commission() {
   let totalRemitted = 0;
   let totalCommission = 0;
   
-  emps.forEach(emp => {
+  const renderRow = (emp) => {
     if (emp.remitted > 0) {
       totalRemitted += emp.remitted;
       totalCommission += emp.commission;
@@ -3394,22 +3375,49 @@ function renderA4Commission() {
       const tr = document.createElement('tr');
       tr.style.height = '40px';
       tr.innerHTML = `
-        <td style="border: 1px solid black; text-align: left; padding-left: 1rem;">${emp.name}</td>
+        <td style="border: 1px solid black; text-align: left; padding-left: 1rem;">${emp.name} ${emp.isManager ? '(หัวหน้า)' : ''}</td>
         <td style="border: 1px solid black; text-align: right; padding-right: 1rem;">${formatNum(emp.remitted)}</td>
         <td style="border: 1px solid black; text-align: right; padding-right: 1rem; font-weight: bold;">${formatNum(emp.commission)}</td>
         <td style="border: 1px solid black; text-align: center;"></td>
       `;
       tbody.appendChild(tr);
     }
-  });
-  
+  };
+
+  // Render Subordinates
+  emps.forEach(renderRow);
+
+  // Add Subordinate Total Row
+  if (managers.some(m => m.remitted > 0) && emps.some(e => e.remitted > 0)) {
+     const subTr = document.createElement('tr');
+     subTr.style.background = '#f3f4f6';
+     subTr.style.height = '35px';
+     subTr.innerHTML = `
+      <td style="border: 1px solid black; text-align: center; color:#4b5563;">รวมเฉพาะทีมงาน</td>
+      <td style="border: 1px solid black; text-align: right; padding-right: 1rem; color:#4b5563;">${formatNum(emps.reduce((s, e) => s + e.remitted, 0))}</td>
+      <td style="border: 1px solid black; text-align: right; padding-right: 1rem; color:#4b5563;">${formatNum(emps.reduce((s, e) => s + e.commission, 0))}</td>
+      <td style="border: 1px solid black; text-align: center;"></td>
+     `;
+     tbody.appendChild(subTr);
+  }
+
+  // Render Managers
+  if (managers.some(m => m.remitted > 0)) {
+    const mgrHeader = document.createElement('tr');
+    mgrHeader.style.background = '#e5e7eb';
+    mgrHeader.style.height = '35px';
+    mgrHeader.innerHTML = `<td colspan="4" style="border: 1px solid black; text-align: center; font-weight: bold;">ส่วนของระดับหัวหน้า</td>`;
+    tbody.appendChild(mgrHeader);
+    managers.forEach(renderRow);
+  }
+
   // Add total row
   const totalTr = document.createElement('tr');
-  totalTr.style.background = '#e5e7eb';
+  totalTr.style.background = '#dbeafe';
   totalTr.style.fontWeight = 'bold';
   totalTr.style.height = '45px';
   totalTr.innerHTML = `
-    <td style="border: 1px solid black; text-align: center;">รวมทั้งหมด</td>
+    <td style="border: 1px solid black; text-align: center;">ยอดรวมทั้งหมด</td>
     <td style="border: 1px solid black; text-align: right; padding-right: 1rem;">${formatNum(totalRemitted)}</td>
     <td style="border: 1px solid black; text-align: right; padding-right: 1rem; font-size: 1.1rem;">${formatNum(totalCommission)}</td>
     <td style="border: 1px solid black; text-align: center;"></td>
