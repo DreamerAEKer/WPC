@@ -1330,7 +1330,7 @@ input:focus, select:focus {
       <div class="sidebar-header">
         <div class="logo-icon">🏆</div>
         <h2>ฟุตบอลระดับโลก 2026</h2>
-        <p class="subtitle">Postcard Tracker <span style="font-size: 0.75rem; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 12px; margin-left: 4px;">v1.2</span></p>
+        <p class="subtitle">Postcard Tracker <span style="font-size: 0.75rem; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 12px; margin-left: 4px;">v1.3</span></p>
       </div>
       <nav class="sidebar-nav">
         <button class="nav-btn active" data-view="dashboard">
@@ -2690,13 +2690,15 @@ function renderTransactions() {
       <td>${dateStr}</td>
       <td>${emp ? emp.name : 'ไม่ทราบชื่อ'}</td>
       <td>${typeBadge}</td>
-      <td>${valStr}</td>
+      <td>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <input type="checkbox" ${tx.verified ? 'checked' : ''} onchange="toggleTxVerified('${tx.id}', this.checked)" style="width: 16px; height: 16px; cursor: pointer; accent-color: #2563eb;" title="ตรวจสอบแล้ว">
+          ${valStr}
+        </div>
+      </td>
       <td>
         <div style="display: flex; align-items: center; justify-content: flex-start; gap: 8px;">
-          <div style="display: flex; align-items: center; gap: 4px;">
-            <input type="checkbox" ${tx.verified ? 'checked' : ''} onchange="toggleTxVerified('${tx.id}', this.checked)" style="width: 16px; height: 16px; cursor: pointer; accent-color: #2563eb;" title="ตรวจสอบแล้ว">
-            <span>${amountStr}</span>
-          </div>
+          <span>${amountStr}</span>
           ${paidIndicatorHtml}
         </div>
       </td>
