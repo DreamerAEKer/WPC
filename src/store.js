@@ -187,14 +187,26 @@ class Store {
     return this.data.employees.map(emp => {
       let requested = 0;
       let remitted = 0;
+      let returned = 0;
+      let tickedReqQty = 0;
 
-      this.data.transactions.filter(t => t.empId === emp.id).forEach(t => {
-        if (t.type === 'req') requested += t.qty;
-        if (t.type === 'remit') remitted += t.qty;
+      this.data.transactions.filter(t => (t.empId || t.employeeId) === emp.id).forEach(t => {
+        const qty = t.qty || t.quantity;
+        if (t.type === 'req' || t.type === 'request') {
+          requested += qty;
+          if (t.verified) {
+            tickedReqQty += qty;
+          }
+        }
+        if (t.type === 'remit') remitted += qty;
+        if (t.type === 'return') returned += qty;
       });
 
-      const outstanding = requested - remitted;
-      const revenue = remitted * this.data.pricePerTicket;
+      // Total cards that are considered paid (either by remit form or by ticking the req)
+      const totalPaidQty = remitted + tickedReqQty;
+      const outstanding = requested - totalPaidQty - returned;
+      
+      const revenue = totalPaidQty * this.data.pricePerTicket;
       const commission = revenue * this.data.commissionRate;
       
       const paidAmount = typeof emp.paidAmount === 'number' ? emp.paidAmount : (emp.paid ? revenue : 0);

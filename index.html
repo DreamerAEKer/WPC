@@ -1334,7 +1334,7 @@ input:focus, select:focus {
       <div class="sidebar-header">
         <div class="logo-icon">🏆</div>
         <h2>ฟุตบอลระดับโลก 2026</h2>
-        <p class="subtitle">Postcard Tracker <span style="font-size: 0.75rem; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 12px; margin-left: 4px;">v1.6.1</span></p>
+        <p class="subtitle">Postcard Tracker <span style="font-size: 0.75rem; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 12px; margin-left: 4px;">v1.6.2</span></p>
       </div>
       <nav class="sidebar-nav">
         <button class="nav-btn active" data-view="dashboard">
@@ -2627,14 +2627,18 @@ function renderTransactions() {
       empTxs.forEach(t => {
         if (t.type === 'req' || t.type === 'request') {
           const reqQty = t.quantity || t.qty;
-          if (totalCredit >= reqQty) {
-            reqPaidStatus[t.id] = { isPaid: true, remaining: 0 };
-            totalCredit -= reqQty;
-          } else if (totalCredit > 0) {
-            reqPaidStatus[t.id] = { isPaid: false, remaining: reqQty - totalCredit };
-            totalCredit = 0;
+          if (t.verified) {
+            reqPaidStatus[t.id] = { isPaid: true, remaining: 0, byTick: true };
           } else {
-            reqPaidStatus[t.id] = { isPaid: false, remaining: reqQty };
+            if (totalCredit >= reqQty) {
+              reqPaidStatus[t.id] = { isPaid: true, remaining: 0 };
+              totalCredit -= reqQty;
+            } else if (totalCredit > 0) {
+              reqPaidStatus[t.id] = { isPaid: false, remaining: reqQty - totalCredit };
+              totalCredit = 0;
+            } else {
+              reqPaidStatus[t.id] = { isPaid: false, remaining: reqQty };
+            }
           }
         }
       });
@@ -2697,7 +2701,7 @@ function renderTransactions() {
       <td>${typeBadge}</td>
       <td>
         <div style="display: flex; align-items: center; gap: 6px;">
-          <input type="checkbox" ${tx.verified ? 'checked' : ''} onchange="toggleTxVerified('${tx.id}', this.checked)" style="width: 16px; height: 16px; cursor: pointer; accent-color: #2563eb;" title="ตรวจสอบแล้ว">
+          <input type="checkbox" ${tx.verified ? 'checked' : ''} onchange="toggleTxVerified('${tx.id}', this.checked)" style="width: 16px; height: 16px; cursor: pointer; accent-color: #2563eb;" title="${isReq ? 'ทำเครื่องหมายว่าจ่ายแล้ว' : 'ตรวจสอบ/รับยอดแล้ว'}">
           ${valStr}
         </div>
       </td>
