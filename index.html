@@ -2605,6 +2605,38 @@ function renderTransactions() {
   tbody.innerHTML = '';
   const txs = [...store.data.transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
   
+  // Pre-calculate paid status for req transactions based on employee remittances
+  const reqPaidStatus = {};
+  if (store.data.employees && store.data.transactions) {
+    store.data.employees.forEach(emp => {
+      const empTxs = store.data.transactions
+        .filter(t => (t.employeeId || t.empId) === emp.id)
+        .sort((a, b) => new Date(a.date) - new Date(b.date));
+      
+      let totalCredit = 0;
+      empTxs.forEach(t => {
+        if (t.type === 'remit' || t.type === 'return') {
+          totalCredit += (t.quantity || t.qty);
+        }
+      });
+  
+      empTxs.forEach(t => {
+        if (t.type === 'req' || t.type === 'request') {
+          const reqQty = t.quantity || t.qty;
+          if (totalCredit >= reqQty) {
+            reqPaidStatus[t.id] = { isPaid: true, remaining: 0 };
+            totalCredit -= reqQty;
+          } else if (totalCredit > 0) {
+            reqPaidStatus[t.id] = { isPaid: false, remaining: reqQty - totalCredit };
+            totalCredit = 0;
+          } else {
+            reqPaidStatus[t.id] = { isPaid: false, remaining: reqQty };
+          }
+        }
+      });
+    });
+  }
+
   if (txs.length === 0) {
     tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-light);">ยังไม่มีรายการ</td></tr>';
   }
@@ -2634,6 +2666,16 @@ function renderTransactions() {
     }
     
     const amountStr = formatNum(qty * store.data.pricePerTicket);
+
+    let paidIndicatorHtml = '';
+    if (isReq) {
+      const status = reqPaidStatus[tx.id];
+      if (status && status.isPaid) {
+        paidIndicatorHtml = '<span title="จ่ายครบแล้ว" style="color: #16a34a; display: flex; align-items: center;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>';
+      } else if (status && status.remaining > 0 && status.remaining < qty) {
+        paidIndicatorHtml = `<span title="ค้างยอด ${formatNum(status.remaining)} ฉบับ" style="color: #ea580c; font-size: 0.75rem; background: #ffedd5; padding: 2px 6px; border-radius: 4px; white-space: nowrap;">ค้าง ${formatNum(status.remaining)}</span>`;
+      }
+    }
     
     let evidenceHtml = '';
     if (tx.evidenceUrl) {
@@ -2648,13 +2690,16 @@ function renderTransactions() {
       <td>${dateStr}</td>
       <td>${emp ? emp.name : 'ไม่ทราบชื่อ'}</td>
       <td>${typeBadge}</td>
+      <td>${valStr}</td>
       <td>
-        <div style="display: flex; align-items: center; gap: 6px;">
-          <input type="checkbox" ${tx.verified ? 'checked' : ''} onchange="toggleTxVerified('${tx.id}', this.checked)" style="width: 16px; height: 16px; cursor: pointer; accent-color: #16a34a;">
-          ${valStr}
+        <div style="display: flex; align-items: center; justify-content: flex-start; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 4px;">
+            <input type="checkbox" ${tx.verified ? 'checked' : ''} onchange="toggleTxVerified('${tx.id}', this.checked)" style="width: 16px; height: 16px; cursor: pointer; accent-color: #2563eb;" title="ตรวจสอบแล้ว">
+            <span>${amountStr}</span>
+          </div>
+          ${paidIndicatorHtml}
         </div>
       </td>
-      <td>${amountStr}</td>
       <td>${evidenceHtml || '-'}</td>
       <td>
         <button class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-right: 4px;" onclick="editTx('${tx.id}')">แก้ไข</button>
