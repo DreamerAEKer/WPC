@@ -1334,7 +1334,7 @@ input:focus, select:focus {
       <div class="sidebar-header">
         <div class="logo-icon">🏆</div>
         <h2>ฟุตบอลระดับโลก 2026</h2>
-        <p class="subtitle">Postcard Tracker <span style="font-size: 0.75rem; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 12px; margin-left: 4px;">v1.6.4</span></p>
+        <p class="subtitle">Postcard Tracker <span style="font-size: 0.75rem; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 12px; margin-left: 4px;">v1.6.5</span></p>
       </div>
       <nav class="sidebar-nav">
         <button class="nav-btn active" data-view="dashboard">
@@ -3001,7 +3001,12 @@ function renderRanking() {
               <span style="font-size: 1.4rem; font-weight: 900; color: var(--primary);">${formatNum(mgr.requested)}</span>
               <span style="font-size: 0.8rem; opacity: 0.8; color: var(--text-light);"> ใบ</span>
             </div>
-            <div style="font-size: 0.85rem; color: var(--secondary); font-weight: 600;">ส่ง ${formatNum(mgr.remitted)}</div>
+            <div style="width: 80px; margin-left: auto; margin-top: 4px;">
+              <div style="display: flex; justify-content: flex-end; font-size: 0.7rem; color: var(--text-light); margin-bottom: 2px; line-height: 1;">ส่งแล้ว ${Math.min(100, Math.round((mgr.remitted / (mgr.requested || 1)) * 100))}%</div>
+              <div style="width: 100%; background: #e2e8f0; border-radius: 99px; height: 5px; overflow: hidden; display: flex; justify-content: flex-end;">
+                 <div style="width: ${Math.min(100, Math.round((mgr.remitted / (mgr.requested || 1)) * 100))}%; height: 100%; background: #10b981; border-radius: 99px;"></div>
+              </div>
+            </div>
           </div>
         </div>
       `;
@@ -3031,7 +3036,12 @@ function renderRanking() {
           <div class="rank-podium-name">${emp.name}</div>
           <div class="rank-podium-score">${formatNum(emp.requested)}</div>
           <div class="rank-podium-label">ใบ</div>
-          <div style="font-size: 0.8rem; color: var(--secondary); margin-top: 4px; font-weight: 600;">ส่ง ${formatNum(emp.remitted)}</div>
+          <div style="width: 80%; max-width: 90px; margin: 8px auto 0;">
+            <div style="font-size: 0.7rem; color: var(--text-light); margin-bottom: 3px; line-height: 1; text-align: center;">ส่งแล้ว ${Math.min(100, Math.round((emp.remitted / (emp.requested || 1)) * 100))}%</div>
+            <div style="width: 100%; background: #e2e8f0; border-radius: 99px; height: 6px; overflow: hidden;">
+               <div style="width: ${Math.min(100, Math.round((emp.remitted / (emp.requested || 1)) * 100))}%; height: 100%; background: #10b981; border-radius: 99px;"></div>
+            </div>
+          </div>
         </div>`;
     });
     podiumHtml += '</div>';
@@ -3047,12 +3057,17 @@ function renderRanking() {
             <div class="rank-list-name">${emp.name}</div>
             <div class="progress-bar-outer"><div class="progress-bar-inner" style="width:${pct}%"></div></div>
           </div>
-          <div class="rank-list-right">
+          <div class="rank-list-right" style="display: flex; flex-direction: column; align-items: flex-end;">
             <div style="display: flex; align-items: baseline; justify-content: flex-end; gap: 4px;">
               <div class="rank-list-score">${formatNum(emp.requested)}</div>
               <div class="rank-list-score-label">ใบ</div>
             </div>
-            <div style="font-size: 0.85rem; color: var(--secondary); font-weight: 600; text-align: right;">ส่ง ${formatNum(emp.remitted)}</div>
+            <div style="width: 70px; margin-top: 4px;">
+              <div style="display: flex; justify-content: flex-end; font-size: 0.65rem; color: var(--text-light); margin-bottom: 2px; line-height: 1;">ส่งแล้ว ${Math.min(100, Math.round((emp.remitted / (emp.requested || 1)) * 100))}%</div>
+              <div style="width: 100%; background: #e2e8f0; border-radius: 99px; height: 4px; overflow: hidden; display: flex; justify-content: flex-end;">
+                 <div style="width: ${Math.min(100, Math.round((emp.remitted / (emp.requested || 1)) * 100))}%; height: 100%; background: #10b981; border-radius: 99px;"></div>
+              </div>
+            </div>
           </div>
         </div>`;
     });
