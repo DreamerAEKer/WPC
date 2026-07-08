@@ -3266,6 +3266,7 @@ async function shareAsImage() {
         <div style="font-size: 0.9rem; font-weight: 700; color: ${sz.nameColor}; margin-bottom: 0.4rem; line-height: 1.2;">${emp.name}</div>
         <div style="font-size: ${sz.numSize}; font-weight: 900; color: ${sz.numColor}; line-height: 1; letter-spacing: -2px;">${formatNum(emp.requested)}</div>
         <div style="font-size: 0.65rem; color: ${sz.labelColor}; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 0.2rem;">ใบ</div>
+        <div style="font-size: 0.7rem; color: ${sz.labelColor}; margin-top: 0.5rem; background: rgba(255,255,255,0.5); padding: 2px 8px; border-radius: 6px; font-weight: bold;">ส่งเงิน: ${formatNum(emp.remitted)}</div>
       </div>`;
   });
 
@@ -3290,6 +3291,7 @@ async function shareAsImage() {
         <div style="text-align: right;">
           <div style="font-size: 1.5rem; font-weight: 900; line-height: 1; color: #4f46e5;">${formatNum(emp.requested)}</div>
           <div style="font-size: 0.6rem; opacity: 0.6; text-transform: uppercase; color: #64748b;">ใบ</div>
+          <div style="font-size: 0.75rem; color: #10b981; font-weight: 700; margin-top: 0.2rem;">ส่งเงิน: ${formatNum(emp.remitted)}</div>
         </div>
       </div>`;
   });
@@ -3316,6 +3318,7 @@ async function shareAsImage() {
           <div style="text-align: right;">
             <div style="font-size: 1.5rem; font-weight: 900; line-height: 1; color: #64748b;">${formatNum(mgr.requested)}</div>
             <div style="font-size: 0.6rem; opacity: 0.6; text-transform: uppercase; color: #64748b;">ใบ</div>
+            <div style="font-size: 0.75rem; color: #10b981; font-weight: 700; margin-top: 0.2rem;">ส่งเงิน: ${formatNum(mgr.remitted)}</div>
           </div>
         </div>`;
     });
