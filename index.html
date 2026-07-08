@@ -1778,6 +1778,14 @@ input:focus, select:focus {
                 </tr>
               </thead>
               <tbody></tbody>
+              <tfoot>
+                <tr id="tx-history-summary" style="display: none; background: #f8fafc; font-weight: 600;">
+                  <td colspan="4" style="text-align: right; border-top: 2px solid var(--border);">รวมยอด:</td>
+                  <td id="tx-history-sum-qty" style="color: var(--primary); border-top: 2px solid var(--border);">0</td>
+                  <td id="tx-history-sum-amt" style="color: var(--primary); border-top: 2px solid var(--border);">0</td>
+                  <td colspan="2" style="border-top: 2px solid var(--border);"></td>
+                </tr>
+              </tfoot>
             </table>
           </div>
         </div>
@@ -2800,6 +2808,9 @@ function renderTransactions() {
     tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-light);">ยังไม่มีรายการ</td></tr>';
   }
 
+  let sumQty = 0;
+  let sumAmt = 0;
+
   txs.forEach((tx) => {
     const empId = tx.employeeId || tx.empId;
     const emp = store.data.employees.find(e => e.id === empId);
@@ -2870,7 +2881,19 @@ function renderTransactions() {
       </td>
     `;
     tbody.appendChild(tr);
+    
+    sumQty += qty;
+    sumAmt += (qty * store.data.pricePerTicket);
   });
+  
+  const sumRow = document.getElementById('tx-history-summary');
+  if (sumRow && txs.length > 0 && typeof currentHistoryFilter !== 'undefined' && currentHistoryFilter !== 'all') {
+    sumRow.style.display = 'table-row';
+    document.getElementById('tx-history-sum-qty').textContent = formatNum(sumQty);
+    document.getElementById('tx-history-sum-amt').textContent = formatNum(sumAmt);
+  } else if (sumRow) {
+    sumRow.style.display = 'none';
+  }
 }
 
 function renderGifts() {
