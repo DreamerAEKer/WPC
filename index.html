@@ -2737,14 +2737,14 @@ function renderTransactions() {
     const isReq = tx.type === 'req' || tx.type === 'request';
     
     if (isReq) {
-      typeBadge = '<span style="color: var(--text-dark); font-weight: 600;">เบิกไปรษณียบัตร</span>';
-      valStr = `<span style="color: var(--text-dark)">${formatNum(qty)}</span>`;
+      typeBadge = '<span style="color: #3b82f6; font-weight: 600;">เบิกไปรษณียบัตร</span>';
+      valStr = `<span style="color: #3b82f6">${formatNum(qty)}</span>`;
     } else if (tx.type === 'remit') {
-      typeBadge = '<span style="color: var(--secondary); font-weight: 600;">นำส่งเงิน</span>';
-      valStr = `<span style="color: var(--secondary)">${formatNum(qty)}</span>`;
+      typeBadge = '<span style="color: #10b981; font-weight: 600;">นำส่งเงิน</span>';
+      valStr = `<span style="color: #10b981">${formatNum(qty)}</span>`;
     } else if (tx.type === 'return') {
-      typeBadge = '<span style="color: #ea580c; font-weight: 600;">คืนเข้าสต็อก</span>';
-      valStr = `<span style="color: #ea580c">${formatNum(qty)}</span>`;
+      typeBadge = '<span style="color: #6b7280; font-weight: 600;">คืนเข้าสต็อก</span>';
+      valStr = `<span style="color: #6b7280">${formatNum(qty)}</span>`;
     } else {
       typeBadge = tx.type;
       valStr = formatNum(qty);
