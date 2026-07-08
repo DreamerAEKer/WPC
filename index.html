@@ -3480,7 +3480,9 @@ async function shareAsImage() {
     const link = document.createElement('a');
     link.download = `ranking-worldcup-${Date.now()}.png`;
     link.href = canvas.toDataURL('image/png');
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
 
     btn.textContent = '✅ โหลดรูปแล้ว!';
     setTimeout(() => { btn.innerHTML = '<span>🖼️</span> แชร์รูปภาพ'; btn.disabled = false; }, 2500);
