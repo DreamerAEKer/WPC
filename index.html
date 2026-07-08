@@ -1795,7 +1795,31 @@ input:focus, select:focus {
     </div>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
   <script>
+// --- FIREBASE CONFIGURATION ---
+// กรุณาใส่ config จาก Firebase Console ของคุณที่นี่
+const firebaseConfig = {
+  apiKey: "AIzaSyCvnS2Rquy3hpmPNy1ODZ79zMubUH5OiZU",
+  authDomain: "wpcgpo.firebaseapp.com",
+  projectId: "wpcgpo",
+  storageBucket: "wpcgpo.firebasestorage.app",
+  messagingSenderId: "204628927792",
+  appId: "1:204628927792:web:6861cfe5a925f323ae14f5",
+  measurementId: "G-B1S0E98L0E",
+  // หากฐานข้อมูลอยู่สิงคโปร์ URL จะเป็นตามด้านล่างนี้ หากอยู่สหรัฐอเมริกา ลบบรรทัดนี้ออกหรือเปลี่ยนเป็น https://wpcgpo-default-rtdb.firebaseio.com
+  databaseURL: "https://wpcgpo-default-rtdb.asia-southeast1.firebasedatabase.app"
+};
+
+let firebaseApp, firebaseDb;
+const isFirebaseEnabled = !!firebaseConfig.apiKey;
+
+if (isFirebaseEnabled) {
+  firebaseApp = firebase.initializeApp(firebaseConfig);
+  firebaseDb = firebase.database();
+}
+
 // --- STORE LOGIC ---
 const STORE_KEY = 'world_cup_tracker_data';
 
@@ -1812,10 +1836,13 @@ const defaultData = {
 
 class Store {
   constructor() {
-    this.data = this.loadData();
+    this.data = this.loadLocalData();
+    if (isFirebaseEnabled) {
+      this.initFirebase();
+    }
   }
 
-  loadData() {
+  loadLocalData() {
     const raw = localStorage.getItem(STORE_KEY);
     if (raw) {
       try {
@@ -1830,8 +1857,46 @@ class Store {
     return defaultData;
   }
 
+  initFirebase() {
+    const dataRef = firebaseDb.ref('tracker_data');
+    dataRef.on('value', (snapshot) => {
+      const val = snapshot.val();
+      if (val) {
+        this.data = { ...defaultData, ...val };
+        // Ensure arrays exist even if empty in Firebase
+        if (!this.data.masterTransactions) this.data.masterTransactions = [];
+        if (!this.data.employees) this.data.employees = [];
+        if (!this.data.transactions) this.data.transactions = [];
+        if (!this.data.gifts) this.data.gifts = [];
+        if (!this.data.giftAllocations) this.data.giftAllocations = [];
+        
+        // Backup to local storage
+        localStorage.setItem(STORE_KEY, JSON.stringify(this.data));
+        
+        // Re-render UI with new data from Firebase
+        if (typeof renderAll === 'function') {
+          renderAll();
+          initPrintForm();
+          renderA4Logbook();
+        }
+      } else {
+        // If Firebase is empty (first run), upload local data to initialize it
+        this.saveData();
+      }
+    });
+  }
+
   saveData() {
-    localStorage.setItem(STORE_KEY, JSON.stringify(this.data));
+    if (isFirebaseEnabled) {
+      firebaseDb.ref('tracker_data').set(this.data).catch(error => {
+        console.error("Firebase write failed:", error);
+        if (typeof showToast === 'function') {
+          showToast('❌ บันทึกข้อมูลขึ้น Firebase ไม่สำเร็จ', 'error');
+        }
+      });
+    } else {
+      localStorage.setItem(STORE_KEY, JSON.stringify(this.data));
+    }
     // Trigger custom event so UI can re-render
     window.dispatchEvent(new Event('storeUpdated'));
   }
