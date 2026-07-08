@@ -1725,6 +1725,7 @@ input:focus, select:focus {
             <table class="data-table" id="tx-history-table">
               <thead>
                 <tr>
+                  <th>ลำดับ</th>
                   <th>วันที่</th>
                   <th>พนักงาน</th>
                   <th>ประเภท</th>
@@ -2743,10 +2744,10 @@ function renderTransactions() {
   }
 
   if (txs.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-light);">ยังไม่มีรายการ</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-light);">ยังไม่มีรายการ</td></tr>';
   }
 
-  txs.forEach(tx => {
+  txs.forEach((tx, i) => {
     const empId = tx.employeeId || tx.empId;
     const emp = store.data.employees.find(e => e.id === empId);
     const dateStr = formatThaiDate(tx.date);
@@ -2793,6 +2794,7 @@ function renderTransactions() {
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
+      <td style="color: var(--text-light); font-size: 0.9em; text-align: center;">${txs.length - i}</td>
       <td>${dateStr}</td>
       <td>${emp ? emp.name : 'ไม่ทราบชื่อ'}</td>
       <td>${typeBadge}</td>
