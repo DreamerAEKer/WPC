@@ -3093,7 +3093,7 @@ function renderRanking() {
               ${pctText ? `<div style="display: flex; justify-content: flex-end; font-size: 0.7rem; color: var(--text-light); margin-bottom: 2px; line-height: 1;">${pctText}</div>` : 
                `<div style="display: flex; justify-content: flex-end; font-size: 0.65rem; line-height: 1; margin-bottom: 3px; gap: 4px;">
                   <span style="color: #10b981;">ส่ง ${formatNum(mgr.remitted)}</span>
-                  ${mgr.outstanding > 0 ? `<span style="color: #f59e0b;">ค้าง ${formatNum(mgr.outstanding)}</span>` : ''}
+                  ${mgr.outstanding > 0 ? `<span style="color: #f59e0b;">รอส่ง ${formatNum(mgr.outstanding)}</span>` : ''}
                 </div>`
               }
               <div style="width: 100%; background: #e2e8f0; border-radius: 99px; height: 5px; overflow: hidden; display: flex; justify-content: flex-end;">
@@ -3144,7 +3144,7 @@ function renderRanking() {
             ${pctText ? `<div style="font-size: 0.65rem; color: var(--text-light); margin-bottom: 2px; line-height: 1; text-align: center;">${pctText}</div>` : 
              `<div style="font-size: 0.65rem; line-height: 1; margin-bottom: 3px; display: flex; justify-content: center; gap: 4px;">
                 <span style="color: #10b981;">ส่ง ${formatNum(emp.remitted)}</span>
-                ${emp.outstanding > 0 ? `<span style="color: #f59e0b;">ค้าง ${formatNum(emp.outstanding)}</span>` : ''}
+                ${emp.outstanding > 0 ? `<span style="color: #f59e0b;">รอส่ง ${formatNum(emp.outstanding)}</span>` : ''}
               </div>`
             }
             <div style="width: 100%; background: #cbd5e1; border-radius: 99px; height: 5px; overflow: hidden;">
@@ -3185,7 +3185,7 @@ function renderRanking() {
               ${pctText ? `<div style="display: flex; justify-content: flex-end; font-size: 0.65rem; color: var(--text-light); margin-bottom: 2px; line-height: 1;">${pctText}</div>` : 
                `<div style="display: flex; justify-content: flex-end; font-size: 0.65rem; line-height: 1; margin-bottom: 3px; gap: 4px;">
                   <span style="color: #10b981;">ส่ง ${formatNum(emp.remitted)}</span>
-                  ${emp.outstanding > 0 ? `<span style="color: #f59e0b;">ค้าง ${formatNum(emp.outstanding)}</span>` : ''}
+                  ${emp.outstanding > 0 ? `<span style="color: #f59e0b;">รอส่ง ${formatNum(emp.outstanding)}</span>` : ''}
                 </div>`
               }
               <div style="width: 100%; background: #e2e8f0; border-radius: 99px; height: 4px; overflow: hidden; display: flex; justify-content: flex-end;">
