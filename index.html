@@ -3579,14 +3579,40 @@ async function shareAsImage() {
       logging: false
     });
 
-    const link = document.createElement('a');
-    link.download = `ranking-worldcup-${Date.now()}.png`;
-    link.href = canvas.toDataURL('image/png');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+    const fileName = `ranking-worldcup-${Date.now()}.png`;
+    const file = new File([blob], fileName, { type: 'image/png' });
+    
+    let shared = false;
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: 'อันดับยอดเบิกสะสม',
+          text: 'ตารางอันดับยอดเบิกสะสม ฟุตบอลระดับโลก 2026'
+        });
+        shared = true;
+        btn.textContent = '✅ แชร์เรียบร้อย!';
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error('Share API error:', err);
+        } else {
+          shared = true; // User canceled the share prompt, avoid fallback
+        }
+      }
+    }
+    
+    if (!shared) {
+      // Fallback to direct download
+      const link = document.createElement('a');
+      link.download = fileName;
+      link.href = URL.createObjectURL(blob);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      btn.textContent = '✅ โหลดรูปแล้ว!';
+    }
 
-    btn.textContent = '✅ โหลดรูปแล้ว!';
     setTimeout(() => { btn.innerHTML = '<span>🖼️</span> แชร์รูปภาพ'; btn.disabled = false; }, 2500);
   } catch(err) {
     console.error(err);
