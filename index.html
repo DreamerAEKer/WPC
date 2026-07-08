@@ -1884,6 +1884,18 @@ class Store {
         this.saveData();
       }
     });
+
+    // Also sync logbook images
+    const imagesRef = firebaseDb.ref('tracker_images');
+    imagesRef.on('value', (snapshot) => {
+      const val = snapshot.val();
+      if (val !== null) {
+        localStorage.setItem('world_cup_tracker_logbook_img', JSON.stringify(val));
+        if (typeof loadLogbookImage === 'function') {
+          loadLogbookImage();
+        }
+      }
+    });
   }
 
   saveData() {
@@ -4044,6 +4056,9 @@ function getLogbookImages() {
 function saveLogbookImages(images) {
   try {
     localStorage.setItem(LOGBOOK_KEY, JSON.stringify(images));
+    if (typeof isFirebaseEnabled !== 'undefined' && isFirebaseEnabled && firebaseDb) {
+      firebaseDb.ref('tracker_images').set(images).catch(e => console.error(e));
+    }
   } catch (err) {
     console.error(err);
     showToast('ไม่สามารถบันทึกรูปภาพได้ (พื้นที่หน่วยความจำอาจเต็ม)', 'error');
@@ -4125,6 +4140,9 @@ function removeLogbookImage(index) {
 
 function clearAllLogbookImages() {
   localStorage.removeItem(LOGBOOK_KEY);
+  if (typeof isFirebaseEnabled !== 'undefined' && isFirebaseEnabled && firebaseDb) {
+    firebaseDb.ref('tracker_images').set([]).catch(e => console.error(e));
+  }
   if (logbookInput) logbookInput.value = '';
   loadLogbookImage();
   showToast('ลบรูปถ่ายทะเบียนคุมทั้งหมดแล้ว', 'success');
