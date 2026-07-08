@@ -3089,8 +3089,13 @@ function renderRanking() {
               <span style="font-size: 1.4rem; font-weight: 900; color: var(--primary);">${formatNum(mgr.requested)}</span>
               <span style="font-size: 0.8rem; opacity: 0.8; color: var(--text-light);"> ใบ</span>
             </div>
-            <div style="width: 80px; margin-left: auto; margin-top: 4px;">
-              ${pctText ? `<div style="display: flex; justify-content: flex-end; font-size: 0.7rem; color: var(--text-light); margin-bottom: 2px; line-height: 1;">${pctText}</div>` : ''}
+            <div style="width: 110px; margin-left: auto; margin-top: 4px;">
+              ${pctText ? `<div style="display: flex; justify-content: flex-end; font-size: 0.7rem; color: var(--text-light); margin-bottom: 2px; line-height: 1;">${pctText}</div>` : 
+               `<div style="display: flex; justify-content: flex-end; font-size: 0.65rem; line-height: 1; margin-bottom: 3px; gap: 4px;">
+                  <span style="color: #10b981;">ส่ง ${formatNum(mgr.remitted)}</span>
+                  ${mgr.outstanding > 0 ? `<span style="color: #f59e0b;">ค้าง ${formatNum(mgr.outstanding)}</span>` : ''}
+                </div>`
+              }
               <div style="width: 100%; background: #e2e8f0; border-radius: 99px; height: 5px; overflow: hidden; display: flex; justify-content: flex-end;">
                  <div style="width: ${remittedPct}%; height: 100%; background: #10b981; border-radius: 99px;"></div>
               </div>
@@ -3135,8 +3140,13 @@ function renderRanking() {
             <div style="color: #059669; font-weight: 700;">ได้ชัวร์: ฿${formatNum(guaranteedInc)}</div>
           </div>
 
-          <div style="width: 80%; max-width: 90px; margin: 6px auto 0;">
-            ${pctText ? `<div style="font-size: 0.65rem; color: var(--text-light); margin-bottom: 2px; line-height: 1; text-align: center;">${pctText}</div>` : ''}
+          <div style="width: 95%; max-width: 110px; margin: 6px auto 0;">
+            ${pctText ? `<div style="font-size: 0.65rem; color: var(--text-light); margin-bottom: 2px; line-height: 1; text-align: center;">${pctText}</div>` : 
+             `<div style="font-size: 0.65rem; line-height: 1; margin-bottom: 3px; display: flex; justify-content: center; gap: 4px;">
+                <span style="color: #10b981;">ส่ง ${formatNum(emp.remitted)}</span>
+                ${emp.outstanding > 0 ? `<span style="color: #f59e0b;">ค้าง ${formatNum(emp.outstanding)}</span>` : ''}
+              </div>`
+            }
             <div style="width: 100%; background: #cbd5e1; border-radius: 99px; height: 5px; overflow: hidden;">
                <div style="width: ${remittedPct}%; height: 100%; background: #10b981; border-radius: 99px;"></div>
             </div>
@@ -3171,8 +3181,13 @@ function renderRanking() {
               <div class="rank-list-score">${formatNum(emp.requested)}</div>
               <div class="rank-list-score-label">ใบ</div>
             </div>
-            <div style="width: 70px; margin-top: 4px;">
-              ${pctText ? `<div style="display: flex; justify-content: flex-end; font-size: 0.65rem; color: var(--text-light); margin-bottom: 2px; line-height: 1;">${pctText}</div>` : ''}
+            <div style="width: 110px; margin-top: 4px;">
+              ${pctText ? `<div style="display: flex; justify-content: flex-end; font-size: 0.65rem; color: var(--text-light); margin-bottom: 2px; line-height: 1;">${pctText}</div>` : 
+               `<div style="display: flex; justify-content: flex-end; font-size: 0.65rem; line-height: 1; margin-bottom: 3px; gap: 4px;">
+                  <span style="color: #10b981;">ส่ง ${formatNum(emp.remitted)}</span>
+                  ${emp.outstanding > 0 ? `<span style="color: #f59e0b;">ค้าง ${formatNum(emp.outstanding)}</span>` : ''}
+                </div>`
+              }
               <div style="width: 100%; background: #e2e8f0; border-radius: 99px; height: 4px; overflow: hidden; display: flex; justify-content: flex-end;">
                  <div style="width: ${remittedPct}%; height: 100%; background: #10b981; border-radius: 99px;"></div>
               </div>
