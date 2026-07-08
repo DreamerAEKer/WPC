@@ -1920,7 +1920,10 @@ class Store {
     let totalReturned = 0;
 
     this.data.transactions.forEach(t => {
-      if (t.type === 'req') totalRequested += t.qty;
+      if (t.type === 'req') {
+        totalRequested += t.qty;
+        if (t.isPaidDirectly) totalRemitted += t.qty;
+      }
       if (t.type === 'remit') totalRemitted += t.qty;
       if (t.type === 'return') totalReturned += t.qty;
     });
@@ -2025,8 +2028,9 @@ class Store {
       if (typeof paid === 'boolean') {
         let remitted = 0;
         this.data.transactions.forEach(t => {
-          if (t.empId === empId && t.type === 'remit') {
-            remitted += t.qty;
+          if (t.empId === empId) {
+            if (t.type === 'remit') remitted += t.qty;
+            if (t.type === 'req' && t.isPaidDirectly) remitted += t.qty;
           }
         });
         const revenue = remitted * this.data.pricePerTicket;
@@ -2071,7 +2075,10 @@ class Store {
       let returned = 0;
 
       this.data.transactions.filter(t => t.empId === emp.id).forEach(t => {
-        if (t.type === 'req') requested += t.qty;
+        if (t.type === 'req') {
+          requested += t.qty;
+          if (t.isPaidDirectly) remitted += t.qty;
+        }
         if (t.type === 'remit') remitted += t.qty;
         if (t.type === 'return') returned += t.qty;
       });
@@ -2150,7 +2157,10 @@ class Store {
       let empReturn = 0;
       this.data.transactions.forEach(t => {
         if (t.empId === empId && t.id !== txId) {
-          if (t.type === 'req') empReq += t.qty;
+          if (t.type === 'req') {
+            empReq += t.qty;
+            if (t.isPaidDirectly) empRemit += t.qty;
+          }
           if (t.type === 'remit') empRemit += t.qty;
           if (t.type === 'return') empReturn += t.qty;
         }
