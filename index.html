@@ -3505,9 +3505,9 @@ async function shareAsImage() {
         margin-top: 0.75rem;
         flex-wrap: wrap;
       ">
-        <div style="background: rgba(255, 255, 255, 0.2); padding: 0.4rem 0.8rem; border-radius: 10px; font-weight: bold; font-size: 0.8rem;">📦 ${boxes} กล่อง</div>
-        <div style="background: rgba(255, 255, 255, 0.2); padding: 0.4rem 0.8rem; border-radius: 10px; font-weight: bold; font-size: 0.8rem;">✉️ ${packs} ก้อน (ก้อนละ 100 ใบ)</div>
-        ${singleSheets > 0 ? `<div style="background: rgba(255, 255, 255, 0.2); padding: 0.4rem 0.8rem; border-radius: 10px; font-weight: bold; font-size: 0.8rem;">📄 ${singleSheets} ใบ</div>` : ''}
+        <div style="background: rgba(255, 255, 255, 0.2); padding: 0.4rem 0.8rem; border-radius: 10px; font-weight: bold; font-size: 1rem;">📦 ${boxes} กล่อง</div>
+        <div style="background: rgba(255, 255, 255, 0.2); padding: 0.4rem 0.8rem; border-radius: 10px; font-weight: bold; font-size: 1rem;">✉️ ${packs} ก้อน (ก้อนละ 100 ใบ)</div>
+        ${singleSheets > 0 ? `<div style="background: rgba(255, 255, 255, 0.2); padding: 0.4rem 0.8rem; border-radius: 10px; font-weight: bold; font-size: 1rem;">📄 ${singleSheets} ใบ</div>` : ''}
       </div>
     `;
   };
@@ -3520,8 +3520,8 @@ async function shareAsImage() {
     <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 16px; padding: 1.25rem 1.2rem; margin-bottom: 1.25rem; display: flex; flex-direction: column; color: white; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1);">
       <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
         <div>
-          <div style="font-size: 0.75rem; font-weight: bold; opacity: 0.9;">🔥 ไปรษณียบัตรคงเหลือในแผนก:</div>
-          <div style="font-size: 1.8rem; font-weight: 900; margin-top: 0.1rem; line-height: 1;">${formatNum(totalStockRemaining)} <span style="font-size: 0.9rem; font-weight: normal;">ใบ</span></div>
+          <div style="font-size: 0.95rem; font-weight: bold; opacity: 0.9;">🔥 ไปรษณียบัตรคงเหลือในแผนก:</div>
+          <div style="font-size: 2.3rem; font-weight: 900; margin-top: 0.1rem; line-height: 1;">${formatNum(totalStockRemaining)} <span style="font-size: 1.1rem; font-weight: normal;">ใบ</span></div>
         </div>
         <div style="font-size: 2.2rem; opacity: 0.8;">📦</div>
       </div>
@@ -3529,12 +3529,12 @@ async function shareAsImage() {
       
       <div style="margin-top: 1rem; padding-top: 0.75rem; border-top: 1px dashed rgba(255,255,255,0.3); display: flex; justify-content: space-between;">
         <div>
-          <div style="font-size: 0.7rem; opacity: 0.9;">ยอดรวมพนักงานเบิก:</div>
-          <div style="font-size: 1.1rem; font-weight: 800;">${formatNum(overview.totalRequested)} <span style="font-size: 0.7rem; font-weight: normal;">ใบ</span></div>
+          <div style="font-size: 0.9rem; opacity: 0.9;">ยอดรวมพนักงานเบิก:</div>
+          <div style="font-size: 1.4rem; font-weight: 800;">${formatNum(overview.totalRequested)} <span style="font-size: 0.9rem; font-weight: normal;">ใบ</span></div>
         </div>
         <div style="text-align: right;">
-          <div style="font-size: 0.7rem; opacity: 0.9;">ส่งเงินแล้ว:</div>
-          <div style="font-size: 1.1rem; font-weight: 800; color: #fde68a;">${formatNum(overview.totalRemitted)} <span style="font-size: 0.7rem; font-weight: normal; color: white;">ใบ</span> <span style="font-size: 0.9rem;">(${formatNum(totalRemittedMoney)}฿)</span></div>
+          <div style="font-size: 0.9rem; opacity: 0.9;">ส่งเงินแล้ว:</div>
+          <div style="font-size: 1.4rem; font-weight: 800; color: #fde68a;">${formatNum(overview.totalRemitted)} <span style="font-size: 0.9rem; font-weight: normal; color: white;">ใบ</span> <span style="font-size: 1.1rem;">(${formatNum(totalRemittedMoney)}฿)</span></div>
         </div>
       </div>
     </div>
