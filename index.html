@@ -2761,7 +2761,7 @@ function renderTransactions() {
   tbody.innerHTML = '';
   const allTxs = [...store.data.transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
   
-  let txs = allTxs.map((t, i) => ({ ...t, seqNo: allTxs.length - i }));
+  let txs = [...allTxs];
   if (typeof currentHistoryFilter !== 'undefined' && currentHistoryFilter !== 'all') {
     txs = txs.filter(t => {
       const isReq = t.type === 'req' || t.type === 'request';
@@ -2811,7 +2811,7 @@ function renderTransactions() {
   let sumQty = 0;
   let sumAmt = 0;
 
-  txs.forEach((tx) => {
+  txs.forEach((tx, i) => {
     const empId = tx.employeeId || tx.empId;
     const emp = store.data.employees.find(e => e.id === empId);
     const dateStr = formatThaiDate(tx.date);
@@ -2858,7 +2858,7 @@ function renderTransactions() {
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td style="color: var(--text-light); font-size: 0.9em; text-align: center;">${tx.seqNo}</td>
+      <td style="color: var(--text-light); font-size: 0.9em; text-align: center;">${txs.length - i}</td>
       <td>${dateStr}</td>
       <td>${emp ? emp.name : 'ไม่ทราบชื่อ'}</td>
       <td>${typeBadge}</td>
