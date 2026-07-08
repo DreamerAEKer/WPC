@@ -1315,6 +1315,39 @@ input:focus, select:focus {
   background: linear-gradient(135deg, #dc2626, #ef4444);
   border-left: 5px solid #b91c1c;
 }
+  /* Form Tabs */
+  .tx-tabs {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+  }
+  .tx-tab {
+    flex: 1;
+    padding: 0.75rem 0.5rem;
+    border-radius: var(--radius);
+    border: 2px solid transparent;
+    background: var(--bg-color);
+    color: var(--text-light);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+  }
+  .tx-tab.active[data-type="req"] {
+    background: #eff6ff;
+    border-color: #3b82f6;
+    color: #1d4ed8;
+  }
+  .tx-tab.active[data-type="remit"] {
+    background: #f0fdf4;
+    border-color: #10b981;
+    color: #047857;
+  }
+  .tx-tab.active[data-type="return"] {
+    background: #f3f4f6;
+    border-color: #6b7280;
+    color: #374151;
+  }
   </style>
 </head>
 <body>
@@ -1684,26 +1717,25 @@ input:focus, select:focus {
         </div>
 
         <div class="card">
-          <div class="card-header">
-            <h3>บันทึกการเบิก และ นำส่งเงิน</h3>
+          <div class="card-header" style="flex-direction: column; align-items: flex-start; gap: 1rem;">
+            <h3>บันทึกรายการ</h3>
+            <div class="tx-tabs">
+              <div class="tx-tab active" data-type="req">เบิกไปรษณียบัตร</div>
+              <div class="tx-tab" data-type="remit">นำส่งเงิน (ขายได้)</div>
+              <div class="tx-tab" data-type="return">คืนเข้าสต็อก</div>
+            </div>
           </div>
           <form id="form-add-tx" class="standard-form">
+            <input type="hidden" id="tx-type" value="req" />
             <div class="form-group">
               <label>พนักงาน</label>
               <select id="tx-emp" required></select>
             </div>
             <div class="form-group">
-              <label>ประเภทรายการ</label>
-              <select id="tx-type" required>
-                <option value="req">ขอเบิกไปรษณียบัตร</option>
-                <option value="remit">นำส่งเงิน (ขายได้)</option>
-                <option value="return">คืนเข้าสต็อก</option>
-              </select>
-            </div>
-            <div class="form-group">
               <label>จำนวน (ฉบับ)</label>
               <input type="number" id="tx-qty" min="1" required />
               <small class="hint">มูลค่า: <span id="tx-value-calc">0</span> บาท</small>
+              <small id="return-hint" style="display: none; color: #ea580c; margin-top: 4px; line-height: 1.4;">* ดึงยอดค้างส่งทั้งหมดมาให้อัตโนมัติ (สามารถแก้ไขตัวเลขได้หากต้องการคืนไม่เต็มจำนวน)</small>
             </div>
             <div class="form-group">
               <label>วันที่</label>
@@ -3950,6 +3982,60 @@ function showToast(message, type = 'success') {
 window.addEventListener('storeUpdated', renderAll);
 window.addEventListener('storeUpdated', renderA4Logbook);
 
+// Tab Switching Logic
+function syncTxTabs(type) {
+  document.querySelectorAll('.tx-tab').forEach(t => t.classList.remove('active'));
+  const activeTab = document.querySelector(`.tx-tab[data-type="${type}"]`);
+  if (activeTab) activeTab.classList.add('active');
+  
+  const submitBtn = document.querySelector('#form-add-tx button[type="submit"]');
+  if (!editingTxId) {
+    if (type === 'req') {
+      submitBtn.textContent = 'บันทึกการเบิก';
+      submitBtn.style.background = '#4f46e5';
+    } else if (type === 'remit') {
+      submitBtn.textContent = 'บันทึกการนำส่งเงิน';
+      submitBtn.style.background = '#10b981';
+    } else if (type === 'return') {
+      submitBtn.textContent = 'บันทึกการคืนสต็อก';
+      submitBtn.style.background = '#6b7280';
+    }
+  }
+}
+
+document.querySelectorAll('.tx-tab').forEach(tab => {
+  tab.addEventListener('click', (e) => {
+    if(editingTxId) {
+      showToast('ไม่สามารถเปลี่ยนประเภทขณะแก้ไขรายการได้', 'error');
+      return;
+    }
+    const type = tab.getAttribute('data-type');
+    document.getElementById('tx-type').value = type;
+    syncTxTabs(type);
+    updateReturnQty();
+  });
+});
+
+function updateReturnQty() {
+  if (editingTxId) return; // Don't auto-fill while editing
+  const type = document.getElementById('tx-type').value;
+  const empId = document.getElementById('tx-emp').value;
+  const hintEl = document.getElementById('return-hint');
+  
+  if (type === 'return' && empId) {
+    const emp = store.data.employees.find(e => e.id === empId);
+    if (emp) {
+      document.getElementById('tx-qty').value = emp.outstanding;
+      document.getElementById('tx-value-calc').textContent = formatNum(emp.outstanding * store.data.pricePerTicket);
+      if(hintEl) hintEl.style.display = 'block';
+    }
+  } else {
+    if(hintEl) hintEl.style.display = 'none';
+  }
+}
+
+document.getElementById('tx-emp').addEventListener('change', updateReturnQty);
+
 // Calculate value dynamically
 document.getElementById('tx-qty').addEventListener('input', (e) => {
   const val = parseInt(e.target.value) || 0;
@@ -3979,7 +4065,13 @@ function editTx(txId) {
   
   editingTxId = tx.id;
   document.getElementById('tx-emp').value = tx.empId || tx.employeeId;
-  document.getElementById('tx-type').value = tx.type === 'request' ? 'req' : tx.type;
+  const txTypeStr = tx.type === 'request' ? 'req' : tx.type;
+  document.getElementById('tx-type').value = txTypeStr;
+  syncTxTabs(txTypeStr);
+  
+  const hintEl = document.getElementById('return-hint');
+  if(hintEl) hintEl.style.display = 'none';
+
   document.getElementById('tx-qty').value = tx.qty || tx.quantity;
   
   const dStr = tx.date || '';
@@ -4023,6 +4115,11 @@ function cancelEdit() {
   
   const cancelBtn = document.getElementById('btn-cancel-edit');
   if (cancelBtn) cancelBtn.remove();
+  
+  document.getElementById('tx-type').value = 'req';
+  syncTxTabs('req');
+  const hintEl = document.getElementById('return-hint');
+  if(hintEl) hintEl.style.display = 'none';
 }
 
 // Add Transaction
