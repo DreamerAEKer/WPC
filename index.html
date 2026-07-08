@@ -1717,19 +1717,21 @@ input:focus, select:focus {
         </div>
 
         <div class="card">
-          <div class="card-header" style="flex-direction: column; align-items: flex-start; gap: 1rem;">
-            <h3>บันทึกรายการ</h3>
-            <div class="tx-tabs">
-              <div class="tx-tab active" data-type="req">เบิกไปรษณียบัตร</div>
-              <div class="tx-tab" data-type="remit">นำส่งเงิน (ขายได้)</div>
-              <div class="tx-tab" data-type="return">คืนเข้าสต็อก</div>
-            </div>
+          <div class="card-header">
+            <h3>บันทึกการเบิก และ นำส่งเงิน</h3>
           </div>
           <form id="form-add-tx" class="standard-form">
-            <input type="hidden" id="tx-type" value="req" />
             <div class="form-group">
               <label>พนักงาน</label>
               <select id="tx-emp" required></select>
+            </div>
+            <div class="form-group">
+              <label>ประเภทรายการ</label>
+              <select id="tx-type" required>
+                <option value="req">ขอเบิกไปรษณียบัตร</option>
+                <option value="remit">นำส่งเงิน (ขายได้)</option>
+                <option value="return">คืนเข้าสต็อก</option>
+              </select>
             </div>
             <div class="form-group">
               <label>จำนวน (ฉบับ)</label>
@@ -1752,7 +1754,15 @@ input:focus, select:focus {
             <button type="submit" class="btn btn-primary">บันทึกรายการ</button>
           </form>
           
-          <h4 style="margin-top: 2rem; margin-bottom: 0.5rem; color: var(--text-dark);">ประวัติรายการล่าสุด</h4>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 1rem;">
+            <h4 style="color: var(--text-dark); margin: 0;">ประวัติรายการล่าสุด</h4>
+            <div class="history-tabs" style="display: flex; gap: 0.25rem; background: var(--bg-color); padding: 0.25rem; border-radius: var(--radius); border: 1px solid var(--border);">
+              <button type="button" class="history-tab active" data-filter="all" style="border: none; background: var(--surface); padding: 0.25rem 0.75rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-family: inherit; box-shadow: var(--shadow-sm); font-weight: 600;">ทั้งหมด</button>
+              <button type="button" class="history-tab" data-filter="req" style="border: none; background: transparent; padding: 0.25rem 0.75rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-family: inherit; color: var(--text-light);">เบิก</button>
+              <button type="button" class="history-tab" data-filter="remit" style="border: none; background: transparent; padding: 0.25rem 0.75rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-family: inherit; color: var(--text-light);">ส่งเงิน</button>
+              <button type="button" class="history-tab" data-filter="return" style="border: none; background: transparent; padding: 0.25rem 0.75rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-family: inherit; color: var(--text-light);">คืนสต็อก</button>
+            </div>
+          </div>
           <div class="table-responsive">
             <table class="data-table" id="tx-history-table">
               <thead>
@@ -2741,7 +2751,18 @@ function renderTransactions() {
   const tbody = document.querySelector('#tx-history-table tbody');
   if(!tbody) return;
   tbody.innerHTML = '';
-  const txs = [...store.data.transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const allTxs = [...store.data.transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  let txs = allTxs.map((t, i) => ({ ...t, seqNo: allTxs.length - i }));
+  if (typeof currentHistoryFilter !== 'undefined' && currentHistoryFilter !== 'all') {
+    txs = txs.filter(t => {
+      const isReq = t.type === 'req' || t.type === 'request';
+      if (currentHistoryFilter === 'req') return isReq;
+      if (currentHistoryFilter === 'remit') return t.type === 'remit';
+      if (currentHistoryFilter === 'return') return t.type === 'return';
+      return true;
+    });
+  }
   
   // Pre-calculate paid status for req transactions based on employee remittances
   const reqPaidStatus = {};
@@ -2779,7 +2800,7 @@ function renderTransactions() {
     tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-light);">ยังไม่มีรายการ</td></tr>';
   }
 
-  txs.forEach((tx, i) => {
+  txs.forEach((tx) => {
     const empId = tx.employeeId || tx.empId;
     const emp = store.data.employees.find(e => e.id === empId);
     const dateStr = formatThaiDate(tx.date);
@@ -2826,7 +2847,7 @@ function renderTransactions() {
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td style="color: var(--text-light); font-size: 0.9em; text-align: center;">${txs.length - i}</td>
+      <td style="color: var(--text-light); font-size: 0.9em; text-align: center;">${tx.seqNo}</td>
       <td>${dateStr}</td>
       <td>${emp ? emp.name : 'ไม่ทราบชื่อ'}</td>
       <td>${typeBadge}</td>
@@ -3982,37 +4003,23 @@ function showToast(message, type = 'success') {
 window.addEventListener('storeUpdated', renderAll);
 window.addEventListener('storeUpdated', renderA4Logbook);
 
-// Tab Switching Logic
-function syncTxTabs(type) {
-  document.querySelectorAll('.tx-tab').forEach(t => t.classList.remove('active'));
-  const activeTab = document.querySelector(`.tx-tab[data-type="${type}"]`);
-  if (activeTab) activeTab.classList.add('active');
-  
-  const submitBtn = document.querySelector('#form-add-tx button[type="submit"]');
-  if (!editingTxId) {
-    if (type === 'req') {
-      submitBtn.textContent = 'บันทึกการเบิก';
-      submitBtn.style.background = '#4f46e5';
-    } else if (type === 'remit') {
-      submitBtn.textContent = 'บันทึกการนำส่งเงิน';
-      submitBtn.style.background = '#10b981';
-    } else if (type === 'return') {
-      submitBtn.textContent = 'บันทึกการคืนสต็อก';
-      submitBtn.style.background = '#6b7280';
-    }
-  }
-}
+let currentHistoryFilter = 'all';
 
-document.querySelectorAll('.tx-tab').forEach(tab => {
+document.querySelectorAll('.history-tab').forEach(tab => {
   tab.addEventListener('click', (e) => {
-    if(editingTxId) {
-      showToast('ไม่สามารถเปลี่ยนประเภทขณะแก้ไขรายการได้', 'error');
-      return;
-    }
-    const type = tab.getAttribute('data-type');
-    document.getElementById('tx-type').value = type;
-    syncTxTabs(type);
-    updateReturnQty();
+    document.querySelectorAll('.history-tab').forEach(t => {
+      t.classList.remove('active');
+      t.style.background = 'transparent';
+      t.style.color = 'var(--text-light)';
+      t.style.boxShadow = 'none';
+    });
+    tab.classList.add('active');
+    tab.style.background = 'var(--surface)';
+    tab.style.color = 'var(--text-dark)';
+    tab.style.boxShadow = 'var(--shadow-sm)';
+    
+    currentHistoryFilter = tab.getAttribute('data-filter');
+    renderTransactions();
   });
 });
 
@@ -4035,6 +4042,7 @@ function updateReturnQty() {
 }
 
 document.getElementById('tx-emp').addEventListener('change', updateReturnQty);
+document.getElementById('tx-type').addEventListener('change', updateReturnQty);
 
 // Calculate value dynamically
 document.getElementById('tx-qty').addEventListener('input', (e) => {
@@ -4067,7 +4075,6 @@ function editTx(txId) {
   document.getElementById('tx-emp').value = tx.empId || tx.employeeId;
   const txTypeStr = tx.type === 'request' ? 'req' : tx.type;
   document.getElementById('tx-type').value = txTypeStr;
-  syncTxTabs(txTypeStr);
   
   const hintEl = document.getElementById('return-hint');
   if(hintEl) hintEl.style.display = 'none';
@@ -4116,8 +4123,6 @@ function cancelEdit() {
   const cancelBtn = document.getElementById('btn-cancel-edit');
   if (cancelBtn) cancelBtn.remove();
   
-  document.getElementById('tx-type').value = 'req';
-  syncTxTabs('req');
   const hintEl = document.getElementById('return-hint');
   if(hintEl) hintEl.style.display = 'none';
 }
