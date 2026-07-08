@@ -1920,10 +1920,7 @@ class Store {
     let totalReturned = 0;
 
     this.data.transactions.forEach(t => {
-      if (t.type === 'req') {
-        totalRequested += t.qty;
-        if (t.isPaidDirectly) totalRemitted += t.qty;
-      }
+      if (t.type === 'req') totalRequested += t.qty;
       if (t.type === 'remit') totalRemitted += t.qty;
       if (t.type === 'return') totalReturned += t.qty;
     });
@@ -2028,9 +2025,8 @@ class Store {
       if (typeof paid === 'boolean') {
         let remitted = 0;
         this.data.transactions.forEach(t => {
-          if (t.empId === empId) {
-            if (t.type === 'remit') remitted += t.qty;
-            if (t.type === 'req' && t.isPaidDirectly) remitted += t.qty;
+          if (t.empId === empId && t.type === 'remit') {
+            remitted += t.qty;
           }
         });
         const revenue = remitted * this.data.pricePerTicket;
@@ -2075,10 +2071,7 @@ class Store {
       let returned = 0;
 
       this.data.transactions.filter(t => t.empId === emp.id).forEach(t => {
-        if (t.type === 'req') {
-          requested += t.qty;
-          if (t.isPaidDirectly) remitted += t.qty;
-        }
+        if (t.type === 'req') requested += t.qty;
         if (t.type === 'remit') remitted += t.qty;
         if (t.type === 'return') returned += t.qty;
       });
@@ -2157,10 +2150,7 @@ class Store {
       let empReturn = 0;
       this.data.transactions.forEach(t => {
         if (t.empId === empId && t.id !== txId) {
-          if (t.type === 'req') {
-            empReq += t.qty;
-            if (t.isPaidDirectly) empRemit += t.qty;
-          }
+          if (t.type === 'req') empReq += t.qty;
           if (t.type === 'remit') empRemit += t.qty;
           if (t.type === 'return') empReturn += t.qty;
         }
@@ -2714,18 +2704,14 @@ function renderTransactions() {
       empTxs.forEach(t => {
         if (t.type === 'req' || t.type === 'request') {
           const reqQty = t.quantity || t.qty;
-          if (t.isPaidDirectly) {
-            reqPaidStatus[t.id] = { isPaid: true, remaining: 0, byTick: true };
+          if (totalCredit >= reqQty) {
+            reqPaidStatus[t.id] = { isPaid: true, remaining: 0 };
+            totalCredit -= reqQty;
+          } else if (totalCredit > 0) {
+            reqPaidStatus[t.id] = { isPaid: false, remaining: reqQty - totalCredit };
+            totalCredit = 0;
           } else {
-            if (totalCredit >= reqQty) {
-              reqPaidStatus[t.id] = { isPaid: true, remaining: 0 };
-              totalCredit -= reqQty;
-            } else if (totalCredit > 0) {
-              reqPaidStatus[t.id] = { isPaid: false, remaining: reqQty - totalCredit };
-              totalCredit = 0;
-            } else {
-              reqPaidStatus[t.id] = { isPaid: false, remaining: reqQty };
-            }
+            reqPaidStatus[t.id] = { isPaid: false, remaining: reqQty };
           }
         }
       });
@@ -2763,14 +2749,10 @@ function renderTransactions() {
     const amountStr = formatNum(qty * store.data.pricePerTicket);
 
     let paidIndicatorHtml = '';
-    let showManualTick = isReq;
     if (isReq) {
       const status = reqPaidStatus[tx.id];
       if (status && status.isPaid) {
         paidIndicatorHtml = '<span title="จ่ายครบแล้ว" style="color: #16a34a; display: flex; align-items: center;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>';
-        if (!status.byTick) {
-          showManualTick = false;
-        }
       } else if (status && status.remaining > 0 && status.remaining < qty) {
         const paidQty = qty - status.remaining;
         paidIndicatorHtml = `<span title="จ่ายแล้ว ${formatNum(paidQty)} รอจ่าย ${formatNum(status.remaining)} ฉบับ" style="color: #ea580c; font-size: 0.75rem; background: #ffedd5; padding: 2px 6px; border-radius: 4px; white-space: nowrap;">จ่าย ${formatNum(paidQty)} รอจ่าย ${formatNum(status.remaining)}</span>`;
@@ -2799,7 +2781,6 @@ function renderTransactions() {
       </td>
       <td>
         <div style="display: flex; align-items: center; justify-content: flex-start; gap: 8px;">
-          ${showManualTick ? `<input type="checkbox" ${tx.isPaidDirectly ? 'checked' : ''} onchange="toggleTxPaidDirectly('${tx.id}', this.checked)" style="width: 16px; height: 16px; cursor: pointer; accent-color: #16a34a;" title="รับยอดแล้ว (จ่ายตรงบิล)">` : ''}
           <span>${amountStr}</span>
         </div>
       </td>
@@ -2895,14 +2876,7 @@ window.toggleTxVerified = function(txId, verified) {
   }
 };
 
-window.toggleTxPaidDirectly = function(txId, isPaidDirectly) {
-  const tx = store.data.transactions.find(t => t.id === txId);
-  if (tx) {
-    tx.isPaidDirectly = isPaidDirectly;
-    store.saveData();
-    renderTransactions();
-  }
-};
+
 
 function renderCommissionTable() {
   const tbody = document.querySelector('#commission-table tbody');
