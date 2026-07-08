@@ -3684,25 +3684,48 @@ function importData(input) {
       if (!parsed.employees && !parsed.transactions) {
         throw new Error('ไฟล์ไม่ถูกต้อง');
       }
-      if (!(await showConfirm(`นำเข้าข้อมูลจากไฟล์ "${file.name}"?\n\nข้อมูลปัจจุบันในเครื่องจะถูกแทนที่ทั้งหมด\nกรุณา Export สำรองก่อนหากต้องการ`, 'ยืนยันการนำเข้าข้อมูล'))) {
+      if (!(await showConfirm(`นำเข้าข้อมูลจากไฟล์ "${file.name}"?\n\nระบบจะทำการอัพเดทข้อมูลที่มีอยู่ และเพิ่มข้อมูลใหม่\nข้อมูลเดิมที่ไม่มีในไฟล์นำเข้าจะยังคงอยู่`, 'ยืนยันการนำเข้าข้อมูล'))) {
         input.value = '';
         return;
       }
-      // Merge defaults with imported data
-      const newData = { ...store.data, ...parsed };
-      if (!newData.masterTransactions) newData.masterTransactions = [];
-      if (!newData.giftAllocations) newData.giftAllocations = [];
-      if (!newData.gifts) newData.gifts = [];
+      
+      const newData = { ...store.data };
+      
+      const mergeArray = (existingArr, importedArr) => {
+        if (!importedArr) return existingArr || [];
+        const newArr = [...(existingArr || [])];
+        importedArr.forEach(importedItem => {
+          const idx = newArr.findIndex(item => item.id === importedItem.id);
+          if (idx >= 0) {
+            newArr[idx] = { ...newArr[idx], ...importedItem };
+          } else {
+            newArr.push(importedItem);
+          }
+        });
+        return newArr;
+      };
+
+      newData.employees = mergeArray(newData.employees, parsed.employees);
+      newData.transactions = mergeArray(newData.transactions, parsed.transactions);
+      newData.masterTransactions = mergeArray(newData.masterTransactions, parsed.masterTransactions);
+      newData.gifts = mergeArray(newData.gifts, parsed.gifts);
+      newData.giftAllocations = mergeArray(newData.giftAllocations, parsed.giftAllocations);
+      
+      if (parsed.quota !== undefined) newData.quota = parsed.quota;
+      if (parsed.pricePerTicket !== undefined) newData.pricePerTicket = parsed.pricePerTicket;
+      if (parsed.commissionRate !== undefined) newData.commissionRate = parsed.commissionRate;
+
       // Ensure each employee has paid/note fields
       newData.employees = newData.employees.map(emp => ({
         paid: false, note: '', ...emp
       }));
+      
       store.data = newData;
       store.saveData();
       renderAll();
       initPrintForm();
       renderA4Logbook();
-      showToast(`✅ Import สำเร็จ! โหลดข้อมูล ${newData.employees.length} คน`, 'success');
+      showToast(`✅ Import สำเร็จ! อัพเดทข้อมูลเรียบร้อยแล้ว`, 'success');
     } catch(err) {
       showToast('❌ เกิดข้อผิดพลาด: ไฟล์ไม่ถูกต้องหรือเสียหาย', 'error');
       console.error(err);
