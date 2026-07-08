@@ -8,6 +8,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <!-- Flatpickr for Thai Year Support -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://npmcdn.com/flatpickr/dist/l10n/th.js"></script>
   <style>
 :root {
   --primary: #4f46e5;
@@ -1703,7 +1707,7 @@ input:focus, select:focus {
             </div>
             <div class="form-group">
               <label>วันที่</label>
-              <input type="date" id="tx-date" required />
+              <input type="text" id="tx-date" required autocomplete="off" placeholder="เลือกวันที่..." />
             </div>
             <div class="form-group">
               <label>หลักฐาน (ถ้ามี)</label>
@@ -2368,6 +2372,8 @@ function showConfirm(message, title = 'ยืนยันการทำรา�
 
 
 // --- MAIN LOGIC ---
+let txDatePicker;
+
 function formatNum(num) {
   if (isNaN(num)) return '0';
   return num.toLocaleString('en-US');
@@ -2410,6 +2416,24 @@ navButtons.forEach(btn => {
       mobilePageTitle.textContent = cleanText;
     }
   });
+});
+
+// Initialize Flatpickr for tx-date
+txDatePicker = flatpickr("#tx-date", {
+  locale: "th",
+  dateFormat: "Y-m-d",
+  altInput: true,
+  altFormat: "TH",
+  disableMobile: "true",
+  formatDate: (date, format, locale) => {
+    if (format === "TH") {
+      const d = String(date.getDate()).padStart(2, '0');
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const y = date.getFullYear() + 543;
+      return `${d}/${m}/${y}`;
+    }
+    return flatpickr.formatDate(date, format, locale);
+  }
 });
 
 // --- Renders ---
@@ -3957,7 +3981,11 @@ function editTx(txId) {
   document.getElementById('tx-qty').value = tx.qty || tx.quantity;
   
   const dStr = tx.date || '';
-  document.getElementById('tx-date').value = dStr.includes('T') ? dStr.split('T')[0] : dStr;
+  if (txDatePicker) {
+    txDatePicker.setDate(dStr.includes('T') ? dStr.split('T')[0] : dStr);
+  } else {
+    document.getElementById('tx-date').value = dStr.includes('T') ? dStr.split('T')[0] : dStr;
+  }
   document.getElementById('tx-require-sign').checked = !!tx.requireSign;
   document.getElementById('tx-value-calc').textContent = formatNum((tx.qty || tx.quantity) * store.data.pricePerTicket);
   
@@ -3983,7 +4011,7 @@ function editTx(txId) {
 function cancelEdit() {
   editingTxId = null;
   document.getElementById('form-add-tx').reset();
-  document.getElementById('tx-date').valueAsDate = new Date();
+  if (txDatePicker) txDatePicker.setDate(new Date()); else document.getElementById('tx-date').valueAsDate = new Date();
   document.getElementById('tx-value-calc').textContent = '0';
   
   const submitBtn = document.querySelector('#form-add-tx button[type="submit"]');
@@ -4014,7 +4042,7 @@ document.getElementById('form-add-tx').addEventListener('submit', (e) => {
         } else {
           store.addTransaction(type, empId, qty, date, evidenceUrl || null, requireSign);
           document.getElementById('form-add-tx').reset();
-          document.getElementById('tx-date').valueAsDate = new Date();
+          if (txDatePicker) txDatePicker.setDate(new Date()); else document.getElementById('tx-date').valueAsDate = new Date();
           document.getElementById('tx-value-calc').textContent = '0';
         }
         showToast('บันทึกรายการเรียบร้อยแล้ว', 'success');
@@ -4083,7 +4111,7 @@ if (formAllocateGift) {
 }
 
 // Initialize Date Pickers to today
-document.getElementById('tx-date').valueAsDate = new Date();
+if (txDatePicker) txDatePicker.setDate(new Date()); else document.getElementById('tx-date').valueAsDate = new Date();
 
 // Close share modal on backdrop click
 document.getElementById('share-text-modal').addEventListener('click', function(e) {
