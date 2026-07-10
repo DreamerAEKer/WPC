@@ -1371,7 +1371,7 @@ input:focus, select:focus {
       <div class="sidebar-header">
         <div class="logo-icon">🏆</div>
         <h2>ฟุตบอลระดับโลก 2026</h2>
-        <p class="subtitle">Postcard Tracker <span style="font-size: 0.75rem; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 12px; margin-left: 4px;">v1.6.8</span></p>
+        <p class="subtitle">Postcard Tracker <span style="font-size: 0.75rem; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 12px; margin-left: 4px;">v1.6.9</span></p>
       </div>
       <nav class="sidebar-nav">
         <button class="nav-btn active" data-view="dashboard">
@@ -3399,9 +3399,9 @@ async function shareAsImage() {
 
   // Podium backgrounds and sizing for premium look
   const podiumSizes = [
-    { height: '280px', numSize: '5.5rem', bg: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)', border: '#f59e0b', nameColor: '#78350f', numColor: '#92400e', labelColor: '#b45309' }, // gold (1st)
-    { height: '210px', numSize: '3.8rem', bg: 'linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%)', border: '#94a3b8', nameColor: '#334155', numColor: '#1e2937', labelColor: '#64748b' }, // silver (2nd)
-    { height: '170px', numSize: '3.2rem', bg: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)', border: '#fdba74', nameColor: '#9a3412', numColor: '#c2410c', labelColor: '#ea580c' }, // bronze (3rd)
+    { height: '300px', numSize: '6.5rem', bg: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)', border: '#f59e0b', nameColor: '#78350f', numColor: '#92400e', labelColor: '#b45309' }, // gold (1st)
+    { height: '230px', numSize: '4.8rem', bg: 'linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%)', border: '#94a3b8', nameColor: '#334155', numColor: '#1e2937', labelColor: '#64748b' }, // silver (2nd)
+    { height: '190px', numSize: '4rem', bg: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)', border: '#fdba74', nameColor: '#9a3412', numColor: '#c2410c', labelColor: '#ea580c' }, // bronze (3rd)
   ];
 
   const top3 = emps.slice(0, 3);
@@ -3432,11 +3432,11 @@ async function shareAsImage() {
         position: relative;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
       ">
-        <div style="font-size: 2.2rem; margin-bottom: 0.4rem;">${rankMedals[idx]}</div>
-        <div style="font-size: 1.6rem; font-weight: 800; color: ${sz.nameColor}; margin-bottom: 0.5rem; line-height: 1.2;">${emp.name}</div>
+        <div style="font-size: 2.8rem; margin-bottom: 0.4rem;">${rankMedals[idx]}</div>
+        <div style="font-size: 2.4rem; font-weight: 800; color: ${sz.nameColor}; margin-bottom: 0.5rem; line-height: 1.2; word-break: break-word;">${emp.name}</div>
         <div style="font-size: ${sz.numSize}; font-weight: 900; color: ${sz.numColor}; line-height: 1; letter-spacing: -2px;">${formatNum(emp.requested)}</div>
-        <div style="font-size: 1rem; color: ${sz.labelColor}; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 0.3rem;">ใบ</div>
-        <div style="font-size: 0.95rem; color: ${sz.labelColor}; margin-top: 0.8rem; background: rgba(255,255,255,0.5); padding: 2px 8px; border-radius: 6px; font-weight: bold;">ส่งเงิน: ${formatNum(emp.remitted)}</div>
+        <div style="font-size: 1.3rem; color: ${sz.labelColor}; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 0.3rem;">ใบ</div>
+        <div style="font-size: 1.2rem; color: ${sz.labelColor}; margin-top: 0.8rem; background: rgba(255,255,255,0.5); padding: 4px 12px; border-radius: 8px; font-weight: bold;">ส่งเงิน: ${formatNum(emp.remitted)}</div>
         ${outstandingHtml}
       </div>`;
   });
@@ -3452,19 +3452,19 @@ async function shareAsImage() {
         gap: 1rem;
         background: white;
         border-radius: 16px;
-        padding: 1rem 1.4rem;
-        margin-bottom: 0.7rem;
+        padding: 1.2rem 1.4rem;
+        margin-bottom: 0.8rem;
         border: 1px solid #e2e8f0;
         box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.02);
       ">
-        <div style="font-size: 1.6rem; font-weight: 800; width: 40px; text-align: center; color: #94a3b8;">${i+4}</div>
+        <div style="font-size: 2rem; font-weight: 800; width: 50px; text-align: center; color: #94a3b8;">${i+4}</div>
         <div style="flex: 1;">
-          <div style="font-weight: 800; font-size: 1.7rem; color: #1e2937;">${emp.name}</div>
+          <div style="font-weight: 800; font-size: 2.2rem; color: #1e2937; word-break: break-word;">${emp.name}</div>
         </div>
         <div style="text-align: right;">
-          <div style="font-size: 2.2rem; font-weight: 900; line-height: 1; color: #4f46e5;">${formatNum(emp.requested)}</div>
-          <div style="font-size: 0.8rem; opacity: 0.6; text-transform: uppercase; color: #64748b;">ใบ</div>
-          <div style="font-size: 1.05rem; color: #10b981; font-weight: 700; margin-top: 0.4rem;">ส่งเงิน: ${formatNum(emp.remitted)} ${outstandingHtml}</div>
+          <div style="font-size: 2.8rem; font-weight: 900; line-height: 1; color: #4f46e5;">${formatNum(emp.requested)}</div>
+          <div style="font-size: 1rem; opacity: 0.6; text-transform: uppercase; color: #64748b;">ใบ</div>
+          <div style="font-size: 1.2rem; color: #10b981; font-weight: 700; margin-top: 0.4rem;">ส่งเงิน: ${formatNum(emp.remitted)} ${outstandingHtml}</div>
         </div>
       </div>`;
   });
@@ -3481,18 +3481,18 @@ async function shareAsImage() {
           gap: 1rem;
           background: #f8fafc;
           border-radius: 16px;
-          padding: 1rem 1.4rem;
-          margin-bottom: 0.7rem;
+          padding: 1.2rem 1.4rem;
+          margin-bottom: 0.8rem;
           border: 1px dashed #cbd5e1;
         ">
-          <div style="font-size: 1.6rem; width: 40px; text-align: center;">👤</div>
+          <div style="font-size: 2rem; width: 50px; text-align: center;">👤</div>
           <div style="flex: 1;">
-            <div style="font-weight: 800; font-size: 1.7rem; color: #1e2937;">${mgr.name}</div>
+            <div style="font-weight: 800; font-size: 2.2rem; color: #1e2937; word-break: break-word;">${mgr.name}</div>
           </div>
           <div style="text-align: right;">
-            <div style="font-size: 2.2rem; font-weight: 900; line-height: 1; color: #64748b;">${formatNum(mgr.requested)}</div>
-            <div style="font-size: 0.8rem; opacity: 0.6; text-transform: uppercase; color: #64748b;">ใบ</div>
-            <div style="font-size: 1.05rem; color: #10b981; font-weight: 700; margin-top: 0.4rem;">ส่งเงิน: ${formatNum(mgr.remitted)} ${outstandingHtml}</div>
+            <div style="font-size: 2.8rem; font-weight: 900; line-height: 1; color: #64748b;">${formatNum(mgr.requested)}</div>
+            <div style="font-size: 1rem; opacity: 0.6; text-transform: uppercase; color: #64748b;">ใบ</div>
+            <div style="font-size: 1.2rem; color: #10b981; font-weight: 700; margin-top: 0.4rem;">ส่งเงิน: ${formatNum(mgr.remitted)} ${outstandingHtml}</div>
           </div>
         </div>`;
     });
@@ -3586,7 +3586,9 @@ async function shareAsImage() {
       scale: 2,
       backgroundColor: null,
       useCORS: true,
-      logging: false
+      logging: false,
+      width: 720,
+      windowWidth: 720
     });
 
     const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
