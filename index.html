@@ -3459,7 +3459,9 @@ async function shareAsImage() {
   const displayOrder = top3.length === 3 ? [1, 0, 2] : top3.map((_, i) => i);
   displayOrder.filter(i => i < top3.length).forEach(idx => {
     const emp = top3[idx];
-    const sz = podiumSizes[idx];
+    const actualRank = emp._rank || (idx + 1);
+    const cssRankIdx = Math.min(actualRank, 3) - 1; // 0, 1, 2 for podium sizes
+    const sz = podiumSizes[cssRankIdx];
     
     let outstandingHtml = emp.outstanding > 0 ? `<div style="font-size: 1.4rem; color: #ef4444; margin-top: 0.6rem; background: rgba(255,255,255,0.8); padding: 4px 12px; border-radius: 8px; font-weight: bold;">รอส่ง: ${formatNum(emp.outstanding)}</div>` : '';
     
@@ -3485,11 +3487,11 @@ async function shareAsImage() {
         box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
         margin: 0 -2px; /* Overlap borders slightly */
       ">
-        <div style="font-size: 4rem; margin-bottom: 0.6rem;">${rankMedals[idx]}</div>
+        <div style="font-size: 4rem; margin-bottom: 0.6rem;">${rankMedals[actualRank - 1] || '🏅'}</div>
         <div style="font-size: 3.5rem; font-weight: 800; color: ${sz.nameColor}; margin-bottom: 0.6rem; line-height: 1.2; word-break: break-word; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${emp.name}</div>
-        <div style="font-size: ${sz.numSize}; font-weight: 900; color: ${sz.numColor}; line-height: 1; letter-spacing: -3px; max-width: 100%; overflow-wrap: break-word;">${formatNum(emp.requested)}</div>
+        <div style="font-size: ${sz.numSize}; font-weight: 900; color: ${sz.numColor}; line-height: 1; letter-spacing: -3px; max-width: 100%; overflow-wrap: break-word; white-space: nowrap;">${formatNum(emp.requested)}</div>
         <div style="font-size: 1.8rem; color: ${sz.labelColor}; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 0.5rem;">ใบ</div>
-        <div style="font-size: 1.8rem; color: ${sz.labelColor}; margin-top: 1.2rem; background: rgba(255,255,255,0.5); padding: 6px 16px; border-radius: 12px; font-weight: bold;">ส่งเงิน: ${formatNum(emp.remitted)}</div>
+        <div style="font-size: 1.8rem; color: ${sz.labelColor}; margin-top: 1.2rem; background: rgba(255,255,255,0.5); padding: 6px 16px; border-radius: 12px; font-weight: bold; white-space: nowrap;">ส่งเงิน: ${formatNum(emp.remitted)}</div>
         ${outstandingHtml}
       </div>`;
   });
@@ -3510,7 +3512,7 @@ async function shareAsImage() {
         border: 2px solid #e2e8f0;
         box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.03);
       ">
-        <div style="font-size: 3rem; font-weight: 800; width: 70px; text-align: center; color: #94a3b8;">${i+4}</div>
+        <div style="font-size: 3rem; font-weight: 800; width: 70px; text-align: center; color: #94a3b8;">${emp._rank}</div>
         <div style="flex: 1;">
           <div style="font-weight: 800; font-size: 3.4rem; color: #1e2937; word-break: break-word;">${emp.name}</div>
         </div>
