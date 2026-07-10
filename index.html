@@ -751,6 +751,9 @@ input:focus, select:focus {
   .rank-podium-card {
     padding-bottom: 0.75rem;
     border-radius: 14px;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+    min-width: 0;
   }
   .rank-podium-card.rank-1 {
     min-height: 150px;
@@ -929,6 +932,9 @@ input:focus, select:focus {
   text-align: center;
   position: relative;
   flex: 1;
+  min-width: 0;
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
   box-shadow: 0 8px 24px rgba(0,0,0,0.12);
   transition: transform 0.2s;
   display: flex;
@@ -982,6 +988,10 @@ input:focus, select:focus {
   font-weight: 700;
   color: #1f2937;
   margin-bottom: 0.4rem;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .rank-1 .rank-podium-name { font-size: 1.1rem; color: #78350f; }
 .rank-2 .rank-podium-name { color: #334155; }
@@ -1360,9 +1370,8 @@ input:focus, select:focus {
         💾 สำรองข้อมูล
       </button>
       <div class="mobile-header-info">
-        3 บาท / คอม 10%
+        3บ. / คอม 10% <span style="opacity: 0.7; margin-left: 2px;">v1.0.2</span>
       </div>
-    </div>
     </div>
   </div>
   <div class="app-layout">
@@ -1371,7 +1380,7 @@ input:focus, select:focus {
       <div class="sidebar-header">
         <div class="logo-icon">🏆</div>
         <h2>ฟุตบอลระดับโลก 2026</h2>
-        <p class="subtitle">Postcard Tracker <span style="font-size: 0.75rem; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 12px; margin-left: 4px;">v1.6.11</span></p>
+        <p class="subtitle">Postcard Tracker <span style="font-size: 0.75rem; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 12px; margin-left: 4px;">v1.0.2</span></p>
       </div>
       <nav class="sidebar-nav">
         <button class="nav-btn active" data-view="dashboard">
@@ -3079,9 +3088,25 @@ function renderAll() {
 
 // ===== RANKING RENDER =====
 function getRankingData() {
-  return store.getEmployeesData()
+  const emps = store.getEmployeesData()
     .filter(e => !e.isManager)
     .sort((a, b) => b.requested - a.requested || b.remitted - a.remitted);
+    
+  if (emps.length > 0) {
+    let currentRank = 1;
+    emps[0]._rank = currentRank;
+    for (let i = 1; i < emps.length; i++) {
+      const prev = emps[i - 1];
+      const curr = emps[i];
+      if (curr.requested === prev.requested && curr.remitted === prev.remitted) {
+        curr._rank = currentRank;
+      } else {
+        currentRank++;
+        curr._rank = currentRank;
+      }
+    }
+  }
+  return emps;
 }
 
 function getManagersData() {
@@ -3218,8 +3243,9 @@ function renderRanking() {
     const displayIndices = top3.length === 3 ? [1, 0, 2] : top3.map((_, i) => i);
     displayIndices.filter(idx => idx < top3.length).forEach(idx => {
       const emp = top3[idx];
-      // idx 0 -> rank-1 (Gold), idx 1 -> rank-2 (Silver), idx 2 -> rank-3 (Bronze)
-      const rankClassNum = idx + 1; 
+      // Use actual dense rank, cap at 3 for CSS styling
+      const actualRank = emp._rank || (idx + 1);
+      const rankClassNum = Math.min(actualRank, 3); 
       
       const expectedInc = emp.requested * store.data.pricePerTicket * store.data.commissionRate;
       const guaranteedInc = emp.remitted * store.data.pricePerTicket * store.data.commissionRate;
@@ -3238,13 +3264,13 @@ function renderRanking() {
 
       podiumHtml += `
         <div class="rank-podium-card rank-${rankClassNum}">
-          <div class="rank-badge">${rankLabels[idx]}</div>
-          <span class="rank-medal">${rankMedals[idx]}</span>
+          <div class="rank-badge">${rankLabels[actualRank - 1] || 'อันดับ ' + actualRank}</div>
+          <span class="rank-medal">${rankMedals[actualRank - 1] || '🏅'}</span>
           <div class="rank-podium-name">${emp.name}</div>
           <div class="rank-podium-score">${formatNum(emp.requested)}</div>
           <div class="rank-podium-label">ใบ</div>
           
-          <div style="background: rgba(255,255,255,0.6); padding: 4px 6px; border-radius: 8px; margin-top: 6px; font-size: 0.65rem; line-height: 1.2; width: 100%;">
+          <div style="background: rgba(255,255,255,0.6); padding: 4px 6px; border-radius: 8px; margin-top: 6px; font-size: 0.65rem; line-height: 1.2; width: 100%; word-break: break-word; overflow-wrap: anywhere;">
             ${incHtml}
           </div>
 
@@ -3265,7 +3291,7 @@ function renderRanking() {
 
     const rest = emps.slice(3);
     rest.forEach((emp, i) => {
-      const rank = i + 4;
+      const rank = emp._rank;
       const pct = maxRequested > 0 ? Math.round((emp.requested / maxRequested) * 100) : 0;
       
       const expectedInc = emp.requested * store.data.pricePerTicket * store.data.commissionRate;
@@ -3427,6 +3453,7 @@ async function shareAsImage() {
         padding: 2rem 1.5rem 1.8rem;
         text-align: center;
         flex: 1;
+        min-width: 0;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -3438,8 +3465,8 @@ async function shareAsImage() {
         margin: 0 -2px; /* Overlap borders slightly */
       ">
         <div style="font-size: 4rem; margin-bottom: 0.6rem;">${rankMedals[idx]}</div>
-        <div style="font-size: 3.5rem; font-weight: 800; color: ${sz.nameColor}; margin-bottom: 0.6rem; line-height: 1.2; word-break: break-word;">${emp.name}</div>
-        <div style="font-size: ${sz.numSize}; font-weight: 900; color: ${sz.numColor}; line-height: 1; letter-spacing: -3px;">${formatNum(emp.requested)}</div>
+        <div style="font-size: 3.5rem; font-weight: 800; color: ${sz.nameColor}; margin-bottom: 0.6rem; line-height: 1.2; word-break: break-word; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${emp.name}</div>
+        <div style="font-size: ${sz.numSize}; font-weight: 900; color: ${sz.numColor}; line-height: 1; letter-spacing: -3px; max-width: 100%; overflow-wrap: break-word;">${formatNum(emp.requested)}</div>
         <div style="font-size: 1.8rem; color: ${sz.labelColor}; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 0.5rem;">ใบ</div>
         <div style="font-size: 1.8rem; color: ${sz.labelColor}; margin-top: 1.2rem; background: rgba(255,255,255,0.5); padding: 6px 16px; border-radius: 12px; font-weight: bold;">ส่งเงิน: ${formatNum(emp.remitted)}</div>
         ${outstandingHtml}
