@@ -1375,7 +1375,7 @@ input:focus, select:focus {
         💾 สำรองข้อมูล
       </button>
       <div class="mobile-header-info">
-        3บ. / คอม 10% <span style="opacity: 0.7; margin-left: 2px;">v1.1.10</span>
+        3บ. / คอม 10% <span style="opacity: 0.7; margin-left: 2px;">v1.1.13</span>
       </div>
     </div>
   </div>
@@ -3298,32 +3298,43 @@ function renderRanking() {
       const nameFontSize = groupEmps.length > 1 ? '0.8rem' : '0.95rem';
       const namesDisplay = `<div style="display:flex; flex-wrap:wrap; justify-content:center; gap:1px 4px; line-height:1.3; font-size:${nameFontSize}; color:inherit;">${namesHtml}</div>`;
       
-      const incDetailsHtml = groupEmps.map(emp => {
-        const price = store.data.pricePerTicket;
-        const rate = store.data.commissionRate;
-        const remittedMoney = emp.remitted * price;
-        const commission = remittedMoney * rate;
-        const outstandingMoney = emp.outstanding * price;
-        const isPaidFull = emp.outstanding === 0 && emp.remitted > 0;
-        const isNoPay = emp.remitted === 0;
-        let rows = '';
-        if (isPaidFull) {
-          rows += `<div style="font-size:0.65rem; color:#059669; font-weight:900; text-align:center; white-space:nowrap;">✅ ส่งเงินครบแล้ว</div>`;
-        } else if (!isNoPay) {
-          rows += `<div class="podium-stat-row"><span class="podium-stat-label" style="color:#059669;">💵 ส่งแล้ว:</span><span class="podium-stat-value" style="color:#059669;">${formatNum(emp.remitted)} ใบ (${formatNum(remittedMoney)} .-)</span></div>`;
-        }
-        if (outstandingMoney > 0) {
-          rows += `<div class="podium-stat-row"><span class="podium-stat-label" style="color:#dc2626;">⏳ รอส่ง:</span><span class="podium-stat-value" style="color:#dc2626;">${formatNum(emp.outstanding)} ใบ (${formatNum(outstandingMoney)} .-)</span></div>`;
-        }
-        if (commission > 0) {
-          rows += `<div class="podium-stat-row"><span class="podium-stat-label" style="color:#4f46e5;">💰 คอมฯ:</span><span class="podium-stat-value" style="color:#4f46e5;">${formatNum(commission)} .-</span></div>`;
-        }
-        if (!rows) return '';
-        return `<div style="width:100%; background:rgba(255,255,255,0.5); border-radius:8px; padding:4px 6px; margin-top:3px; border-top:1px solid rgba(0,0,0,0.06);">
-          ${groupEmps.length > 1 ? `<div style="font-size:0.6rem; font-weight:800; color:inherit; opacity:0.85; margin-bottom:2px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${emp.name}</div>` : ''}
-          ${rows}
-        </div>`;
-      }).join('');
+      const allPaidFull = groupEmps.every(emp => emp.outstanding === 0 && emp.remitted > 0);
+      let incDetailsHtml = '';
+      if (allPaidFull && groupEmps.length > 1) {
+         const suffix = groupEmps.length === 2 ? 'ทั้งคู่' : `ทั้ง ${groupEmps.length} คน`;
+         const commission = groupEmps[0].remitted * store.data.pricePerTicket * store.data.commissionRate;
+         incDetailsHtml = `<div style="width:100%; background:rgba(255,255,255,0.55); border-radius:8px; padding:6px 8px; margin-top:4px; text-align:center;">
+           <div style="font-size:0.65rem; font-weight:900; color:#059669; line-height:1.3; white-space:nowrap;">✅ ส่งเงินครบแล้ว ${suffix}</div>
+           <div style="font-size:0.65rem; color:#4f46e5; font-weight:800; margin-top:2px; white-space:nowrap;">💰 ค่าคอมฯ คนละ: ${formatNum(commission)} .-</div>
+         </div>`;
+      } else {
+         incDetailsHtml = groupEmps.map(emp => {
+           const price = store.data.pricePerTicket;
+           const rate = store.data.commissionRate;
+           const remittedMoney = emp.remitted * price;
+           const commission = remittedMoney * rate;
+           const outstandingMoney = emp.outstanding * price;
+           const isPaidFull = emp.outstanding === 0 && emp.remitted > 0;
+           const isNoPay = emp.remitted === 0;
+           let rows = '';
+           if (isPaidFull) {
+             rows += `<div style="font-size:0.65rem; color:#059669; font-weight:900; text-align:center; white-space:nowrap;">✅ ส่งเงินครบแล้ว</div>`;
+           } else if (!isNoPay) {
+             rows += `<div class="podium-stat-row"><span class="podium-stat-label" style="color:#059669;">💵 ส่ง:</span><span class="podium-stat-value" style="color:#059669;">${formatNum(emp.remitted)}ใบ (${formatNum(remittedMoney)}.-)</span></div>`;
+           }
+           if (outstandingMoney > 0) {
+             rows += `<div class="podium-stat-row"><span class="podium-stat-label" style="color:#dc2626;">⏳ รอ:</span><span class="podium-stat-value" style="color:#dc2626;">${formatNum(emp.outstanding)}ใบ (${formatNum(outstandingMoney)}.-)</span></div>`;
+           }
+           if (commission > 0) {
+             rows += `<div class="podium-stat-row"><span class="podium-stat-label" style="color:#4f46e5;">💰 คอมฯ:</span><span class="podium-stat-value" style="color:#4f46e5;">${formatNum(commission)}.-</span></div>`;
+           }
+           if (!rows) return '';
+           return `<div style="width:100%; background:rgba(255,255,255,0.5); border-radius:8px; padding:4px 6px; margin-top:3px; border-top:1px solid rgba(0,0,0,0.06);">
+             ${groupEmps.length > 1 ? `<div style="font-size:0.65rem; font-weight:900; color:inherit; opacity:0.85; margin-bottom:2px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${emp.name}</div>` : ''}
+             ${rows}
+           </div>`;
+         }).join('');
+      }
 
       const scoreVal = groupEmps[0].requested;
 
@@ -3379,38 +3390,38 @@ function renderRanking() {
       const pctText = remittedPct === 100 ? `ส่งครบแล้ว` : ``;
       
       let incHtml = '';
-      if (emp.remitted === 0) {
-        incHtml = `<span style="color: #f59e0b; font-weight: 600;">ในมือ: ${formatNum(expectedInc)} บาท</span>`;
-      } else if (remittedPct === 100) {
-        incHtml = `<span style="color: #10b981; font-weight: 600;">ได้ชัวร์: ${formatNum(guaranteedInc)} บาท</span>`;
+      if (emp.outstanding === 0 && emp.remitted > 0) {
+         incHtml = `<div style="color: #059669; font-weight: 800; font-size: 0.75rem;">✅ ส่งเงินครบแล้ว</div>
+                    <div style="color: #4f46e5; font-weight: 800; font-size: 0.7rem;">💰 คอมฯ: ${formatNum(guaranteedInc)}.-</div>`;
       } else {
-        incHtml = `<span style="color: #f59e0b; font-weight: 600;">ในมือ: ${formatNum(expectedInc)} บาท</span>
-                   <span style="color: #10b981; font-weight: 600;">ได้ชัวร์: ${formatNum(guaranteedInc)} บาท</span>`;
+         const price = store.data.pricePerTicket;
+         const remittedStr = emp.remitted > 0 ? `<span style="color: #059669; font-weight: 600;">💵 ส่ง: ${formatNum(emp.remitted)}ใบ (${formatNum(emp.remitted * price)}.-)</span>` : '';
+         const outStr = emp.outstanding > 0 ? `<span style="color: #dc2626; font-weight: 600;">⏳ รอ: ${formatNum(emp.outstanding)}ใบ (${formatNum(emp.outstanding * price)}.-)</span>` : '';
+         const commStr = emp.remitted > 0 ? `<span style="color: #4f46e5; font-weight: 800;">💰 คอมฯ: ${formatNum(guaranteedInc)}.-</span>` : '';
+         incHtml = `<div style="display: flex; flex-direction: column; gap: 2px; font-size: 0.65rem;">
+            ${remittedStr ? `<div>${remittedStr}</div>` : ''}
+            ${outStr ? `<div>${outStr}</div>` : ''}
+            ${commStr ? `<div>${commStr}</div>` : ''}
+         </div>`;
       }
       
       listHtml += `
         <div class="rank-list-item">
           <div class="rank-list-num">${rank}</div>
-          <div class="rank-list-info">
+          <div class="rank-list-info" style="flex: 1;">
             <div class="rank-list-name">${emp.name}</div>
             <div class="progress-bar-outer"><div class="progress-bar-inner" style="width:${pct}%"></div></div>
-            <div style="display: flex; gap: 8px; font-size: 0.7rem; margin-top: 3px;">
+            <div style="margin-top: 4px;">
                ${incHtml}
             </div>
           </div>
-          <div class="rank-list-right" style="display: flex; flex-direction: column; align-items: flex-end;">
+          <div class="rank-list-right" style="display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-start;">
             <div style="display: flex; align-items: baseline; justify-content: flex-end; gap: 4px;">
               <div class="rank-list-score">${formatNum(emp.requested)}</div>
               <div class="rank-list-score-label">ใบ</div>
             </div>
-            <div style="width: 110px; margin-top: 4px;">
-              ${pctText ? `<div style="display: flex; justify-content: flex-end; font-size: 0.65rem; color: var(--text-light); margin-bottom: 2px; line-height: 1;">${pctText}</div>` : 
-               `<div style="display: flex; justify-content: flex-end; font-size: 0.65rem; line-height: 1; margin-bottom: 3px; gap: 4px;">
-                  <span style="color: #10b981;">ส่ง ${formatNum(emp.remitted)}</span>
-                  ${emp.outstanding > 0 ? `<span style="color: #f59e0b;">รอส่ง ${formatNum(emp.outstanding)}</span>` : ''}
-                </div>`
-              }
-              <div style="width: 100%; background: #e2e8f0; border-radius: 99px; height: 4px; overflow: hidden; display: flex; justify-content: flex-end;">
+            <div style="width: 100px; margin-top: 6px;">
+              <div style="width: 100%; background: #e2e8f0; border-radius: 99px; height: 6px; overflow: hidden; display: flex; justify-content: flex-start;">
                  <div style="width: ${remittedPct}%; height: 100%; background: #10b981; border-radius: 99px;"></div>
               </div>
             </div>
@@ -3541,32 +3552,43 @@ async function shareAsImage() {
     const fs = groupEmps.length > 1 ? '2.5rem' : '3.5rem';
     const namesContainer = `<div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 12px; font-size: ${fs}; color: ${sz.nameColor}; line-height: 1.2; width: 100%; padding: 0 10px;">${namesHtml}</div>`;
 
-    const detailsHtml = groupEmps.map(emp => {
-      const price = store.data.pricePerTicket;
-      const rate = store.data.commissionRate;
-      const remittedMoney = emp.remitted * price;
-      const commission = remittedMoney * rate;
-      const outstandingMoney = emp.outstanding * price;
-      const isPaidFull = emp.outstanding === 0 && emp.remitted > 0;
-      const isNoPay = emp.remitted === 0;
-      let rows = '';
-      if (isPaidFull) {
-         rows += `<div style="font-size: 1.5rem; color: #059669; font-weight: 900; text-align: center; white-space: nowrap;">✅ ส่งเงินครบแล้ว</div>`;
-      } else if (!isNoPay) {
-         rows += `<div style="display: flex; justify-content: space-between; margin-top: 2px; white-space: nowrap; gap: 2px;"><span style="color: #059669; font-weight: bold;">💵 ส่ง:</span><span style="font-weight: 800; color: #059669;">${formatNum(emp.remitted)}ใบ (${formatNum(remittedMoney)}.-)</span></div>`;
-      }
-      if (outstandingMoney > 0) {
-         rows += `<div style="display: flex; justify-content: space-between; margin-top: 2px; white-space: nowrap; gap: 2px;"><span style="color: #dc2626; font-weight: bold;">⏳ รอ:</span><span style="font-weight: 800; color: #dc2626;">${formatNum(emp.outstanding)}ใบ (${formatNum(outstandingMoney)}.-)</span></div>`;
-      }
-      if (commission > 0) {
-         rows += `<div style="display: flex; justify-content: space-between; margin-top: 2px; white-space: nowrap; gap: 2px;"><span style="color: #4f46e5; font-weight: bold;">💰 คอมฯ:</span><span style="font-weight: 800; color: #4f46e5;">${formatNum(commission)}.-</span></div>`;
-      }
-      if (!rows) return '';
-      return `<div style="font-size: 1.05rem; color: #374151; margin-top: 0.5rem; background: rgba(255,255,255,0.6); padding: 6px 8px; border-radius: 12px; text-align: left; line-height: 1.3; width: 100%;">
-        ${groupEmps.length > 1 ? `<div style="font-weight: 900; font-size: 1.2rem; border-bottom: 2px solid rgba(0,0,0,0.05); padding-bottom: 2px; margin-bottom: 3px; color: #1f2937; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${emp.name}</div>` : ''}
-        ${rows}
-      </div>`;
-    }).join('');
+    const allPaidFull = groupEmps.every(emp => emp.outstanding === 0 && emp.remitted > 0);
+    let detailsHtml = '';
+    if (allPaidFull && groupEmps.length > 1) {
+       const suffix = groupEmps.length === 2 ? 'ทั้งคู่' : `ทั้ง ${groupEmps.length} คน`;
+       const commission = groupEmps[0].remitted * store.data.pricePerTicket * store.data.commissionRate;
+       detailsHtml = `<div style="width: 100%; background: rgba(255,255,255,0.7); border-radius: 14px; padding: 10px 10px; margin-top: 0.8rem; text-align: center;">
+         <div style="font-size: 1.25rem; font-weight: 900; color: #059669; line-height: 1.3; white-space: nowrap;">✅ ส่งเงินครบแล้ว ${suffix}</div>
+         <div style="font-size: 1.2rem; color: #4f46e5; font-weight: 800; margin-top: 4px; white-space: nowrap;">💰 ค่าคอมฯ คนละ: ${formatNum(commission)} .-</div>
+       </div>`;
+    } else {
+       detailsHtml = groupEmps.map(emp => {
+         const price = store.data.pricePerTicket;
+         const rate = store.data.commissionRate;
+         const remittedMoney = emp.remitted * price;
+         const commission = remittedMoney * rate;
+         const outstandingMoney = emp.outstanding * price;
+         const isPaidFull = emp.outstanding === 0 && emp.remitted > 0;
+         const isNoPay = emp.remitted === 0;
+         let rows = '';
+         if (isPaidFull) {
+            rows += `<div style="font-size: 1.25rem; color: #059669; font-weight: 900; text-align: center; white-space: nowrap;">✅ ส่งเงินครบแล้ว</div>`;
+         } else if (!isNoPay) {
+            rows += `<div style="display: flex; justify-content: space-between; margin-top: 2px; white-space: nowrap; gap: 2px;"><span style="color: #059669; font-weight: bold;">💵 ส่ง:</span><span style="font-weight: 800; color: #059669;">${formatNum(emp.remitted)}ใบ (${formatNum(remittedMoney)}.-)</span></div>`;
+         }
+         if (outstandingMoney > 0) {
+            rows += `<div style="display: flex; justify-content: space-between; margin-top: 2px; white-space: nowrap; gap: 2px;"><span style="color: #dc2626; font-weight: bold;">⏳ รอ:</span><span style="font-weight: 800; color: #dc2626;">${formatNum(emp.outstanding)}ใบ (${formatNum(outstandingMoney)}.-)</span></div>`;
+         }
+         if (commission > 0) {
+            rows += `<div style="display: flex; justify-content: space-between; margin-top: 2px; white-space: nowrap; gap: 2px;"><span style="color: #4f46e5; font-weight: bold;">💰 คอมฯ:</span><span style="font-weight: 800; color: #4f46e5;">${formatNum(commission)}.-</span></div>`;
+         }
+         if (!rows) return '';
+         return `<div style="font-size: 1.05rem; color: #374151; margin-top: 0.5rem; background: rgba(255,255,255,0.6); padding: 6px 8px; border-radius: 12px; text-align: left; line-height: 1.3; width: 100%;">
+           ${groupEmps.length > 1 ? `<div style="font-weight: 900; font-size: 1.2rem; border-bottom: 2px solid rgba(0,0,0,0.05); padding-bottom: 2px; margin-bottom: 3px; color: #1f2937; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${emp.name}</div>` : ''}
+           ${rows}
+         </div>`;
+       }).join('');
+    }
 
     const baseColors = [
       { bg: '#d97706', text: '#ffffff' }, // Gold
@@ -3615,7 +3637,11 @@ async function shareAsImage() {
         <div style="text-align: right;">
           <div style="font-size: 4.2rem; font-weight: 900; line-height: 1; color: #4f46e5;">${formatNum(emp.requested)}</div>
           <div style="font-size: 1.5rem; opacity: 0.6; text-transform: uppercase; color: #64748b;">ใบ</div>
-          <div style="font-size: 1.8rem; color: #10b981; font-weight: 700; margin-top: 0.6rem;">ส่งเงิน: ${formatNum(emp.remitted)} ใบ ${outstandingHtml}</div>
+          <div style="font-size: 1.7rem; color: #10b981; font-weight: 700; margin-top: 0.8rem; display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+            <div>💵 ส่ง: ${formatNum(emp.remitted)} ใบ <span style="color: #64748b; font-size: 1.5rem;">(${formatNum(emp.remitted * store.data.pricePerTicket)}.-)</span></div>
+            ${emp.outstanding > 0 ? `<div style="color: #ef4444;">⏳ รอ: ${formatNum(emp.outstanding)} ใบ <span style="color: #64748b; font-size: 1.5rem;">(${formatNum(emp.outstanding * store.data.pricePerTicket)}.-)</span></div>` : ''}
+            ${emp.remitted > 0 ? `<div style="color: #4f46e5; font-size: 1.8rem; font-weight: 900;">💰 คอมฯ: ${formatNum(emp.remitted * store.data.pricePerTicket * store.data.commissionRate)}.-</div>` : ''}
+          </div>
         </div>
       </div>`;
   });
@@ -3643,7 +3669,11 @@ async function shareAsImage() {
           <div style="text-align: right;">
             <div style="font-size: 4.2rem; font-weight: 900; line-height: 1; color: #64748b;">${formatNum(mgr.requested)}</div>
             <div style="font-size: 1.5rem; opacity: 0.6; text-transform: uppercase; color: #64748b;">ใบ</div>
-            <div style="font-size: 1.8rem; color: #10b981; font-weight: 700; margin-top: 0.6rem;">ส่งเงิน: ${formatNum(mgr.remitted)} ใบ ${outstandingHtml}</div>
+            <div style="font-size: 1.7rem; color: #10b981; font-weight: 700; margin-top: 0.8rem; display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+              <div>💵 ส่ง: ${formatNum(mgr.remitted)} ใบ <span style="color: #64748b; font-size: 1.5rem;">(${formatNum(mgr.remitted * store.data.pricePerTicket)}.-)</span></div>
+              ${mgr.outstanding > 0 ? `<div style="color: #ef4444;">⏳ รอ: ${formatNum(mgr.outstanding)} ใบ <span style="color: #64748b; font-size: 1.5rem;">(${formatNum(mgr.outstanding * store.data.pricePerTicket)}.-)</span></div>` : ''}
+              ${mgr.remitted > 0 ? `<div style="color: #4f46e5; font-size: 1.8rem; font-weight: 900;">💰 คอมฯ: ${formatNum(mgr.remitted * store.data.pricePerTicket * store.data.commissionRate)}.-</div>` : ''}
+            </div>
           </div>
         </div>`;
     });
