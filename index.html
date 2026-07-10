@@ -775,9 +775,9 @@ input:focus, select:focus {
   .rank-1 .rank-medal { font-size: 1.8rem; }
   .rank-podium-name { font-size: 0.78rem; margin-bottom: 0.2rem; }
   .rank-1 .rank-podium-name { font-size: 0.88rem; }
-  .rank-1 .rank-podium-score { font-size: 1.8rem; }
-  .rank-2 .rank-podium-score { font-size: 1.4rem; }
-  .rank-3 .rank-podium-score { font-size: 1.2rem; }
+  .rank-1 .rank-podium-score { font-size: 1.35rem; }
+  .rank-2 .rank-podium-score { font-size: 1.2rem; }
+  .rank-3 .rank-podium-score { font-size: 1.1rem; }
   .rank-podium-label { font-size: 0.6rem; }
   
   .rank-list-item {
@@ -3089,6 +3089,21 @@ function renderAll() {
 
 // ===== RANKING RENDER =====
 function getRankingData() {
+  const getPaidInFullDate = (empId, requestedQty) => {
+    const empTxs = store.data.transactions
+      .filter(t => t.empId === empId && t.type === 'remit')
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+    let sum = 0;
+    for (const tx of empTxs) {
+      sum += tx.qty;
+      if (sum >= requestedQty && requestedQty > 0) {
+        return new Date(tx.date).getTime();
+      }
+    }
+    return Infinity; // Not paid in full yet
+  };
+
   const emps = store.getEmployeesData()
     .filter(e => !e.isManager)
     .sort((a, b) => {
@@ -3097,11 +3112,11 @@ function getRankingData() {
         return b.requested - a.requested;
       }
       
-      // 2. Prioritize who paid in full (outstanding === 0)
-      const aPaid = a.outstanding === 0 ? 1 : 0;
-      const bPaid = b.outstanding === 0 ? 1 : 0;
-      if (aPaid !== bPaid) {
-        return bPaid - aPaid; // 1 (paid in full) comes first
+      // 2. Sort by paid-in-full date (earlier date first)
+      const aPaidDate = getPaidInFullDate(a.id, a.requested);
+      const bPaidDate = getPaidInFullDate(b.id, b.requested);
+      if (aPaidDate !== bPaidDate) {
+        return aPaidDate - bPaidDate;
       }
       
       // 3. Sort by remitted descending
@@ -3148,12 +3163,6 @@ function renderRanking() {
 
   // Let's calculate remaining stock of postcards
   const overview = store.getOverview();
-  // Remaining stock at Head = what Head requested - what employees (including manager) requested
-  // However, the remaining postcards for motivation = remaining quota in hand + what employees still have to sell?
-  // Let's show: Remaining at Head of Department (คงเหลือในมือ หน.แผนก) + Remaining at Postal Center (คงเหลือที่ ปณ.กลาง)
-  // Let's show remaining postcards in team's hands that is not yet remitted, or total remaining quota.
-  // The user requested: "ขอ จำนวน ไปรษณียบัตร ที่เหลือ แสดงไว้เป็น แรงกระตุ้น ทุกคนในแผนกด้วย"
-  // Let's show: ยอดไปรษณียบัตรคงเหลือในโควต้ารวม (โควต้ารวม - เบิกไปแล้ว) และ คงเหลือในมือ หน.แผนก
   const totalStockRemaining = overview.quota - overview.totalRequested;
 
   // Helper to generate text statistics for remaining stock
@@ -3283,22 +3292,31 @@ function renderRanking() {
       `).join('');
       
       const incDetailsHtml = groupEmps.map(emp => {
-        const expectedInc = emp.requested * store.data.pricePerTicket * store.data.commissionRate;
-        const guaranteedInc = emp.remitted * store.data.pricePerTicket * store.data.commissionRate;
-        const remittedPct = Math.min(100, Math.round((emp.remitted / (emp.requested || 1)) * 100));
+        const price = store.data.pricePerTicket;
+        const rate = store.data.commissionRate;
+        const remittedMoney = emp.remitted * price;
+        const commission = remittedMoney * rate;
+        const outstandingMoney = emp.outstanding * price;
         
-        let label = '';
-        if (emp.remitted === 0) {
-          label = `<span style="color:#b45309">ในมือ: ${formatNum(expectedInc)}</span>`;
-        } else if (remittedPct === 100) {
-          label = `<span style="color:#059669">ได้ชัวร์: ${formatNum(guaranteedInc)}</span>`;
-        } else {
-          label = `<span style="color:#b45309">ในมือ: ${formatNum(expectedInc)}</span> | <span style="color:#059669">ได้ชัวร์: ${formatNum(guaranteedInc)}</span>`;
-        }
-        
-        return `<div style="font-size: 0.62rem; margin-top: 2px; padding: 2px 4px; background: rgba(255,255,255,0.4); border-radius: 4px; text-align: left; width: 100%; border-bottom: 1px dashed rgba(0,0,0,0.05);">
-                  <span style="font-weight: 600;">${emp.name}:</span> ${label}
-                </div>`;
+        return `
+          <div style="font-size: 0.65rem; margin-top: 3px; padding: 4px 6px; background: rgba(255,255,255,0.45); border-radius: 6px; text-align: left; line-height: 1.3; border-bottom: 1px dashed rgba(0,0,0,0.05); color: #374151;">
+            <div style="font-weight: 700; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 1px; margin-bottom: 2px; color: #1f2937;">${emp.name}</div>
+            <div style="display: flex; justify-content: space-between; gap: 4px;">
+              <span style="color: #059669; font-weight: 500;">🟢 สถานะ:</span>
+              <span style="font-weight: 600; color: #059669;">${emp.outstanding === 0 ? 'ส่งเงินครบแล้ว' : `ส่งแล้ว ${formatNum(remittedMoney)} .- (${formatNum(emp.remitted)} ใบ)`}</span>
+            </div>
+            ${outstandingMoney > 0 ? `
+            <div style="display: flex; justify-content: space-between; gap: 4px;">
+              <span style="color: #b45309; font-weight: 500;">🟡 รอส่ง:</span>
+              <span style="font-weight: 700; color: #ef4444;">${formatNum(outstandingMoney)} .-</span>
+            </div>
+            ` : ''}
+            <div style="display: flex; justify-content: space-between; gap: 4px;">
+              <span style="color: #4f46e5; font-weight: 500;">💰 คอมฯ:</span>
+              <span style="font-weight: 600; color: #4f46e5;">${formatNum(commission)} .-</span>
+            </div>
+          </div>
+        `;
       }).join('');
 
       const scoreVal = groupEmps[0].requested;
@@ -3515,17 +3533,45 @@ async function shareAsImage() {
       <div style="font-size: ${groupEmps.length > 1 ? '2.8rem' : '3.5rem'}; font-weight: 800; color: ${sz.nameColor}; margin-bottom: 0.2rem; line-height: 1.2; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${emp.name}</div>
     `).join('');
     
-    const remittedHtml = groupEmps.map(emp => `
-      <div style="font-size: 1.5rem; color: ${sz.labelColor}; margin-top: 0.4rem; background: rgba(255,255,255,0.5); padding: 4px 12px; border-radius: 12px; font-weight: bold; white-space: nowrap; text-align: center;">
-        ${emp.name}: ส่งเงิน ${formatNum(emp.remitted)}
-      </div>
-    `).join('');
-    
-    const outstandingHtml = groupEmps.map(emp => emp.outstanding > 0 ? `
-      <div style="font-size: 1.2rem; color: #ef4444; margin-top: 0.4rem; background: rgba(255,255,255,0.8); padding: 4px 12px; border-radius: 8px; font-weight: bold; text-align: center;">
-        ${emp.name}: รอส่ง ${formatNum(emp.outstanding)}
-      </div>
-    ` : '').join('');
+    const detailsHtml = groupEmps.map(emp => {
+      const price = store.data.pricePerTicket;
+      const rate = store.data.commissionRate;
+      
+      const remittedMoney = emp.remitted * price;
+      const commission = remittedMoney * rate;
+      const outstandingMoney = emp.outstanding * price;
+      
+      return `
+        <div style="
+          font-size: 1.3rem;
+          color: #374151;
+          margin-top: 0.6rem;
+          background: rgba(255,255,255,0.6);
+          padding: 8px 12px;
+          border-radius: 14px;
+          text-align: left;
+          line-height: 1.4;
+          width: 100%;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        ">
+          <div style="font-weight: 800; font-size: 1.5rem; border-bottom: 2px solid rgba(0,0,0,0.05); padding-bottom: 2px; margin-bottom: 4px; color: #1f2937;">${emp.name}</div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: #059669; font-weight: bold;">🟢 สถานะ:</span>
+            <span style="font-weight: 800; color: #059669;">${emp.outstanding === 0 ? 'ส่งเงินครบแล้ว' : `${formatNum(remittedMoney)} .- (${formatNum(emp.remitted)} ใบ)`}</span>
+          </div>
+          ${outstandingMoney > 0 ? `
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: #b45309; font-weight: bold;">🟡 รอส่ง:</span>
+            <span style="font-weight: 800; color: #ef4444;">${formatNum(outstandingMoney)} .-</span>
+          </div>
+          ` : ''}
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: #4f46e5; font-weight: bold;">💰 คอมฯ:</span>
+            <span style="font-weight: 800; color: #4f46e5;">${formatNum(commission)} .-</span>
+          </div>
+        </div>
+      `;
+    }).join('');
     
     const baseColors = [
       { bg: '#d97706', text: '#ffffff' }, // Gold
@@ -3558,12 +3604,11 @@ async function shareAsImage() {
         <div style="width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 0.6rem;">
           ${namesHtml}
         </div>
-        <div style="font-size: ${sz.numSize}; font-weight: 900; color: ${sz.numColor}; line-height: 1; letter-spacing: -3px; max-width: 100%; overflow-wrap: break-word; white-space: nowrap;">${formatNum(groupEmps[0].requested)}</div>
+        <div style="font-size: ${sz.numSize}; font-weight: 900; color: ${sz.numColor}; line-height: 1; letter-spacing: -3px; max-width: 100%; overflow-wrap: break-word; white-space: nowrap !important; display: inline-block;">${formatNum(groupEmps[0].requested)}</div>
         <div style="font-size: 1.8rem; color: ${sz.labelColor}; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 0.5rem;">ใบ</div>
         
-        <div style="width: 100%; max-height: 140px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; margin-top: 0.8rem; padding-bottom: 1rem;">
-          ${remittedHtml}
-          ${outstandingHtml}
+        <div style="width: 100%; max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; margin-top: 0.8rem; padding-bottom: 1rem;">
+          ${detailsHtml}
         </div>
         
         <!-- Physical sports podium stand bottom styling -->
