@@ -1375,7 +1375,7 @@ input:focus, select:focus {
         💾 สำรองข้อมูล
       </button>
       <div class="mobile-header-info">
-        3บ. / คอม 10% <span style="opacity: 0.7; margin-left: 2px;">v1.1.1</span>
+        3บ. / คอม 10% <span style="opacity: 0.7; margin-left: 2px;">v1.1.2</span>
       </div>
     </div>
   </div>
@@ -3534,103 +3534,57 @@ async function shareAsImage() {
     const cardZIndex = rankNum === topRanks[0] ? 10 : 5;
     
     // Group names html
-    const namesHtml = groupEmps.map(emp => `
-      <div style="font-size: ${groupEmps.length > 1 ? '2.8rem' : '3.5rem'}; font-weight: 800; color: ${sz.nameColor}; margin-bottom: 0.2rem; line-height: 1.2; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${emp.name}</div>
-    `).join('');
-    
+    const namesHtml = groupEmps.map(emp => {
+      const fs = groupEmps.length > 1 ? '2.8rem' : '3.5rem';
+      return `<div style="font-size: ${fs}; font-weight: 800; color: ${sz.nameColor}; margin-bottom: 0.2rem; line-height: 1.2; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${emp.name}</div>`;
+    }).join('');
+
     const detailsHtml = groupEmps.map(emp => {
       const price = store.data.pricePerTicket;
       const rate = store.data.commissionRate;
-      
       const remittedMoney = emp.remitted * price;
       const commission = remittedMoney * rate;
       const outstandingMoney = emp.outstanding * price;
-      
-      return `
-        <div style="
-          font-size: 1.3rem;
-          color: #374151;
-          margin-top: 0.6rem;
-          background: rgba(255,255,255,0.6);
-          padding: 8px 12px;
-          border-radius: 14px;
-          text-align: left;
-          line-height: 1.4;
-          width: 100%;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        ">
-          <div style="font-weight: 800; font-size: 1.5rem; border-bottom: 2px solid rgba(0,0,0,0.05); padding-bottom: 2px; margin-bottom: 4px; color: #1f2937;">${emp.name}</div>
-          <div style="display: flex; justify-content: space-between;">
-            <span style="color: #059669; font-weight: bold;">🟢 สถานะ:</span>
-            <span style="font-weight: 800; color: #059669;">${emp.outstanding === 0 ? 'ส่งเงินครบแล้ว' : `${formatNum(remittedMoney)} .- (${formatNum(emp.remitted)} ใบ)`}</span>
-          </div>
-          ${outstandingMoney > 0 ? `
-          <div style="display: flex; justify-content: space-between;">
-            <span style="color: #b45309; font-weight: bold;">🟡 รอส่ง:</span>
-            <span style="font-weight: 800; color: #ef4444;">${formatNum(outstandingMoney)} .-</span>
-          </div>
-          ` : ''}
-          <div style="display: flex; justify-content: space-between;">
-            <span style="color: #4f46e5; font-weight: bold;">💰 คอมฯ:</span>
-            <span style="font-weight: 800; color: #4f46e5;">${formatNum(commission)} .-</span>
-          </div>
+      const statusText = emp.outstanding === 0
+        ? 'ส่งเงินครบแล้ว'
+        : formatNum(remittedMoney) + ' .- (' + formatNum(emp.remitted) + ' ใบ)';
+      const outstandingRow = outstandingMoney > 0
+        ? `<div style="display: flex; justify-content: space-between; margin-top: 2px;">
+             <span style="color: #b45309; font-weight: bold;">🟡 รอส่ง:</span>
+             <span style="font-weight: 800; color: #ef4444;">${formatNum(outstandingMoney)} .-</span>
+           </div>`
+        : '';
+      return `<div style="font-size: 1.3rem; color: #374151; margin-top: 0.6rem; background: rgba(255,255,255,0.6); padding: 8px 12px; border-radius: 14px; text-align: left; line-height: 1.4; width: 100%;">
+        <div style="font-weight: 800; font-size: 1.5rem; border-bottom: 2px solid rgba(0,0,0,0.05); padding-bottom: 2px; margin-bottom: 4px; color: #1f2937;">${emp.name}</div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: #059669; font-weight: bold;">🟢 สถานะ:</span>
+          <span style="font-weight: 800; color: #059669;">${statusText}</span>
         </div>
-      `;
+        ${outstandingRow}
+        <div style="display: flex; justify-content: space-between; margin-top: 2px;">
+          <span style="color: #4f46e5; font-weight: bold;">💰 คอมฯ:</span>
+          <span style="font-weight: 800; color: #4f46e5;">${formatNum(commission)} .-</span>
+        </div>
+      </div>`;
     }).join('');
-    
+
     const baseColors = [
       { bg: '#d97706', text: '#ffffff' }, // Gold
       { bg: '#475569', text: '#ffffff' }, // Silver
       { bg: '#c2410c', text: '#ffffff' }  // Bronze
     ];
     const baseStyle = baseColors[Math.min(rankNum, 3) - 1] || { bg: '#4b5563', text: '#ffffff' };
-    podiumCardsHtml += `
-        background: ${sz.bg};
-        border: 3px solid ${sz.border};
-        border-radius: 32px;
-        padding: 2rem 1.5rem 0;
-        text-align: center;
-        flex: 1;
-        min-width: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-end;
-        min-height: ${sz.height};
-        position: relative;
-        z-index: ${cardZIndex};
-        box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
-        margin: 0 -2px; /* Overlap borders slightly */
-      ">
-        <div style="font-size: 4rem; margin-bottom: 0.6rem;">${rankMedals[rankNum - 1] || '🏅'}</div>
-        <div style="width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 0.6rem;">
-          ${namesHtml}
-        </div>
-        <div style="font-size: ${sz.numSize}; font-weight: 900; color: ${sz.numColor}; line-height: 1; letter-spacing: -3px; max-width: 100%; overflow-wrap: break-word; white-space: nowrap !important; display: inline-block;">${formatNum(groupEmps[0].requested)}</div>
-        <div style="font-size: 1.8rem; color: ${sz.labelColor}; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 0.5rem;">ใบ</div>
-        
-        <div style="width: 100%; max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; margin-top: 0.8rem; padding-bottom: 1rem;">
-          ${detailsHtml}
-        </div>
-        
-        <!-- Physical sports podium stand bottom styling -->
-        <div style="
-          width: calc(100% + 3rem);
-          margin-left: -1.5rem;
-          margin-right: -1.5rem;
-          padding: 16px 0;
-          background: ${baseStyle.bg};
-          color: ${baseStyle.text};
-          font-size: 2.5rem;
-          font-weight: 900;
-          margin-top: auto;
-          box-shadow: inset 0 4px 6px rgba(0,0,0,0.15);
-          border-radius: 0 0 32px 32px;
-        ">
-          ${rankNum}
-        </div>
-      </div>`;
+
+    podiumCardsHtml += `<div style="background: ${sz.bg}; border: 3px solid ${sz.border}; border-radius: 32px; padding: 2rem 1.5rem 0; text-align: center; flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; min-height: ${sz.height}; position: relative; z-index: ${cardZIndex}; box-shadow: 0 -4px 12px rgba(0,0,0,0.05); margin: 0 -2px; overflow: hidden;">
+      <div style="font-size: 4rem; margin-bottom: 0.6rem;">${rankMedals[rankNum - 1] || '🏅'}</div>
+      <div style="width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 0.6rem;">${namesHtml}</div>
+      <div style="font-size: ${sz.numSize}; font-weight: 900; color: ${sz.numColor}; line-height: 1; letter-spacing: -3px; max-width: 100%; white-space: nowrap; display: inline-block;">${formatNum(groupEmps[0].requested)}</div>
+      <div style="font-size: 1.8rem; color: ${sz.labelColor}; font-weight: 600; margin-top: 0.5rem;">ใบ</div>
+      <div style="width: 100%; max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; margin-top: 0.8rem; padding-bottom: 1rem;">${detailsHtml}</div>
+      <div style="width: calc(100% + 3rem); margin-left: -1.5rem; margin-right: -1.5rem; padding: 16px 0; background: ${baseStyle.bg}; color: ${baseStyle.text}; font-size: 2.5rem; font-weight: 900; margin-top: auto; box-shadow: inset 0 4px 6px rgba(0,0,0,0.15); border-radius: 0 0 32px 32px;">${rankNum}</div>
+    </div>`;
   });
+
 
   let restHtml = '';
   rest.forEach((emp, i) => {
