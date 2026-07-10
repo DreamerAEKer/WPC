@@ -754,10 +754,10 @@ input:focus, select:focus {
     padding-right: 0.3rem;
     padding-bottom: 0 !important;
     min-width: 0;
-    overflow: hidden !important;
+    overflow: visible !important;
   }
   .rank-podium-card .podium-block-base {
-    border-radius: 0 0 14px 14px !important;
+    border-radius: 0 0 14px 14px;
   }
   .rank-podium-card.rank-1 {
     min-height: 220px;
@@ -1375,7 +1375,7 @@ input:focus, select:focus {
         💾 สำรองข้อมูล
       </button>
       <div class="mobile-header-info">
-        3บ. / คอม 10% <span style="opacity: 0.7; margin-left: 2px;">v1.1.5</span>
+        3บ. / คอม 10% <span style="opacity: 0.7; margin-left: 2px;">v1.1.6</span>
       </div>
     </div>
   </div>
@@ -3293,9 +3293,10 @@ function renderRanking() {
       // Render names - each name nowrap, wrap only between names
       const namesHtml = groupEmps.map((emp, i) => {
         const comma = i < groupEmps.length - 1 ? ',' : '';
-        return `<span style="white-space:nowrap; font-weight:700;">${emp.name}${comma}</span>`;
+        return `<span style="white-space:nowrap; word-break:keep-all; font-weight:700;">${emp.name}${comma}</span>`;
       }).join(' ');
-      const namesDisplay = `<div style="display:flex; flex-wrap:wrap; justify-content:center; gap:0 3px; line-height:1.35;">${namesHtml}</div>`;
+      const nameFontSize = groupEmps.length > 1 ? '0.8rem' : '0.95rem';
+      const namesDisplay = `<div style="display:flex; flex-wrap:wrap; justify-content:center; gap:1px 4px; line-height:1.3; font-size:${nameFontSize}; color:inherit;">${namesHtml}</div>`;
       
       // Build stat section - if ALL paid full, show ONE shared status
       const allPaidFull = groupEmps.every(emp => emp.outstanding === 0 && emp.remitted > 0);
@@ -3349,14 +3350,12 @@ function renderRanking() {
         <div class="rank-podium-card rank-${rankClassNum}" style="padding-bottom: 0 !important; display: flex; flex-direction: column;">
           <div class="rank-badge">${rankLabels[rankNum - 1] || 'อันดับ ' + rankNum}</div>
           
-          <div style="width: 100%; margin-bottom: 0.5rem; text-align: center;">
+          <div style="width: 100%; margin-bottom: 0.5rem; text-align: center; padding: 0 2px;">
             <span class="rank-medal">${rankMedals[rankNum - 1] || '🏅'}</span>
-            <div style="font-size: ${groupEmps.length > 1 ? '0.82rem' : '0.95rem'}; line-height: 1.4; max-width: 100%; overflow: hidden; color: inherit;">
-              ${namesDisplay}
-            </div>
+            ${namesDisplay}
           </div>
           
-          <div class="rank-podium-score" style="margin-bottom: 0.1rem; width:100%; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${formatNum(scoreVal)}</div>
+          <div class="rank-podium-score" style="margin-bottom: 0.1rem; width:100%; text-align:center; white-space:nowrap; overflow:visible;">${formatNum(scoreVal)}</div>
           <div class="rank-podium-label" style="margin-bottom: 0.5rem;">ใบ</div>
           
           <div style="width: 100%; max-height: 80px; overflow-y: auto; margin-bottom: 0.4rem; display: flex; flex-direction: column; gap: 2px;">
