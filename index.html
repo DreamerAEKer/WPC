@@ -754,6 +754,10 @@ input:focus, select:focus {
     padding-left: 0.25rem;
     padding-right: 0.25rem;
     min-width: 0;
+    overflow: visible !important;
+  }
+  .rank-podium-card .podium-block-base {
+    border-radius: 0 0 14px 14px !important;
   }
   .rank-podium-card.rank-1 {
     min-height: 220px;
@@ -1371,7 +1375,7 @@ input:focus, select:focus {
         💾 สำรองข้อมูล
       </button>
       <div class="mobile-header-info">
-        3บ. / คอม 10% <span style="opacity: 0.7; margin-left: 2px;">v1.0.9</span>
+        3บ. / คอม 10% <span style="opacity: 0.7; margin-left: 2px;">v1.1.1</span>
       </div>
     </div>
   </div>
@@ -1381,7 +1385,7 @@ input:focus, select:focus {
       <div class="sidebar-header">
         <div class="logo-icon">🏆</div>
         <h2>ฟุตบอลระดับโลก 2026</h2>
-        <p class="subtitle">Postcard Tracker <span style="font-size: 0.75rem; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 12px; margin-left: 4px;">v1.0.9</span></p>
+        <p class="subtitle">Postcard Tracker <span style="font-size: 0.75rem; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 12px; margin-left: 4px;">v1.1.1</span></p>
       </div>
       <nav class="sidebar-nav">
         <button class="nav-btn active" data-view="dashboard">
@@ -3329,7 +3333,7 @@ function renderRanking() {
       const baseStyle = baseColors[rankClassNum - 1] || { bg: '#4b5563', text: '#ffffff' };
 
       podiumHtml += `
-        <div class="rank-podium-card rank-${rankClassNum}" style="padding-bottom: 0 !important; overflow: hidden; display: flex; flex-direction: column;">
+        <div class="rank-podium-card rank-${rankClassNum}" style="padding-bottom: 0 !important; display: flex; flex-direction: column;">
           <div class="rank-badge">${rankLabels[rankNum - 1] || 'อันดับ ' + rankNum}</div>
           
           <div style="width: 100%; margin-bottom: 0.5rem; text-align: center;">
@@ -3356,6 +3360,7 @@ function renderRanking() {
             font-weight: 900;
             margin-top: auto;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
+            border-radius: 0 0 20px 20px;
           ">
             ${rankNum}
           </div>
@@ -3579,9 +3584,7 @@ async function shareAsImage() {
       { bg: '#c2410c', text: '#ffffff' }  // Bronze
     ];
     const baseStyle = baseColors[Math.min(rankNum, 3) - 1] || { bg: '#4b5563', text: '#ffffff' };
-
     podiumCardsHtml += `
-      <div style="
         background: ${sz.bg};
         border: 3px solid ${sz.border};
         border-radius: 32px;
@@ -3598,7 +3601,6 @@ async function shareAsImage() {
         z-index: ${cardZIndex};
         box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
         margin: 0 -2px; /* Overlap borders slightly */
-        overflow: hidden;
       ">
         <div style="font-size: 4rem; margin-bottom: 0.6rem;">${rankMedals[rankNum - 1] || '🏅'}</div>
         <div style="width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 0.6rem;">
@@ -3623,6 +3625,7 @@ async function shareAsImage() {
           font-weight: 900;
           margin-top: auto;
           box-shadow: inset 0 4px 6px rgba(0,0,0,0.15);
+          border-radius: 0 0 32px 32px;
         ">
           ${rankNum}
         </div>
