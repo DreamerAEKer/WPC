@@ -1375,7 +1375,7 @@ input:focus, select:focus {
         💾 สำรองข้อมูล
       </button>
       <div class="mobile-header-info">
-        3บ. / คอม 10% <span style="opacity: 0.7; margin-left: 2px;">v1.1.2</span>
+        3บ. / คอม 10% <span style="opacity: 0.7; margin-left: 2px;">v1.1.3</span>
       </div>
     </div>
   </div>
@@ -3290,10 +3290,9 @@ function renderRanking() {
       const groupEmps = rankGroups[rankNum];
       const rankClassNum = Math.min(rankNum, 3);
       
-      // Render names vertical list inside card
-      const namesHtml = groupEmps.map(emp => `
-        <div style="font-weight: 700; margin-bottom: 2px;">${emp.name}</div>
-      `).join('');
+      // Render names with comma separator inside card
+      const namesHtml = groupEmps.map((emp, i) => `<span style="font-weight: 700;">${emp.name}${i < groupEmps.length - 1 ? ',' : ''}</span>`).join(' ');
+      const namesDisplay = `<div style="line-height: 1.4;">${namesHtml}</div>`;
       
       const incDetailsHtml = groupEmps.map(emp => {
         const price = store.data.pricePerTicket;
@@ -3338,8 +3337,8 @@ function renderRanking() {
           
           <div style="width: 100%; margin-bottom: 0.5rem; text-align: center;">
             <span class="rank-medal">${rankMedals[rankNum - 1] || '🏅'}</span>
-            <div style="font-size: ${groupEmps.length > 1 ? '0.82rem' : '0.95rem'}; line-height: 1.2; max-width: 100%; overflow: hidden; color: inherit;">
-              ${namesHtml}
+            <div style="font-size: ${groupEmps.length > 1 ? '0.82rem' : '0.95rem'}; line-height: 1.4; max-width: 100%; overflow: hidden; color: inherit;">
+              ${namesDisplay}
             </div>
           </div>
           
@@ -3534,10 +3533,12 @@ async function shareAsImage() {
     const cardZIndex = rankNum === topRanks[0] ? 10 : 5;
     
     // Group names html
-    const namesHtml = groupEmps.map(emp => {
+    const namesHtml = groupEmps.map((emp, i) => {
       const fs = groupEmps.length > 1 ? '2.8rem' : '3.5rem';
-      return `<div style="font-size: ${fs}; font-weight: 800; color: ${sz.nameColor}; margin-bottom: 0.2rem; line-height: 1.2; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${emp.name}</div>`;
-    }).join('');
+      const comma = i < groupEmps.length - 1 ? ',' : '';
+      return `<span style="font-size: ${fs}; font-weight: 800; color: ${sz.nameColor}; line-height: 1.2;">${emp.name}${comma}</span>`;
+    }).join(' ');
+    const namesContainer = `<div style="max-width: 100%; line-height: 1.4; overflow: hidden;">${namesHtml}</div>`;
 
     const detailsHtml = groupEmps.map(emp => {
       const price = store.data.pricePerTicket;
@@ -3577,7 +3578,7 @@ async function shareAsImage() {
 
     podiumCardsHtml += `<div style="background: ${sz.bg}; border: 3px solid ${sz.border}; border-radius: 32px; padding: 2rem 1.5rem 0; text-align: center; flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; min-height: ${sz.height}; position: relative; z-index: ${cardZIndex}; box-shadow: 0 -4px 12px rgba(0,0,0,0.05); margin: 0 -2px; overflow: hidden;">
       <div style="font-size: 4rem; margin-bottom: 0.6rem;">${rankMedals[rankNum - 1] || '🏅'}</div>
-      <div style="width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 0.6rem;">${namesHtml}</div>
+      <div style="width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 0.6rem;">${namesContainer}</div>
       <div style="font-size: ${sz.numSize}; font-weight: 900; color: ${sz.numColor}; line-height: 1; letter-spacing: -3px; max-width: 100%; white-space: nowrap; display: inline-block;">${formatNum(groupEmps[0].requested)}</div>
       <div style="font-size: 1.8rem; color: ${sz.labelColor}; font-weight: 600; margin-top: 0.5rem;">ใบ</div>
       <div style="width: 100%; max-height: 250px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; margin-top: 0.8rem; padding-bottom: 1rem;">${detailsHtml}</div>
