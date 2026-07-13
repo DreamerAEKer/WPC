@@ -620,6 +620,14 @@ input:focus, select:focus {
     display: none !important;
   }
 
+  /* Make print containers horizontally scrollable on mobile */
+  .print-container {
+    overflow-x: auto;
+    max-width: 100vw;
+    padding: 1rem !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
   /* Specifically make the employee management table a card layout */
   #emp-manage-table, #emp-manage-table thead, #emp-manage-table tbody, #emp-manage-table th, #emp-manage-table td, #emp-manage-table tr { 
     display: block; 
