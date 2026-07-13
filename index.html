@@ -3286,7 +3286,13 @@ function renderRanking() {
     
     podiumHtml = `<div class="rank-podium-row">`;
     
-    topRanks.forEach(rankNum => {
+    // Reorder for podium display: Rank 2 on left, Rank 1 in middle, Rank 3 on right
+    let displayRanks = [];
+    if (topRanks.length === 3) displayRanks = [topRanks[1], topRanks[0], topRanks[2]];
+    else if (topRanks.length === 2) displayRanks = [topRanks[1], topRanks[0]];
+    else displayRanks = topRanks;
+    
+    displayRanks.forEach(rankNum => {
       const groupEmps = rankGroups[rankNum];
       const rankClassNum = Math.min(rankNum, 3);
       
@@ -3298,7 +3304,7 @@ function renderRanking() {
       const nameFontSize = groupEmps.length > 1 ? '0.8rem' : '0.95rem';
       const namesDisplay = `<div style="display:flex; flex-wrap:wrap; justify-content:center; gap:1px 4px; line-height:1.3; font-size:${nameFontSize}; color:inherit;">${namesHtml}</div>`;
       
-      const allPaidFull = groupEmps.every(emp => emp.outstanding === 0 && emp.remitted > 0);
+      const allPaidFull = groupEmps.every(emp => emp.outstanding <= 0 && emp.remitted > 0);
       let incDetailsHtml = '';
       if (allPaidFull && groupEmps.length > 1) {
          const suffix = groupEmps.length === 2 ? 'ทั้งคู่' : `ทั้ง ${groupEmps.length} คน`;
@@ -3314,7 +3320,7 @@ function renderRanking() {
            const remittedMoney = emp.remitted * price;
            const commission = remittedMoney * rate;
            const outstandingMoney = emp.outstanding * price;
-           const isPaidFull = emp.outstanding === 0 && emp.remitted > 0;
+           const isPaidFull = emp.outstanding <= 0 && emp.remitted > 0;
            const isNoPay = emp.remitted === 0;
            let rows = '';
            if (isPaidFull) {
@@ -3390,13 +3396,13 @@ function renderRanking() {
       const pctText = remittedPct === 100 ? `ส่งครบแล้ว` : ``;
       
       let incHtml = '';
-      if (emp.outstanding === 0 && emp.remitted > 0) {
+      if (emp.outstanding <= 0 && emp.remitted > 0) {
          incHtml = `<div style="color: #059669; font-weight: 800; font-size: 0.75rem;">✅ ส่งเงินครบแล้ว</div>
                     <div style="color: #4f46e5; font-weight: 800; font-size: 0.7rem;">💰 คอมฯ: ${formatNum(guaranteedInc)}.-</div>`;
       } else {
          const price = store.data.pricePerTicket;
          const remittedStr = emp.remitted > 0 ? `<span style="color: #059669; font-weight: 600;">💵 ส่ง: ${formatNum(emp.remitted)}ใบ (${formatNum(emp.remitted * price)}.-)</span>` : '';
-         const outStr = emp.outstanding > 0 ? `<span style="color: #dc2626; font-weight: 600;">⏳ รอ: ${formatNum(emp.outstanding)}ใบ (${formatNum(emp.outstanding * price)}.-)</span>` : '';
+         const outStr = emp.outstanding > 0 ? `<span style="color: #dc2626; font-weight: 600;">⏳ รอส่ง: ${formatNum(emp.outstanding)}ใบ (${formatNum(emp.outstanding * price)}.-)</span>` : '';
          const commStr = emp.remitted > 0 ? `<span style="color: #4f46e5; font-weight: 800;">💰 คอมฯ: ${formatNum(guaranteedInc)}.-</span>` : '';
          incHtml = `<div style="display: flex; flex-direction: column; gap: 2px; font-size: 0.65rem;">
             ${remittedStr ? `<div>${remittedStr}</div>` : ''}
@@ -3552,7 +3558,7 @@ async function shareAsImage() {
     const fs = groupEmps.length > 1 ? '2.5rem' : '3.5rem';
     const namesContainer = `<div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 12px; font-size: ${fs}; color: ${sz.nameColor}; line-height: 1.2; width: 100%; padding: 0 10px;">${namesHtml}</div>`;
 
-    const allPaidFull = groupEmps.every(emp => emp.outstanding === 0 && emp.remitted > 0);
+    const allPaidFull = groupEmps.every(emp => emp.outstanding <= 0 && emp.remitted > 0);
     let detailsHtml = '';
     if (allPaidFull && groupEmps.length > 1) {
        const suffix = groupEmps.length === 2 ? 'ทั้งคู่' : `ทั้ง ${groupEmps.length} คน`;
@@ -3568,7 +3574,7 @@ async function shareAsImage() {
          const remittedMoney = emp.remitted * price;
          const commission = remittedMoney * rate;
          const outstandingMoney = emp.outstanding * price;
-         const isPaidFull = emp.outstanding === 0 && emp.remitted > 0;
+         const isPaidFull = emp.outstanding <= 0 && emp.remitted > 0;
          const isNoPay = emp.remitted === 0;
          let rows = '';
          if (isPaidFull) {
@@ -3577,7 +3583,7 @@ async function shareAsImage() {
             rows += `<div style="display: flex; justify-content: space-between; margin-top: 2px; white-space: nowrap; gap: 2px;"><span style="color: #059669; font-weight: bold;">💵 ส่ง:</span><span style="font-weight: 800; color: #059669;">${formatNum(emp.remitted)}ใบ (${formatNum(remittedMoney)}.-)</span></div>`;
          }
          if (outstandingMoney > 0) {
-            rows += `<div style="display: flex; justify-content: space-between; margin-top: 2px; white-space: nowrap; gap: 2px;"><span style="color: #dc2626; font-weight: bold;">⏳ รอ:</span><span style="font-weight: 800; color: #dc2626;">${formatNum(emp.outstanding)}ใบ (${formatNum(outstandingMoney)}.-)</span></div>`;
+            rows += `<div style="display: flex; justify-content: space-between; margin-top: 2px; white-space: nowrap; gap: 2px;"><span style="color: #dc2626; font-weight: bold;">⏳ รอส่ง:</span><span style="font-weight: 800; color: #dc2626;">${formatNum(emp.outstanding)}ใบ (${formatNum(outstandingMoney)}.-)</span></div>`;
          }
          if (commission > 0) {
             rows += `<div style="display: flex; justify-content: space-between; margin-top: 2px; white-space: nowrap; gap: 2px;"><span style="color: #4f46e5; font-weight: bold;">💰 คอมฯ:</span><span style="font-weight: 800; color: #4f46e5;">${formatNum(commission)}.-</span></div>`;
@@ -3638,8 +3644,11 @@ async function shareAsImage() {
           <div style="font-size: 4.2rem; font-weight: 900; line-height: 1; color: #4f46e5;">${formatNum(emp.requested)}</div>
           <div style="font-size: 1.5rem; opacity: 0.6; text-transform: uppercase; color: #64748b;">ใบ</div>
           <div style="font-size: 1.7rem; color: #10b981; font-weight: 700; margin-top: 0.8rem; display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
-            <div>💵 ส่ง: ${formatNum(emp.remitted)} ใบ <span style="color: #64748b; font-size: 1.5rem;">(${formatNum(emp.remitted * store.data.pricePerTicket)}.-)</span></div>
-            ${emp.outstanding > 0 ? `<div style="color: #ef4444;">⏳ รอ: ${formatNum(emp.outstanding)} ใบ <span style="color: #64748b; font-size: 1.5rem;">(${formatNum(emp.outstanding * store.data.pricePerTicket)}.-)</span></div>` : ''}
+            ${(emp.outstanding <= 0 && emp.remitted > 0) 
+              ? `<div style="color: #059669;">✅ ส่งเงินครบแล้ว</div>` 
+              : `<div>💵 ส่ง: ${formatNum(emp.remitted)} ใบ <span style="color: #64748b; font-size: 1.5rem;">(${formatNum(emp.remitted * store.data.pricePerTicket)}.-)</span></div>`
+            }
+            ${emp.outstanding > 0 ? `<div style="color: #ef4444;">⏳ รอส่ง: ${formatNum(emp.outstanding)} ใบ <span style="color: #64748b; font-size: 1.5rem;">(${formatNum(emp.outstanding * store.data.pricePerTicket)}.-)</span></div>` : ''}
             ${emp.remitted > 0 ? `<div style="color: #4f46e5; font-size: 1.8rem; font-weight: 900;">💰 คอมฯ: ${formatNum(emp.remitted * store.data.pricePerTicket * store.data.commissionRate)}.-</div>` : ''}
           </div>
         </div>
@@ -3670,8 +3679,11 @@ async function shareAsImage() {
             <div style="font-size: 4.2rem; font-weight: 900; line-height: 1; color: #64748b;">${formatNum(mgr.requested)}</div>
             <div style="font-size: 1.5rem; opacity: 0.6; text-transform: uppercase; color: #64748b;">ใบ</div>
             <div style="font-size: 1.7rem; color: #10b981; font-weight: 700; margin-top: 0.8rem; display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
-              <div>💵 ส่ง: ${formatNum(mgr.remitted)} ใบ <span style="color: #64748b; font-size: 1.5rem;">(${formatNum(mgr.remitted * store.data.pricePerTicket)}.-)</span></div>
-              ${mgr.outstanding > 0 ? `<div style="color: #ef4444;">⏳ รอ: ${formatNum(mgr.outstanding)} ใบ <span style="color: #64748b; font-size: 1.5rem;">(${formatNum(mgr.outstanding * store.data.pricePerTicket)}.-)</span></div>` : ''}
+              ${(mgr.outstanding <= 0 && mgr.remitted > 0) 
+                ? `<div style="color: #059669;">✅ ส่งเงินครบแล้ว</div>` 
+                : `<div>💵 ส่ง: ${formatNum(mgr.remitted)} ใบ <span style="color: #64748b; font-size: 1.5rem;">(${formatNum(mgr.remitted * store.data.pricePerTicket)}.-)</span></div>`
+              }
+              ${mgr.outstanding > 0 ? `<div style="color: #ef4444;">⏳ รอส่ง: ${formatNum(mgr.outstanding)} ใบ <span style="color: #64748b; font-size: 1.5rem;">(${formatNum(mgr.outstanding * store.data.pricePerTicket)}.-)</span></div>` : ''}
               ${mgr.remitted > 0 ? `<div style="color: #4f46e5; font-size: 1.8rem; font-weight: 900;">💰 คอมฯ: ${formatNum(mgr.remitted * store.data.pricePerTicket * store.data.commissionRate)}.-</div>` : ''}
             </div>
           </div>
