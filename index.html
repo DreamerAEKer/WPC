@@ -1061,6 +1061,19 @@ input:focus, select:focus {
 .rank-2 .rank-badge { background: #64748b; color: white; }
 .rank-3 .rank-badge { background: #9a6048; color: white; }
 
+.podium-stat-row {
+  font-size: 0.78rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+.podium-stat-label { font-weight: 700; }
+.podium-stat-value { font-weight: 800; }
+.rank-1 .podium-stat-row { font-size: 0.82rem; }
+
 /* Other ranks list */
 .ranking-cards-container {
   display: grid;
@@ -3352,8 +3365,8 @@ function renderRanking() {
          const suffix = groupEmps.length === 2 ? 'ทั้งคู่' : `ทั้ง ${groupEmps.length} คน`;
          const commission = groupEmps[0].remitted * store.data.pricePerTicket * store.data.commissionRate;
          incDetailsHtml = `<div style="width:100%; background:rgba(255,255,255,0.55); border-radius:8px; padding:6px 8px; margin-top:4px; text-align:center;">
-           <div style="font-size:0.65rem; font-weight:900; color:#059669; line-height:1.3; white-space:nowrap;">✅ ส่งเงินครบแล้ว ${suffix}</div>
-           <div style="font-size:0.65rem; color:#4f46e5; font-weight:800; margin-top:2px; white-space:nowrap;">💰 ค่าคอมฯ คนละ: ${formatNum(commission)} .-</div>
+           <div style="font-size:0.75rem; font-weight:900; color:#059669; line-height:1.3; white-space:nowrap;">✅ ส่งเงินครบแล้ว ${suffix}</div>
+           <div style="font-size:0.75rem; color:#4f46e5; font-weight:800; margin-top:2px; white-space:nowrap;">💰 ค่าคอมฯ คนละ: ${formatNum(commission)} .-</div>
          </div>`;
       } else {
          incDetailsHtml = groupEmps.map(emp => {
@@ -3366,7 +3379,7 @@ function renderRanking() {
            const isNoPay = emp.remitted === 0;
            let rows = '';
            if (isPaidFull) {
-             rows += `<div style="font-size:0.65rem; color:#059669; font-weight:900; text-align:center; white-space:nowrap;">✅ ส่งเงินครบแล้ว</div>`;
+             rows += `<div style="font-size:0.75rem; color:#059669; font-weight:900; text-align:center; white-space:nowrap;">✅ ส่งเงินครบแล้ว</div>`;
            } else if (!isNoPay) {
              rows += `<div class="podium-stat-row"><span class="podium-stat-label" style="color:#059669;">💵 ส่ง:</span><span class="podium-stat-value" style="color:#059669;">${formatNum(emp.remitted)}ใบ (${formatNum(remittedMoney)}.-)</span></div>`;
            }
@@ -3378,7 +3391,7 @@ function renderRanking() {
            }
            if (!rows) return '';
            return `<div style="width:100%; background:rgba(255,255,255,0.5); border-radius:8px; padding:4px 6px; margin-top:3px; border-top:1px solid rgba(0,0,0,0.06);">
-             ${groupEmps.length > 1 ? `<div style="font-size:0.65rem; font-weight:900; color:inherit; opacity:0.85; margin-bottom:2px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${emp.name}</div>` : ''}
+             ${groupEmps.length > 1 ? `<div style="font-size:0.75rem; font-weight:900; color:inherit; opacity:0.85; margin-bottom:2px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${emp.name}</div>` : ''}
              ${rows}
            </div>`;
          }).join('');
