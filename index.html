@@ -3510,7 +3510,7 @@ async function shareAsImage() {
   }
 
   // Make the snapshot layout lighter and more vibrant
-  snapEl.style.background = 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)';
+  snapEl.style.background = 'linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%)';
   snapEl.style.color = '#1e2937';
   snapEl.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
   snapEl.style.border = '1px solid #cbd5e1';
@@ -3521,9 +3521,9 @@ async function shareAsImage() {
 
   // Podium backgrounds and sizing for premium look
   const podiumSizes = [
-    { height: '580px', numSize: '8.5rem', bg: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)', border: '#f59e0b', nameColor: '#78350f', numColor: '#92400e', labelColor: '#b45309' }, // gold (1st)
-    { height: '460px', numSize: '6.5rem', bg: 'linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%)', border: '#94a3b8', nameColor: '#334155', numColor: '#1e2937', labelColor: '#64748b' }, // silver (2nd)
-    { height: '360px', numSize: '5.5rem', bg: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)', border: '#fdba74', nameColor: '#9a3412', numColor: '#c2410c', labelColor: '#ea580c' }, // bronze (3rd)
+    { height: '580px', numSize: '8.5rem', bg: 'linear-gradient(135deg, #fffbeb 0%, #fde68a 100%)', border: '#fbbf24', nameColor: '#78350f', numColor: '#92400e', labelColor: '#b45309' }, // gold (1st)
+    { height: '460px', numSize: '6.5rem', bg: 'linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%)', border: '#cbd5e1', nameColor: '#334155', numColor: '#1e2937', labelColor: '#64748b' }, // silver (2nd)
+    { height: '360px', numSize: '5.5rem', bg: 'linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%)', border: '#fdba74', nameColor: '#9a3412', numColor: '#c2410c', labelColor: '#ea580c' }, // bronze (3rd)
   ];
 
   // Group employees by rank
@@ -3541,7 +3541,7 @@ async function shareAsImage() {
 
   // Build ordered display: Silver (1), Gold (0), Bronze (2)  
   let podiumCardsHtml = '';
-  const displayOrder = topRanks.map((_, i) => i);
+  const displayOrder = [1, 0, 2];
   displayOrder.filter(i => i < topRanks.length).forEach(idx => {
     const rankNum = topRanks[idx];
     const groupEmps = rankGroups[rankNum];
