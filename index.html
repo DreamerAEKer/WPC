@@ -2040,7 +2040,7 @@ class Store {
   }
 
   // --- Master Transactions ---
-  addMasterTx(type, qty, dateStr) {
+  addMasterTx(type, qty, dateStr, allocations = []) {
     const amount = qty * this.data.pricePerTicket;
     
     // Validation
@@ -2063,6 +2063,7 @@ class Store {
       type,
       qty,
       amount,
+      allocations: allocations || [],
       date: dateStr || new Date().toISOString()
     });
     this.saveData();
@@ -2850,6 +2851,18 @@ function renderTransactions() {
       valStr = `<span style="color: #3b82f6">${formatNum(qty)}</span>`;
     } else if (tx.type === 'remit') {
       typeBadge = '<span style="color: #10b981; font-weight: 600;">นำส่งเงิน</span>';
+      
+      // Show allocation details for remit transactions
+      if (tx.allocations && tx.allocations.length > 0) {
+        const empDataList = store.getEmployeesData();
+        const allocDetails = tx.allocations.map(a => {
+          const allocEmp = empDataList.find(e => e.id === a.empId);
+          const empName = allocEmp ? allocEmp.name : 'พนักงาน';
+          return `<div style="font-size: 0.75rem; color: var(--text-light); white-space: normal; line-height: 1.4;">• ${empName}: ${formatNum(a.qty)}</div>`;
+        }).join('');
+        typeBadge += `<div style="margin-top: 6px; padding: 6px; background: #f8fafc; border-radius: 4px; border: 1px dashed #cbd5e1; text-align: left; max-width: 150px;">${allocDetails}</div>`;
+      }
+      
       valStr = `<span style="color: #10b981">${formatNum(qty)}</span>`;
     } else if (tx.type === 'return') {
       typeBadge = '<span style="color: #6b7280; font-weight: 600;">คืนเข้าสต็อก</span>';
