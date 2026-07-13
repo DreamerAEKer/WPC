@@ -1620,7 +1620,7 @@ input:focus, select:focus {
                     <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">คิดเป็นเงิน<br>บาท</th>
                     <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">ยอดค้างนำส่ง<br>ฉบับ</th>
                     <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">คิดเป็นเงิน<br>บาท</th>
-                    <td style="border: 1px solid black; padding: 0.75rem; width: 28.56%; text-align: left; vertical-align: top; font-size: 0.85rem; line-height: 1.4;" colspan="2" rowspan="2" id="c-alloc-details"></td>
+                    <td style="border: 1px solid black; padding: 0.75rem; width: 28.56%; text-align: left; vertical-align: top; font-size: 0.85rem; line-height: 1.4;" colspan="2" rowspan="2">หมายเหตุ:<br><br>......................................................................</td>
                   </tr>
                   <tr style="height: 60px;">
                     <td style="border: 1px solid black; background: #fffbe6;" contenteditable="true" id="c-date2" oninput="syncDates('c-date2')"></td>
@@ -1643,28 +1643,7 @@ input:focus, select:focus {
                 </div>
               </div>
               
-              <div class="no-print" style="margin-top: 3rem; border-top: 1px solid var(--border); padding-top: 2rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
-                  <h3 style="color: var(--text-dark); font-size: 1.2rem; margin: 0;">ประวัติการรับโควต้า / นำส่งเงิน (Master History)</h3>
-                  <button class="btn btn-primary" onclick="saveMasterTx()">💾 บันทึกประวัติ (จากแบบฟอร์มด้านบน)</button>
-                </div>
-                <div class="table-responsive">
-                  <table class="data-table" id="master-history-table">
-                    <thead>
-                      <tr>
-                        <th>ว/ด/ป</th>
-                        <th>รายการ</th>
-                        <th>จำนวน (ฉบับ)</th>
-                        <th>จำนวนเงิน (บาท)</th>
-                        <th>จัดการ</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <!-- Populated by JS -->
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+
             </div>
 
             <!-- Type 2: Log Book Form -->
@@ -1815,6 +1794,31 @@ input:focus, select:focus {
               </tfoot>
             </table>
           </div>
+          </div>
+          
+          <div style="margin-top: 3rem; border-top: 1px solid var(--border); padding-top: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
+              <h3 style="color: var(--text-dark); font-size: 1.2rem; margin: 0;">ประวัติของหัวหน้าแผนก (รับโควต้า / นำส่งเงิน)</h3>
+              <!-- The button is removed because they don't have the "form above" anymore. The master tx is saved from the dashboard -->
+            </div>
+            <div class="table-responsive">
+              <table class="data-table" id="master-history-table">
+                <thead>
+                  <tr>
+                    <th>ว/ด/ป</th>
+                    <th>รายการ</th>
+                    <th>จำนวน (ฉบับ)</th>
+                    <th>จำนวนเงิน (บาท)</th>
+                    <th>จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
         </div>
       </div>
 
@@ -4158,25 +4162,11 @@ function printMasterTx(txId) {
     document.getElementById('c-remit-qty').textContent = '';
     document.getElementById('p-sign-role').textContent = '(ผู้เบิก)';
     document.getElementById('p-sign-date-label').textContent = 'วันที่เบิก';
-    document.getElementById('c-alloc-details').innerHTML = '';
   } else {
     document.getElementById('c-req-qty').textContent = '';
     document.getElementById('c-remit-qty').textContent = tx.qty;
     document.getElementById('p-sign-role').textContent = '(ผู้นำส่ง)';
     document.getElementById('p-sign-date-label').textContent = 'วันที่นำส่ง';
-    
-    // Add allocation details if available
-    let allocText = '';
-    if (tx.allocations && tx.allocations.length > 0) {
-      const empDataList = store.getEmployeesData();
-      allocText = '<div style="font-weight: bold; margin-bottom: 4px; text-align: center;">-- ประกอบด้วยยอดของ --</div>';
-      tx.allocations.forEach(a => {
-        const emp = empDataList.find(e => e.id === a.empId);
-        const empName = emp ? emp.name : 'พนักงาน';
-        allocText += `<div>• ${empName}: ${formatNum(a.qty)} ฉบับ</div>`;
-      });
-    }
-    document.getElementById('c-alloc-details').innerHTML = allocText;
   }
   
   // Trigger calculation
