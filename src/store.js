@@ -85,7 +85,7 @@ class Store {
   }
 
   // --- Master Transactions ---
-  addMasterTx(type, qty, dateStr) {
+  addMasterTx(type, qty, dateStr, allocations = []) {
     const amount = qty * this.data.pricePerTicket;
     
     // Validation
@@ -108,7 +108,8 @@ class Store {
       type,
       qty,
       amount,
-      date: dateStr || new Date().toISOString()
+      date: dateStr || new Date().toISOString(),
+      allocations: type === 'remit' ? (allocations || []) : []
     });
     this.saveData();
   }
@@ -127,6 +128,37 @@ class Store {
     
     this.data.masterTransactions = this.data.masterTransactions.filter(t => t.id !== txId);
     this.saveData();
+  }
+
+  getUnallocatedRemittances() {
+    const employeesData = this.getEmployeesData();
+    const allocationsByEmp = {};
+    
+    // Sum all allocations inside master transactions
+    this.data.masterTransactions.forEach(mt => {
+      if (mt.type === 'remit' && Array.isArray(mt.allocations)) {
+        mt.allocations.forEach(alloc => {
+          if (!allocationsByEmp[alloc.empId]) allocationsByEmp[alloc.empId] = 0;
+          allocationsByEmp[alloc.empId] += alloc.qty;
+        });
+      }
+    });
+
+    const unallocated = [];
+    employeesData.forEach(emp => {
+      const allocatedQty = allocationsByEmp[emp.id] || 0;
+      const unallocatedQty = emp.paidQty - allocatedQty;
+      
+      if (unallocatedQty > 0) {
+        unallocated.push({
+          empId: emp.id,
+          name: emp.name,
+          unallocatedQty
+        });
+      }
+    });
+    
+    return unallocated;
   }
 
   // --- Employees ---
@@ -216,6 +248,7 @@ class Store {
         ...emp,
         requested,
         remitted,
+        paidQty: totalPaidQty,
         outstanding,
         revenue,
         commission,
