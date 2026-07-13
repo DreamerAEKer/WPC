@@ -1617,7 +1617,7 @@ input:focus, select:focus {
                     <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">คิดเป็นเงิน<br>บาท</th>
                     <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">ยอดค้างนำส่ง<br>ฉบับ</th>
                     <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">คิดเป็นเงิน<br>บาท</th>
-                    <td style="border: 1px solid black; padding: 0.75rem; width: 28.56%;" colspan="2" rowspan="2"></td>
+                    <td style="border: 1px solid black; padding: 0.75rem; width: 28.56%; text-align: left; vertical-align: top; font-size: 0.85rem; line-height: 1.4;" colspan="2" rowspan="2" id="c-alloc-details"></td>
                   </tr>
                   <tr style="height: 60px;">
                     <td style="border: 1px solid black; background: #fffbe6;" contenteditable="true" id="c-date2" oninput="syncDates('c-date2')"></td>
@@ -4142,11 +4142,25 @@ function printMasterTx(txId) {
     document.getElementById('c-remit-qty').textContent = '';
     document.getElementById('p-sign-role').textContent = '(ผู้เบิก)';
     document.getElementById('p-sign-date-label').textContent = 'วันที่เบิก';
+    document.getElementById('c-alloc-details').innerHTML = '';
   } else {
     document.getElementById('c-req-qty').textContent = '';
     document.getElementById('c-remit-qty').textContent = tx.qty;
     document.getElementById('p-sign-role').textContent = '(ผู้นำส่ง)';
     document.getElementById('p-sign-date-label').textContent = 'วันที่นำส่ง';
+    
+    // Add allocation details if available
+    let allocText = '';
+    if (tx.allocations && tx.allocations.length > 0) {
+      const empDataList = store.getEmployeesData();
+      allocText = '<div style="font-weight: bold; margin-bottom: 4px; text-align: center;">-- ประกอบด้วยยอดของ --</div>';
+      tx.allocations.forEach(a => {
+        const emp = empDataList.find(e => e.id === a.empId);
+        const empName = emp ? emp.name : 'พนักงาน';
+        allocText += `<div>• ${empName}: ${formatNum(a.qty)} ฉบับ</div>`;
+      });
+    }
+    document.getElementById('c-alloc-details').innerHTML = allocText;
   }
   
   // Trigger calculation
