@@ -1404,7 +1404,7 @@ input:focus, select:focus {
         💾 สำรองข้อมูล
       </button>
       <div class="mobile-header-info">
-        3บ. / คอม 10% <span style="opacity: 0.7; margin-left: 2px;">v1.1.15</span>
+        3บ. / คอม 10% <span style="opacity: 0.7; margin-left: 2px;">v1.1.16</span>
       </div>
     </div>
   </div>
@@ -1459,6 +1459,9 @@ input:focus, select:focus {
       </header>
 
       <div id="view-dashboard" class="view-section active">
+        <!-- Box Remission Alert -->
+        <div id="box-remission-alert" style="margin-bottom: 1.5rem;"></div>
+
         <!-- Ranking Header & Share Buttons -->
         <div class="ranking-header-card no-print">
           <div class="ranking-trophy">🏆</div>
@@ -2539,6 +2542,38 @@ txDatePicker = flatpickr("#tx-date", {
 function renderDashboard() {
   const data = store.getOverview();
   
+  // Calculate Box Remission Alert
+  const cashOnHandCards = data.totalRemitted - data.masterRemitted;
+  const alertEl = document.getElementById('box-remission-alert');
+  if (alertEl) {
+    if (cashOnHandCards >= 4000) {
+      const boxes = Math.floor(cashOnHandCards / 4000);
+      const remaining = cashOnHandCards % 4000;
+      const extraText = remaining > 0 ? ` (มีเศษอีก ${formatNum(remaining)} ใบ)` : '';
+      alertEl.innerHTML = `
+        <div style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); border-radius: 16px; padding: 1.5rem; color: white; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2);">
+          <div>
+            <div style="font-size: 1.1rem; font-weight: 600; opacity: 0.9;">🎉 พร้อมนำส่ง ปณ.กลาง แล้ว!</div>
+            <div style="font-size: 1.8rem; font-weight: 800; line-height: 1.2; margin-top: 0.2rem;">ยอดเงินสดพอส่ง ${boxes} กล่อง${extraText}</div>
+          </div>
+          <div style="font-size: 3.5rem; opacity: 0.9;">📦</div>
+        </div>
+      `;
+    } else {
+      const missing = 4000 - cashOnHandCards;
+      alertEl.innerHTML = `
+        <div style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); border-radius: 16px; padding: 1.5rem; color: white; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.2);">
+          <div>
+            <div style="font-size: 1.1rem; font-weight: 600; opacity: 0.9;">⏳ สะสมยอดเงินสดสำหรับนำส่ง</div>
+            <div style="font-size: 1.5rem; font-weight: 800; line-height: 1.2; margin-top: 0.2rem;">ขาดอีก ${formatNum(missing)} ใบ จะครบ 1 กล่อง</div>
+            <div style="font-size: 0.95rem; opacity: 0.8; margin-top: 0.4rem;">(ยอดเงินสดในมือปัจจุบัน: ${formatNum(cashOnHandCards)} ใบ)</div>
+          </div>
+          <div style="font-size: 3.5rem; opacity: 0.6;">📦</div>
+        </div>
+      `;
+    }
+  }
+
   document.getElementById('dashboard-kpi').innerHTML = `
     <div style="grid-column: 1 / -1; margin-bottom: -0.5rem; margin-top: 0.5rem;">
       <h3 style="color: var(--text-dark); font-size: 1.1rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem;">ข้อมูลโควต้าแผนก (ระดับหัวหน้า)</h3>
