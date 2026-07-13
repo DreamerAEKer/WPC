@@ -754,7 +754,7 @@ input:focus, select:focus {
   /* Podium - keep horizontal, scale down for mobile */
   .rank-podium-row {
     gap: 0.5rem;
-    align-items: flex-end;
+    align-items: stretch;
   }
   .rank-podium-card {
     border-radius: 14px;
@@ -772,16 +772,19 @@ input:focus, select:focus {
     padding-top: 1.25rem;
     flex: 1.2;
     max-width: none;
+    margin-top: 0;
   }
   .rank-podium-card.rank-2 {
     min-height: 180px;
     padding-top: 1rem;
     max-width: none;
+    margin-top: 30px;
   }
   .rank-podium-card.rank-3 {
     min-height: 165px;
     padding-top: 0.75rem;
     max-width: none;
+    margin-top: 50px;
   }
   .rank-medal { font-size: 1.4rem; margin-bottom: 0.25rem; }
   .rank-1 .rank-medal { font-size: 1.8rem; }
