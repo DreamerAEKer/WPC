@@ -936,7 +936,7 @@ input:focus, select:focus {
   gap: 1rem;
   justify-content: center;
   margin-bottom: 1.5rem;
-  align-items: flex-end;
+  align-items: stretch;
 }
 .rank-podium-card {
   border-radius: 20px;
@@ -959,7 +959,8 @@ input:focus, select:focus {
 .rank-podium-card.rank-2 {
   background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
   border: 2px solid #cbd5e1;
-  order: 2;
+  order: 1;
+  margin-top: 40px;
   min-height: 280px;
   padding-top: 2rem;
   flex: 1;
@@ -971,8 +972,9 @@ input:focus, select:focus {
 .rank-podium-card.rank-1 {
   background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
   border: 3px solid #f59e0b;
-  order: 1;
-  min-height: 380px;
+  order: 2;
+  margin-top: 0;
+  min-height: 320px;
   padding-top: 2.5rem;
   flex: 1.2;
   max-width: 280px;
@@ -984,7 +986,8 @@ input:focus, select:focus {
   background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
   border: 2px solid #fdba74;
   order: 3;
-  min-height: 200px;
+  margin-top: 70px;
+  min-height: 250px;
   padding-top: 1.5rem;
   flex: 1;
   max-width: 220px;
