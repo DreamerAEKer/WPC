@@ -2617,11 +2617,15 @@ document.getElementById('form-transfer-tx').addEventListener('submit', (e) => {
   }
 
   try {
-    // 1. คืนสต็อกจาก ลธ. (Return from source)
-    store.addTransaction('return', qty, srcId, dateStr);
-    
-    // 2. เบิกเข้าพนักงาน (Request for destination)
-    store.addTransaction('req', qty, destId, dateStr);
+    if (srcId === 'HEAD') {
+      // ดึงจากกองกลางโดยตรง (ไม่มีการ return)
+      store.addTransaction('req', qty, destId, dateStr);
+    } else {
+      // 1. คืนสต็อกจาก ลธ. (Return from source)
+      store.addTransaction('return', qty, srcId, dateStr);
+      // 2. เบิกเข้าพนักงาน (Request for destination)
+      store.addTransaction('req', qty, destId, dateStr);
+    }
     
     // 3. (Optional) นำส่งเงินทันที (Remit for destination)
     if (remitNow) {
@@ -2935,9 +2939,14 @@ function renderTransactions() {
     const destVal = transferDestSelect.value;
     
     transferSrcSelect.innerHTML = '<option value="">-- เลือกผู้โอน (ลธ.) --</option>';
+    
+    // Add Head's stock (Central pool)
+    const overview = store.getOverview();
+    transferSrcSelect.innerHTML += `<option value="HEAD" data-balance="${overview.remainingQuota}" style="font-weight:bold; color:var(--primary);">⭐ สต็อกกองกลาง หน.แผนก (คงเหลือ: ${formatNum(overview.remainingQuota)})</option>`;
+
     transferDestSelect.innerHTML = '<option value="">-- เลือกผู้รับ --</option>';
     emps.forEach(emp => {
-      transferSrcSelect.innerHTML += `<option value="${emp.id}" data-balance="${emp.outstanding}">${emp.name} (คงค้าง: ${formatNum(emp.outstanding)})</option>`;
+      transferSrcSelect.innerHTML += `<option value="${emp.id}" data-balance="${emp.outstanding}">${emp.name} (สต็อกในมือ: ${formatNum(emp.outstanding)})</option>`;
       transferDestSelect.innerHTML += `<option value="${emp.id}">${emp.name}</option>`;
     });
     
