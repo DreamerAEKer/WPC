@@ -3309,7 +3309,8 @@ function renderRanking() {
         <div style="display: flex; flex-direction: column; gap: 0.5rem;">
     `;
     managers.forEach(mgr => {
-      const expectedInc = mgr.requested * store.data.pricePerTicket * store.data.commissionRate;
+      const remainingCards = Math.max(0, (mgr.requested || 0) - (mgr.remitted || 0));
+      const expectedInc = remainingCards * store.data.pricePerTicket * store.data.commissionRate;
       const guaranteedInc = mgr.remitted * store.data.pricePerTicket * store.data.commissionRate;
       const remittedPct = Math.min(100, Math.round((mgr.remitted / (mgr.requested || 1)) * 100));
       const pctText = remittedPct === 100 ? `ส่งครบแล้ว` : ``;
@@ -4399,6 +4400,27 @@ function updateReturnQty() {
 
 document.getElementById('tx-emp').addEventListener('change', updateReturnQty);
 document.getElementById('tx-type').addEventListener('change', updateReturnQty);
+
+function updateTxTypeColor() {
+  const typeEl = document.getElementById('tx-type');
+  const val = typeEl.value;
+  if (val === 'req') {
+    typeEl.style.border = '2px solid #3b82f6';
+    typeEl.style.backgroundColor = '#eff6ff';
+    typeEl.style.color = '#1e3a8a';
+  } else if (val === 'remit') {
+    typeEl.style.border = '2px solid #10b981';
+    typeEl.style.backgroundColor = '#ecfdf5';
+    typeEl.style.color = '#064e3b';
+  } else if (val === 'return') {
+    typeEl.style.border = '2px solid #ea580c';
+    typeEl.style.backgroundColor = '#fff7ed';
+    typeEl.style.color = '#7c2d12';
+  }
+}
+document.getElementById('tx-type').addEventListener('change', updateTxTypeColor);
+// Initialize color on load
+updateTxTypeColor();
 
 // Calculate value dynamically
 document.getElementById('tx-qty').addEventListener('input', (e) => {
