@@ -1778,6 +1778,37 @@ input:focus, select:focus {
             </div>
             <button type="submit" class="btn btn-primary">บันทึกรายการ</button>
           </form>
+
+        <div class="card" style="margin-top: 2rem; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border: 1px solid #cbd5e1; padding: 1.5rem;">
+          <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 1rem; margin-bottom: 1.5rem;">
+            <h3 style="color: #334155; margin: 0; display: flex; align-items: center; gap: 0.5rem;">🔄 โอนสต็อก / กระจายยอด (เช่น จาก ลธ.)</h3>
+            <p style="margin: 0.5rem 0 0; font-size: 0.85rem; color: #64748b;">ใช้สำหรับดึงสต็อกจากพนักงานคนหนึ่ง (เช่น ลธ.) ไปให้พนักงานอีกคนหนึ่ง</p>
+          </div>
+          <form id="form-transfer-tx" class="standard-form">
+            <div class="form-group">
+              <label>โอนจาก (ลธ. / ผู้โอน)</label>
+              <select id="transfer-src-emp" required></select>
+              <small class="hint">ยอดคงค้าง: <span id="transfer-src-balance" style="font-weight: 600; color: #ea580c;">0</span> ใบ</small>
+            </div>
+            <div class="form-group">
+              <label>โอนให้ (ผู้รับ)</label>
+              <select id="transfer-dest-emp" required></select>
+            </div>
+            <div class="form-group">
+              <label>จำนวน (ฉบับ)</label>
+              <input type="number" id="transfer-qty" min="1" required />
+            </div>
+            <div class="form-group">
+              <label>วันที่ทำรายการ</label>
+              <input type="text" id="transfer-date" required autocomplete="off" placeholder="เลือกวันที่..." />
+            </div>
+            <div class="form-group" style="flex-direction: row; align-items: center; gap: 0.5rem; background: #fff; padding: 1rem; border-radius: 8px; border: 1px solid #e2e8f0;">
+              <input type="checkbox" id="transfer-remit-now" style="width: 20px; height: 20px; accent-color: #10b981;" />
+              <label for="transfer-remit-now" style="font-weight: 600; cursor: pointer; color: #065f46; margin: 0;">โอนพร้อมนำส่งเงินทันที (พนักงานผู้รับนำส่งเงินแล้ว)</label>
+            </div>
+            <button type="submit" class="btn btn-primary" style="background-color: #3b82f6;">บันทึกการโอนย้าย</button>
+          </form>
+        </div>
           
           <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 1rem;">
             <h4 style="color: var(--text-dark); margin: 0;">ประวัติรายการล่าสุด</h4>
@@ -2538,6 +2569,73 @@ txDatePicker = flatpickr("#tx-date", {
   }
 });
 
+// Initialize Flatpickr for transfer-date
+flatpickr("#transfer-date", {
+  locale: "th",
+  dateFormat: "Y-m-d",
+  altInput: true,
+  altFormat: "TH",
+  disableMobile: "true",
+  formatDate: (date, format, locale) => {
+    if (format === "TH") {
+      const d = String(date.getDate()).padStart(2, '0');
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const y = date.getFullYear() + 543;
+      return `${d}/${m}/${y}`;
+    }
+    return flatpickr.formatDate(date, format, locale);
+  }
+});
+
+// Transfer logic
+document.getElementById('transfer-src-emp').addEventListener('change', (e) => {
+  const selectedOption = e.target.options[e.target.selectedIndex];
+  if (selectedOption && selectedOption.value) {
+    const balance = selectedOption.getAttribute('data-balance') || 0;
+    document.getElementById('transfer-src-balance').textContent = formatNum(balance);
+    document.getElementById('transfer-qty').max = balance;
+  } else {
+    document.getElementById('transfer-src-balance').textContent = '0';
+    document.getElementById('transfer-qty').max = '';
+  }
+});
+
+document.getElementById('form-transfer-tx').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const srcId = document.getElementById('transfer-src-emp').value;
+  const destId = document.getElementById('transfer-dest-emp').value;
+  const qty = parseInt(document.getElementById('transfer-qty').value) || 0;
+  const dateStr = document.getElementById('transfer-date').value;
+  const remitNow = document.getElementById('transfer-remit-now').checked;
+
+  if (srcId === destId) {
+    return showToast('ไม่สามารถโอนให้ตัวเองได้', 'error');
+  }
+  
+  if (qty <= 0) {
+    return showToast('จำนวนต้องมากกว่า 0', 'error');
+  }
+
+  try {
+    // 1. คืนสต็อกจาก ลธ. (Return from source)
+    store.addTransaction('return', qty, srcId, dateStr);
+    
+    // 2. เบิกเข้าพนักงาน (Request for destination)
+    store.addTransaction('req', qty, destId, dateStr);
+    
+    // 3. (Optional) นำส่งเงินทันที (Remit for destination)
+    if (remitNow) {
+      store.addTransaction('remit', qty, destId, dateStr);
+    }
+    
+    document.getElementById('form-transfer-tx').reset();
+    document.getElementById('transfer-src-balance').textContent = '0';
+    showToast('ทำรายการโอนสต็อกสำเร็จ', 'success');
+  } catch (err) {
+    showToast(err.message, 'error');
+  }
+});
+
 // --- Renders ---
 function renderDashboard() {
   const data = store.getOverview();
@@ -2828,6 +2926,24 @@ function renderTransactions() {
     emps.forEach(emp => {
       txEmpSelect.innerHTML += `<option value="${emp.id}">${emp.name} (ค้างส่ง: ${emp.outstanding})</option>`;
     });
+  }
+
+  const transferSrcSelect = document.getElementById('transfer-src-emp');
+  const transferDestSelect = document.getElementById('transfer-dest-emp');
+  if (transferSrcSelect && transferDestSelect) {
+    const srcVal = transferSrcSelect.value;
+    const destVal = transferDestSelect.value;
+    
+    transferSrcSelect.innerHTML = '<option value="">-- เลือกผู้โอน (ลธ.) --</option>';
+    transferDestSelect.innerHTML = '<option value="">-- เลือกผู้รับ --</option>';
+    emps.forEach(emp => {
+      transferSrcSelect.innerHTML += `<option value="${emp.id}" data-balance="${emp.outstanding}">${emp.name} (คงค้าง: ${formatNum(emp.outstanding)})</option>`;
+      transferDestSelect.innerHTML += `<option value="${emp.id}">${emp.name}</option>`;
+    });
+    
+    // Restore previous selection if any
+    if (srcVal) transferSrcSelect.value = srcVal;
+    if (destVal) transferDestSelect.value = destVal;
   }
 
   const allocEmpSelect = document.getElementById('alloc-emp');
