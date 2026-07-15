@@ -4291,8 +4291,46 @@ async function deleteTx(txId) {
     }
   }
 }
+function populatePrintFieldsForTx(txId) {
+  const tx = store.data.masterTransactions.find(t => t.id === txId);
+  if (!tx) return;
+  
+  const sorted = [...store.data.masterTransactions].sort((a,b) => new Date(a.date) - new Date(b.date));
+  const idx = sorted.findIndex(t => t.id === txId);
+  
+  let prevReq = 0;
+  let prevRemit = 0;
+  
+  for (let i = 0; i < idx; i++) {
+    if (sorted[i].type === 'req') prevReq += sorted[i].qty;
+    if (sorted[i].type === 'remit') prevRemit += sorted[i].qty;
+  }
+  
+  const d = new Date(tx.date);
+  let year = d.getFullYear();
+  if (year < 2500) year += 543;
+  const dateStr = `${d.getDate()}/${d.getMonth() + 1}/${year}`;
+  
+  document.getElementById('c-date1').textContent = dateStr;
+  document.getElementById('c-date2').textContent = dateStr;
+  
+  document.getElementById('c-prev-qty').textContent = prevReq > 0 ? prevReq : '';
+  document.getElementById('c-remit-accum').textContent = prevRemit > 0 ? prevRemit : '';
+  
+  if (tx.type === 'req') {
+    document.getElementById('c-req-qty').textContent = tx.qty;
+    document.getElementById('c-remit-qty').textContent = '';
+  } else if (tx.type === 'remit') {
+    document.getElementById('c-req-qty').textContent = '';
+    document.getElementById('c-remit-qty').textContent = tx.qty;
+  }
+  
+  document.getElementById('p-sign-date').textContent = dateStr;
+  
+  calcForm();
+}
+
 function printMasterTx(txId) {
-  // Find and click the "พิมพ์เอกสาร" nav button to switch tab
   const printBtn = document.querySelector('.nav-btn[data-view="print"]');
   if (printBtn) printBtn.click();
   
