@@ -1404,7 +1404,7 @@ input:focus, select:focus {
         💾 สำรองข้อมูล
       </button>
       <div class="mobile-header-info">
-        3บ. / คอม 10% <span style="opacity: 0.7; margin-left: 2px;">v1.1.16</span>
+        3บ. / คอม 10% <span style="opacity: 0.7; margin-left: 2px;">v1.1.17</span>
       </div>
     </div>
   </div>
@@ -1414,7 +1414,7 @@ input:focus, select:focus {
       <div class="sidebar-header">
         <div class="logo-icon">🏆</div>
         <h2>ฟุตบอลระดับโลก 2026</h2>
-        <p class="subtitle">Postcard Tracker <span style="font-size: 0.75rem; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 12px; margin-left: 4px;">v1.1.16</span></p>
+        <p class="subtitle">Postcard Tracker <span style="font-size: 0.75rem; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 12px; margin-left: 4px;">v1.1.17</span></p>
       </div>
       <nav class="sidebar-nav">
         <button class="nav-btn active" data-view="dashboard">
@@ -2625,17 +2625,17 @@ document.getElementById('form-transfer-tx').addEventListener('submit', (e) => {
   try {
     if (srcId === 'HEAD') {
       // ดึงจากกองกลางโดยตรง (ไม่มีการ return)
-      store.addTransaction('req', qty, destId, dateStr);
+      store.addTransaction('req', destId, qty, dateStr);
     } else {
       // 1. คืนสต็อกจาก ลธ. (Return from source)
-      store.addTransaction('return', qty, srcId, dateStr);
+      store.addTransaction('return', srcId, qty, dateStr);
       // 2. เบิกเข้าพนักงาน (Request for destination)
-      store.addTransaction('req', qty, destId, dateStr);
+      store.addTransaction('req', destId, qty, dateStr);
     }
     
     // 3. (Optional) นำส่งเงินทันที (Remit for destination)
     if (remitNow) {
-      store.addTransaction('remit', qty, destId, dateStr);
+      store.addTransaction('remit', destId, qty, dateStr);
     }
     
     document.getElementById('form-transfer-tx').reset();
@@ -3330,7 +3330,7 @@ function getRankingData() {
   };
 
   const emps = store.getEmployeesData()
-    .filter(e => !e.isManager && !e.name.includes('ลธ.') && !e.name.includes('สต็อก'))
+    .filter(e => !e.isManager && !e.name.includes('ลธ') && !e.name.includes('สต็อก'))
     .sort((a, b) => {
       // 1. Sort by requested descending
       if (b.requested !== a.requested) {
@@ -4364,32 +4364,6 @@ function importData(input) {
   reader.readAsText(file, 'utf-8');
 }
 
-// Toast notification helper
-function showToast(message, type = 'success') {
-  let toast = document.getElementById('app-toast');
-  if (!toast) {
-    toast = document.createElement('div');
-    toast.id = 'app-toast';
-    toast.style.cssText = `
-      position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px);
-      padding: 0.75rem 1.5rem; border-radius: 12px; font-size: 0.95rem; font-weight: 600;
-      font-family: 'Kanit', sans-serif; z-index: 9999; opacity: 0;
-      transition: all 0.3s ease; box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-      max-width: 320px; text-align: center; white-space: nowrap;
-    `;
-    document.body.appendChild(toast);
-  }
-  toast.textContent = message;
-  toast.style.background = type === 'success' ? '#10b981' : '#ef4444';
-  toast.style.color = 'white';
-  toast.style.opacity = '1';
-  toast.style.transform = 'translateX(-50%) translateY(0)';
-  clearTimeout(toast._timer);
-  toast._timer = setTimeout(() => {
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateX(-50%) translateY(20px)';
-  }, 3000);
-}
 
 // Event Listeners
 window.addEventListener('storeUpdated', renderAll);
