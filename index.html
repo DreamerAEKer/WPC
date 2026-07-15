@@ -1404,7 +1404,7 @@ input:focus, select:focus {
         💾 สำรองข้อมูล
       </button>
       <div class="mobile-header-info">
-        3บ. / ซ 10% <span style="opacity: 0.7; margin-left: 2px;">v1.1.18</span>
+        3บ. / ซ 10% <span style="opacity: 0.7; margin-left: 2px;">v1.1.19</span>
       </div>
     </div>
   </div>
@@ -1414,7 +1414,7 @@ input:focus, select:focus {
       <div class="sidebar-header">
         <div class="logo-icon">🏆</div>
         <h2>ฟุตบอลระดับโลก 2026</h2>
-        <p class="subtitle">Postcard Tracker <span style="font-size: 0.75rem; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 12px; margin-left: 4px;">v1.1.18</span></p>
+        <p class="subtitle">Postcard Tracker <span style="font-size: 0.75rem; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 12px; margin-left: 4px;">v1.1.19</span></p>
       </div>
       <nav class="sidebar-nav">
         <button class="nav-btn active" data-view="dashboard">
@@ -3207,15 +3207,6 @@ function renderMasterHistory() {
       valStr = `<span style="color: var(--text-dark)">${formatNum(tx.qty)}</span>`;
     } else {
       typeBadge = '<span style="color: var(--secondary); font-weight: 600;">นำส่งเงิน</span>';
-      if (tx.allocations && tx.allocations.length > 0) {
-        const empDataList = store.getEmployeesData();
-        const allocDetails = tx.allocations.map(a => {
-          const emp = empDataList.find(e => e.id === a.empId);
-          const empName = emp ? emp.name : 'พนักงาน';
-          return `<div style="font-size: 0.75rem; color: var(--text-light); white-space: normal; line-height: 1.4;">• ${empName}: ${formatNum(a.qty)}</div>`;
-        }).join('');
-        typeBadge += `<div style="margin-top: 6px; padding: 6px; background: #f8fafc; border-radius: 4px; border: 1px dashed #cbd5e1; text-align: left;">${allocDetails}</div>`;
-      }
       valStr = `<span style="color: var(--secondary)">${formatNum(tx.qty)}</span>`;
     }
     
@@ -4226,17 +4217,10 @@ async function saveMasterTx() {
       // Action
       if (reqQty > 0) {
         store.addMasterTx('req', reqQty, parseThaiDateStr(date1Str));
-        if (remitQty === 0) {
-          showToast('บันทึกข้อมูลเรียบร้อยแล้ว', 'success');
-          renderAll();
-          initPrintForm();
-        }
       }
       
       if (remitQty > 0) {
-        // Intercept to show allocation modal
-        openMasterAllocationModal(remitQty, parseThaiDateStr(date2Str), reqQty, parseThaiDateStr(date1Str));
-        return;
+        store.addMasterTx('remit', remitQty, parseThaiDateStr(date2Str));
       }
       
       showToast('บันทึกข้อมูลเรียบร้อยแล้ว', 'success');
@@ -4918,168 +4902,5 @@ if (logbookInput) {
   loadLogbookImage();
 }
   </script>
-<!-- Master Remit Allocation Modal -->
-<div id="master-allocation-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); z-index: 10000; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s ease;">
-  <div style="max-width: 500px; width: 90%; background: white; border-radius: 16px; padding: 2rem; transform: scale(0.9); transition: transform 0.2s ease; max-height: 90vh; display: flex; flex-direction: column;">
-    <h3 style="margin-top: 0; margin-bottom: 1rem; font-size: 1.3rem; font-weight: 700; color: var(--text-dark); text-align: center;">จับคู่ยอดเงินลงกล่องนำส่ง</h3>
-    <div style="margin-bottom: 1rem; padding: 1rem; background: #f0fdf4; border-radius: 8px; border: 1px solid #bbf7d0; text-align: center;">
-      <h4 style="margin:0 0 0.5rem 0; color: #166534;">ยอดที่ต้องจัดลงกล่อง: <span id="master-alloc-target" style="font-size: 1.5rem; font-weight: bold;">0</span> ฉบับ</h4>
-      <p style="margin:0; font-size: 0.9rem; color: #15803d;">จัดไปแล้ว: <span id="master-alloc-current">0</span> / <span id="master-alloc-total">0</span> ฉบับ</p>
-    </div>
-    
-    <p style="font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--text-light);">เลือกว่ายอดที่นำส่งครั้งนี้ เป็นของใครบ้าง:</p>
-    
-    <div class="table-responsive" style="flex: 1; overflow-y: auto; margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 8px;">
-      <table class="data-table" style="width: 100%; margin: 0;">
-        <thead style="position: sticky; top: 0; z-index: 1;">
-          <tr>
-            <th style="padding: 0.5rem;">พนักงาน</th>
-            <th style="padding: 0.5rem; text-align: center;">ยอดว่าง</th>
-            <th style="padding: 0.5rem; text-align: center;">จัดลงกล่อง</th>
-          </tr>
-        </thead>
-        <tbody id="master-alloc-tbody">
-        </tbody>
-      </table>
-    </div>
-    
-    <div style="display: flex; gap: 0.75rem; justify-content: center; width: 100%;">
-      <button class="btn" onclick="closeMasterAllocationModal()" style="background: #f1f5f9; color: var(--text-dark); flex: 1; border: 1px solid var(--border); transition: background 0.15s; font-family: inherit;">ยกเลิก</button>
-      <button class="btn" id="btn-save-master-allocation" onclick="confirmMasterAllocation()" style="background: var(--primary); color: white; flex: 2; transition: background 0.15s; font-family: inherit; font-weight: 600;">💾 บันทึกและนำส่ง</button>
-    </div>
-  </div>
-</div>
-
-<script>
-let tempMasterRemitData = null;
-
-function openMasterAllocationModal(remitQty, date2Str, reqQty, date1Str) {
-  const modal = document.getElementById('master-allocation-modal');
-  const inner = modal.querySelector('div');
-  
-  tempMasterRemitData = { remitQty, date2Str, reqQty, date1Str };
-  
-  document.getElementById('master-alloc-target').textContent = formatNum(remitQty);
-  document.getElementById('master-alloc-total').textContent = formatNum(remitQty);
-  
-  const unallocatedList = store.getUnallocatedRemittances();
-  const tbody = document.getElementById('master-alloc-tbody');
-  tbody.innerHTML = '';
-  
-  if (unallocatedList.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-light); padding: 1rem;">ไม่มีพนักงานที่มียอดค้างจัดสรร</td></tr>';
-  } else {
-    // Auto-fill logic
-    let remainingToFill = remitQty;
-    
-    unallocatedList.forEach((item, index) => {
-      let autoFill = 0;
-      if (remainingToFill > 0) {
-        autoFill = Math.min(remainingToFill, item.unallocatedQty);
-        remainingToFill -= autoFill;
-      }
-      
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td style="padding: 0.5rem; white-space: nowrap;">${item.name}</td>
-        <td style="padding: 0.5rem; text-align: center; font-weight: bold; color: var(--primary);">${formatNum(item.unallocatedQty)}</td>
-        <td style="padding: 0.5rem; text-align: center;">
-          <input type="number" class="alloc-input form-control" data-emp-id="${item.empId}" data-max="${item.unallocatedQty}" value="${autoFill > 0 ? autoFill : ''}" min="0" max="${item.unallocatedQty}" oninput="updateMasterAllocTotal()" style="width: 80px; text-align: center; margin: 0 auto; padding: 4px;">
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-  
-  updateMasterAllocTotal();
-  
-  modal.style.display = 'flex';
-  // Trigger reflow
-  modal.offsetWidth;
-  modal.style.opacity = '1';
-  inner.style.transform = 'scale(1)';
-}
-
-function closeMasterAllocationModal() {
-  const modal = document.getElementById('master-allocation-modal');
-  const inner = modal.querySelector('div');
-  modal.style.opacity = '0';
-  inner.style.transform = 'scale(0.9)';
-  setTimeout(() => {
-    modal.style.display = 'none';
-    tempMasterRemitData = null;
-  }, 200);
-}
-
-function updateMasterAllocTotal() {
-  const inputs = document.querySelectorAll('.alloc-input');
-  let currentTotal = 0;
-  inputs.forEach(input => {
-    let val = parseInt(input.value) || 0;
-    const max = parseInt(input.getAttribute('data-max')) || 0;
-    if (val > max) {
-      val = max;
-      input.value = max;
-    }
-    if (val < 0) {
-      val = 0;
-      input.value = '';
-    }
-    currentTotal += val;
-  });
-  
-  const currentEl = document.getElementById('master-alloc-current');
-  currentEl.textContent = formatNum(currentTotal);
-  
-  const targetQty = tempMasterRemitData ? tempMasterRemitData.remitQty : 0;
-  const btn = document.getElementById('btn-save-master-allocation');
-  
-  if (currentTotal === targetQty) {
-    currentEl.style.color = '#15803d'; // Green
-    btn.disabled = false;
-    btn.style.opacity = '1';
-    btn.style.cursor = 'pointer';
-  } else {
-    currentEl.style.color = '#dc2626'; // Red
-    btn.disabled = true;
-    btn.style.opacity = '0.5';
-    btn.style.cursor = 'not-allowed';
-  }
-}
-
-function confirmMasterAllocation() {
-  if (!tempMasterRemitData) return;
-  
-  const inputs = document.querySelectorAll('.alloc-input');
-  let currentTotal = 0;
-  const allocations = [];
-  
-  inputs.forEach(input => {
-    const val = parseInt(input.value) || 0;
-    if (val > 0) {
-      currentTotal += val;
-      allocations.push({
-        empId: input.getAttribute('data-emp-id'),
-        qty: val
-      });
-    }
-  });
-  
-  if (currentTotal !== tempMasterRemitData.remitQty) {
-    showToast('ยอดจัดสรรไม่ตรงกับยอดที่ต้องการนำส่ง', 'error');
-    return;
-  }
-  
-  try {
-    store.addMasterTx('remit', tempMasterRemitData.remitQty, tempMasterRemitData.date2Str, allocations);
-    showToast('บันทึกรายการนำส่งเรียบร้อยแล้ว', 'success');
-    renderAll();
-    initPrintForm();
-    closeMasterAllocationModal();
-  } catch(e) {
-    showToast(e.message, 'error');
-  }
-}
-</script>
 </body>
 </html>
