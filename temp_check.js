@@ -1,1946 +1,4 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ระบบจัดการไปรษณียบัตรทายผลบอลโลก 2026</title>
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <!-- Flatpickr for Thai Year Support -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <script src="https://npmcdn.com/flatpickr/dist/l10n/th.js"></script>
-  <style>
-:root {
-  --primary: #4f46e5;
-  --primary-hover: #4338ca;
-  --secondary: #10b981;
-  --bg-color: #f3f4f6;
-  --surface: #ffffff;
-  --text-dark: #1f2937;
-  --text-light: #6b7280;
-  --border: #e5e7eb;
-  --danger: #ef4444;
-  --sidebar-width: 260px;
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --radius: 12px;
-}
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: 'Kanit', 'Inter', sans-serif;
-  background-color: var(--bg-color);
-  color: var(--text-dark);
-  line-height: 1.5;
-}
-
-.app-layout {
-  display: flex;
-  min-height: 100vh;
-}
-
-/* Sidebar */
-.sidebar {
-  width: var(--sidebar-width);
-  background: var(--surface);
-  border-right: 1px solid var(--border);
-  display: flex;
-  flex-direction: column;
-  position: fixed;
-  height: 100vh;
-  z-index: 10;
-  box-shadow: var(--shadow-sm);
-  overflow-y: auto;
-}
-
-.sidebar-header {
-  padding: 2rem 1.5rem;
-  text-align: center;
-  border-bottom: 1px solid var(--border);
-}
-
-.logo-icon {
-  font-size: 3rem;
-  margin-bottom: 0.5rem;
-}
-
-.sidebar-header h2 {
-  font-size: 1.25rem;
-  color: var(--primary);
-  font-weight: 700;
-}
-
-.subtitle {
-  color: var(--text-light);
-  font-size: 0.875rem;
-}
-
-.sidebar-nav {
-  padding: 1.5rem 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  flex: 1;
-}
-
-.nav-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  width: 100%;
-  padding: 0.875rem 1rem;
-  background: transparent;
-  border: none;
-  border-radius: 8px;
-  font-family: inherit;
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--text-light);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: left;
-}
-
-.nav-btn:hover {
-  background: #f8fafc;
-  color: var(--primary);
-}
-
-.nav-btn.active {
-  background: var(--primary);
-  color: white;
-  box-shadow: var(--shadow-md);
-}
-
-.sidebar-footer {
-  padding: 1rem 1.5rem 1.5rem;
-  border-top: 1px solid var(--border);
-  background: #f8fafc;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-.data-backup-section {
-  background: linear-gradient(135deg, #1e1b4b, #4f46e5);
-  border-radius: 10px;
-  padding: 0.85rem;
-  color: white;
-}
-.backup-label {
-  font-size: 0.8rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-  opacity: 0.95;
-}
-.backup-btns {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 0.35rem;
-}
-.btn-backup {
-  flex: 1;
-  background: rgba(255,255,255,0.2);
-  color: white;
-  border: 1px solid rgba(255,255,255,0.3);
-  border-radius: 7px;
-  padding: 0.45rem 0.5rem;
-  font-size: 0.78rem;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-  text-align: center;
-  transition: background 0.15s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.25rem;
-}
-.btn-backup:hover { background: rgba(255,255,255,0.3); }
-.btn-import { cursor: pointer; }
-.backup-hint {
-  font-size: 0.7rem;
-  opacity: 0.65;
-  text-align: center;
-}
-/* Paid checkbox & note input */
-.paid-toggle {
-  display: inline-flex;
-  align-items: center;
-  cursor: pointer;
-  gap: 0.25rem;
-}
-.paid-checkbox {
-  width: 18px;
-  height: 18px;
-  accent-color: #10b981;
-  cursor: pointer;
-}
-.paid-checkmark {
-  font-size: 1rem;
-  line-height: 1;
-}
-.note-input {
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  padding: 0.4rem 0.65rem;
-  font-size: 0.85rem;
-  font-family: inherit;
-  width: 180px;
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  color: var(--text-dark);
-}
-.note-input:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(79,70,229,0.12);
-}
-.btn-delete-emp {
-  background: #fee2e2;
-  border: 1px solid #fca5a5;
-  border-radius: 6px;
-  padding: 0.3rem 0.6rem;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: background 0.15s;
-}
-.btn-delete-emp:hover { background: #fecaca; }
-
-.price-info {
-  background: white;
-  padding: 1rem;
-  border-radius: 8px;
-  border: 1px dashed #cbd5e1;
-  font-size: 0.875rem;
-  color: var(--text-light);
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.price-info b {
-  color: var(--primary);
-}
-
-/* Main Content */
-.main-content {
-  flex: 1;
-  margin-left: var(--sidebar-width);
-  padding: 2rem 3rem;
-  width: calc(100% - var(--sidebar-width));
-}
-
-.top-header {
-  margin-bottom: 2rem;
-}
-
-.top-header h1 {
-  font-size: 1.8rem;
-  font-weight: 600;
-  color: var(--text-dark);
-}
-
-/* Views */
-.view-section {
-  display: none;
-  animation: fadeIn 0.3s ease;
-}
-
-.view-section.active {
-  display: block;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* Dashboard KPIs */
-.kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.kpi-card {
-  background: var(--surface);
-  padding: 1.5rem;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-md);
-  border-left: 4px solid var(--primary);
-  transition: transform 0.2s ease;
-}
-
-.kpi-card:hover {
-  transform: translateY(-2px);
-}
-
-.kpi-card h4 {
-  color: var(--text-light);
-  font-size: 0.875rem;
-  font-weight: 500;
-  margin-bottom: 0.5rem;
-}
-
-.kpi-card .value {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: var(--text-dark);
-}
-
-.kpi-card .value.text-primary { color: var(--primary); }
-.kpi-card .value.text-success { color: var(--secondary); }
-.kpi-card .value.text-danger { color: var(--danger); }
-
-/* Cards & Tables */
-.card {
-  background: var(--surface);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
-  padding: 1.5rem;
-  border: 1px solid var(--border);
-}
-
-.print-card {
-  padding: 2rem;
-}
-
-.card-header {
-  margin-bottom: 1.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--border);
-}
-
-.card-header h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
-}
-
-.table-responsive {
-  overflow-x: auto;
-}
-
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.data-table th, .data-table td {
-  padding: 1rem;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-}
-
-.data-table th {
-  background: #f9fafb;
-  font-weight: 600;
-  color: var(--text-light);
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.data-table tr:hover td {
-  background: #f8fafc;
-}
-
-/* Forms */
-.inline-form {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-
-.standard-form {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.form-group label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text-dark);
-}
-
-input[type="text"],
-input[type="number"],
-input[type="date"],
-select {
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  font-family: inherit;
-  font-size: 0.95rem;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-input:focus, select:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-}
-
-.hint {
-  font-size: 0.8rem;
-  color: var(--text-light);
-}
-
-/* Buttons */
-.btn {
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-family: inherit;
-  font-weight: 600;
-  font-size: 0.95rem;
-  cursor: pointer;
-  border: none;
-  transition: all 0.2s ease;
-}
-
-.btn-primary {
-  background: var(--primary);
-  color: white;
-}
-
-.btn-primary:hover {
-  background: var(--primary-hover);
-}
-
-.btn-secondary {
-  background: var(--secondary);
-  color: white;
-}
-
-.btn-secondary:hover {
-  background: #059669;
-}
-
-/* Utils */
-.grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-}
-
-/* Mobile Header */
-.mobile-header {
-  display: none;
-}
-
-@media (max-width: 768px) {
-  .mobile-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: calc(env(safe-area-inset-top, 0px) + 0.75rem) 1rem 0.75rem;
-    position: sticky;
-    top: 0;
-    z-index: 110;
-    box-shadow: var(--shadow-sm);
-  }
-  
-  .mobile-header-title {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--primary);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  
-  .mobile-header-info {
-    font-size: 0.75rem;
-    background: #e0e7ff;
-    color: var(--primary);
-    padding: 0.25rem 0.5rem;
-    border-radius: 6px;
-    font-weight: 500;
-  }
-
-  .app-layout {
-    flex-direction: column;
-  }
-
-  /* Transform Sidebar into Bottom Nav Bar */
-  .sidebar {
-    width: 100%;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    top: auto;
-    height: calc(72px + env(safe-area-inset-bottom, 0px));
-    border-top: 1px solid var(--border);
-    border-right: none;
-    flex-direction: row;
-    z-index: 100;
-    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.08);
-    overflow-y: hidden;
-    overflow-x: auto;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-    -webkit-overflow-scrolling: touch;
-  }
-  .sidebar::-webkit-scrollbar {
-    display: none;
-  }
-
-  .sidebar-header {
-    display: none;
-  }
-
-  .sidebar-footer {
-    display: none;
-  }
-
-  .sidebar-nav {
-    flex-direction: row;
-    padding: 0.25rem 0.5rem;
-    gap: 0.25rem;
-    justify-content: flex-start;
-    width: max-content;
-    height: 100%;
-  }
-
-  .nav-btn {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 3px;
-    padding: 4px 6px;
-    font-size: 0.7rem;
-    font-weight: 500;
-    height: 100%;
-    border-radius: 8px;
-    background: transparent !important;
-    text-align: center;
-    color: var(--text-light);
-    flex: 0 0 88px;
-    box-shadow: none !important;
-  }
-
-  .nav-btn span {
-    font-size: 1.25rem;
-  }
-
-  .nav-btn:hover {
-    color: var(--primary);
-  }
-
-  .nav-btn.active {
-    color: var(--primary);
-  }
-
-  /* Main Content Layout Adjustments */
-  .main-content {
-    margin-left: 0;
-    padding: 1rem 1rem calc(150px + env(safe-area-inset-bottom, 0px)) 1rem;
-    width: 100%;
-  }
-
-  /* Form adjustments for iOS Safari zoom prevention & readability */
-  input[type="text"],
-  input[type="number"],
-  input[type="date"],
-  select {
-    font-size: 16px; /* Prevents auto zoom-in on iPhone */
-  }
-
-  .inline-form {
-    flex-direction: column;
-    align-items: stretch;
-    width: 100%;
-  }
-
-  .inline-form input {
-    width: 100%;
-  }
-
-  .inline-form button {
-    width: 100%;
-  }
-
-  /* KPI Grid for iPhone 13 (2-column layout) */
-  .kpi-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
-  }
-
-  .kpi-grid .kpi-card {
-    padding: 1rem;
-    border-radius: 10px;
-  }
-
-  .kpi-grid .kpi-card:last-child {
-    grid-column: span 2;
-  }
-
-  .kpi-card h4 {
-    font-size: 0.75rem;
-    margin-bottom: 0.25rem;
-  }
-
-  .kpi-card .value {
-    font-size: 1.4rem;
-  }
-
-  /* Table layout optimizations for narrow screen */
-  .data-table th, .data-table td {
-    padding: 0.75rem 0.5rem;
-    font-size: 0.8rem;
-    white-space: nowrap; /* Prevent ugly wrapping in headers */
-  }
-
-  .data-table {
-    min-width: unset; /* Remove min-width to allow compact layout */
-  }
-
-  .hide-mobile {
-    display: none !important;
-  }
-
-  /* Make print containers horizontally scrollable on mobile */
-  .print-container {
-    overflow-x: auto;
-    max-width: 100vw;
-    padding: 1rem !important;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  /* Specifically make the employee management table a card layout */
-  #emp-manage-table, #emp-manage-table thead, #emp-manage-table tbody, #emp-manage-table th, #emp-manage-table td, #emp-manage-table tr { 
-    display: block; 
-  }
-  
-  #emp-manage-table {
-    min-width: unset;
-  }
-
-  #emp-manage-table thead tr { 
-    position: absolute;
-    top: -9999px;
-    left: -9999px;
-  }
-  
-  #emp-manage-table tr {
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    background: white;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-    padding: 0.5rem;
-  }
-  
-  #emp-manage-table td { 
-    border: none;
-    border-bottom: 1px solid #f1f5f9; 
-    position: relative;
-    padding-left: 50% !important; 
-    text-align: right;
-    font-size: 0.85rem;
-    min-height: 2rem;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    white-space: normal;
-  }
-
-  #emp-manage-table td:last-child {
-    border-bottom: 0;
-  }
-  
-  #emp-manage-table td:before { 
-    position: absolute;
-    top: 50%;
-    left: 0.75rem;
-    transform: translateY(-50%);
-    width: 45%; 
-    padding-right: 10px; 
-    white-space: nowrap;
-    text-align: left;
-    font-weight: 600;
-    color: var(--text-light);
-  }
-
-  #emp-manage-table td:nth-of-type(1):before { content: "ชื่อพนักงาน"; }
-  #emp-manage-table td:nth-of-type(2):before { content: "หน.แผนก"; }
-  #emp-manage-table td:nth-of-type(3):before { content: "เบิก (ฉบับ)"; }
-  #emp-manage-table td:nth-of-type(4):before { content: "นำส่งแล้ว"; }
-  #emp-manage-table td:nth-of-type(5):before { content: "ค้างนำส่ง"; }
-  #emp-manage-table td:nth-of-type(6):before { content: "คอมมิชชัน"; }
-  #emp-manage-table td:nth-of-type(7):before { content: "จัดการ"; }
-
-  .grid-2 {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .card {
-    padding: 1rem;
-    border-radius: 10px;
-  }
-
-  .card-header {
-    margin-bottom: 1rem;
-    padding-bottom: 0.75rem;
-  }
-
-  /* Print View on mobile container */
-  .print-container {
-    padding: 1rem !important;
-    overflow-x: auto !important;
-    max-width: 100% !important;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .print-card {
-    padding: 1rem !important;
-    max-width: 100% !important;
-  }
-
-  .print-tabs {
-    flex-wrap: wrap !important;
-    gap: 0.5rem !important;
-  }
-
-  .print-tabs button {
-    flex: 1 1 calc(50% - 0.25rem) !important;
-    min-width: 140px !important;
-    font-size: 0.8rem !important;
-    padding: 0.5rem 0.5rem !important;
-  }
-
-  .top-header {
-    display: none; /* We use sticky mobile-header instead */
-  }
-
-  .ranking-header-card {
-    flex-direction: column;
-    gap: 1rem;
-    padding: 1.25rem;
-  }
-
-  .ranking-share-btns {
-    width: 100%;
-    flex-direction: row;
-    justify-content: center;
-  }
-
-  .ranking-cards-container {
-    grid-template-columns: 1fr;
-  }
-
-  /* Podium - keep horizontal, scale down for mobile */
-  .rank-podium-row {
-    gap: 0.5rem;
-    align-items: stretch;
-  }
-  .rank-podium-card {
-    border-radius: 14px;
-    padding-left: 0.3rem;
-    padding-right: 0.3rem;
-    padding-bottom: 0 !important;
-    min-width: 0;
-    overflow: visible !important;
-  }
-  .rank-podium-card .podium-block-base {
-    border-radius: 0 0 14px 14px;
-  }
-  .rank-podium-card.rank-1 {
-    min-height: 220px;
-    padding-top: 1.25rem;
-    flex: 1.2;
-    max-width: none;
-    margin-top: 0;
-  }
-  .rank-podium-card.rank-2 {
-    min-height: 180px;
-    padding-top: 1rem;
-    max-width: none;
-    margin-top: 30px;
-  }
-  .rank-podium-card.rank-3 {
-    min-height: 165px;
-    padding-top: 0.75rem;
-    max-width: none;
-    margin-top: 50px;
-  }
-  .rank-medal { font-size: 1.4rem; margin-bottom: 0.25rem; }
-  .rank-1 .rank-medal { font-size: 1.8rem; }
-  .rank-podium-name { font-size: 0.78rem; margin-bottom: 0.2rem; }
-  .rank-1 .rank-podium-name { font-size: 0.88rem; }
-  .rank-1 .rank-podium-score { font-size: 1.25rem; }
-  .rank-2 .rank-podium-score { font-size: 1.1rem; }
-  .rank-3 .rank-podium-score { font-size: 1rem; }
-  .rank-podium-label { font-size: 0.58rem; }
-  
-  .rank-list-item {
-    padding: 0.75rem 1rem;
-    gap: 0.5rem;
-  }
-  .rank-list-num {
-    width: 30px;
-    font-size: 1.2rem;
-  }
-  .rank-list-score {
-    font-size: 1.1rem;
-  }
-}
-
-@media print {
-  @page {
-    margin: 15mm;
-  }
-  body {
-    background: white;
-  }
-  body * {
-    visibility: hidden;
-  }
-  #printable-area, #printable-area * {
-    visibility: visible;
-    color: black !important;
-  }
-  #printable-area {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-  }
-  .sidebar, .top-header, .btn, .card, .no-print {
-    border: none !important;
-    box-shadow: none !important;
-  }
-  .no-print {
-    display: none !important;
-  }
-  .print-container {
-    border: none !important;
-    padding: 0 !important;
-    overflow: visible !important;
-  }
-  .print-container > div {
-    min-width: 0 !important;
-    width: 100% !important;
-  }
-}
-
-/* ===== RANKING STYLES ===== */
-.ranking-header-card {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4f46e5 100%);
-  border-radius: 16px;
-  padding: 1.75rem 2rem;
-  margin-bottom: 1.5rem;
-  color: white;
-  box-shadow: 0 8px 32px rgba(79, 70, 229, 0.35);
-  position: relative;
-  overflow: hidden;
-}
-.ranking-header-card::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  right: -10%;
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
-  border-radius: 50%;
-}
-.ranking-trophy {
-  font-size: 3.5rem;
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
-  flex-shrink: 0;
-}
-.ranking-title {
-  font-size: 1.6rem;
-  font-weight: 700;
-  margin: 0 0 0.25rem;
-}
-.ranking-subtitle {
-  font-size: 0.9rem;
-  opacity: 0.8;
-  margin: 0;
-}
-.ranking-share-btns {
-  display: flex;
-  gap: 0.75rem;
-  margin-left: auto;
-  flex-shrink: 0;
-}
-.btn-share-text {
-  background: rgba(255,255,255,0.15);
-  color: white;
-  border: 1px solid rgba(255,255,255,0.3);
-  backdrop-filter: blur(10px);
-  padding: 0.6rem 1.25rem;
-  border-radius: 10px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-family: inherit;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-.btn-share-text:hover {
-  background: rgba(255,255,255,0.25);
-  transform: translateY(-1px);
-}
-.btn-share-img {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-  color: white;
-  border: none;
-  padding: 0.6rem 1.25rem;
-  border-radius: 10px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-family: inherit;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-.btn-share-img:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.5);
-}
-
-/* Podium top 3 */
-.rank-podium-row {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  margin-bottom: 1.5rem;
-  align-items: stretch;
-}
-.rank-podium-card {
-  border-radius: 20px;
-  text-align: center;
-  position: relative;
-  flex: 1;
-  min-width: 0;
-  padding-left: 0.25rem;
-  padding-right: 0.25rem;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-  transition: transform 0.2s;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  padding-bottom: 1.5rem;
-}
-.rank-podium-card:hover { transform: translateY(-4px); }
-/* อันดับ 2 — ซ้าย */
-.rank-podium-card.rank-2 {
-  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-  border: 2px solid #cbd5e1;
-  order: 2;
-  margin-top: 40px;
-  min-height: 280px;
-  padding-top: 2rem;
-  flex: 1;
-  max-width: 220px;
-  color: #334155;
-  box-shadow: 0 10px 15px -3px rgba(148, 163, 184, 0.15);
-}
-/* อันดับ 1 — กลาง ใหญ่ที่สุด */
-.rank-podium-card.rank-1 {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  border: 3px solid #f59e0b;
-  order: 1;
-  margin-top: 0;
-  min-height: 320px;
-  padding-top: 2.5rem;
-  flex: 1.2;
-  max-width: 280px;
-  box-shadow: 0 20px 25px -5px rgba(245, 158, 11, 0.25), 0 8px 10px -6px rgba(0,0,0,0.1);
-  color: #78350f;
-}
-/* อันดับ 3 — ขวา */
-.rank-podium-card.rank-3 {
-  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
-  border: 2px solid #fdba74;
-  order: 3;
-  margin-top: 70px;
-  min-height: 250px;
-  padding-top: 1.5rem;
-  flex: 1;
-  max-width: 220px;
-  color: #c2410c;
-  box-shadow: 0 10px 15px -3px rgba(253, 186, 116, 0.15);
-}
-.rank-medal {
-  font-size: 2rem;
-  display: block;
-  margin-bottom: 0.5rem;
-}
-.rank-1 .rank-medal { font-size: 2.8rem; }
-.rank-podium-name {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #1f2937;
-  margin-bottom: 0.4rem;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.rank-1 .rank-podium-name { font-size: 1.1rem; color: #78350f; }
-.rank-2 .rank-podium-name { color: #334155; }
-.rank-3 .rank-podium-name { color: #7c3b1e; }
-/* ตัวเลขหลัก — ใหญ่แตกต่างกันมาก */
-.rank-podium-score {
-  font-size: 2.2rem;
-  font-weight: 900;
-  line-height: 1;
-  letter-spacing: -1px;
-  white-space: nowrap;
-}
-.rank-1 .rank-podium-score {
-  font-size: 3.6rem;
-  color: #78350f;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.15);
-}
-.rank-2 .rank-podium-score {
-  font-size: 2.6rem;
-  color: #1e3a5f;
-}
-.rank-3 .rank-podium-score {
-  font-size: 2rem;
-  color: #7c3b1e;
-}
-.rank-podium-label {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: #6b7280;
-  margin-top: 0.2rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-.rank-1 .rank-podium-label { color: #92400e; font-size: 0.75rem; }
-.rank-badge {
-  position: absolute;
-  top: -12px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.72rem;
-  font-weight: 700;
-  padding: 3px 12px;
-  border-radius: 20px;
-  white-space: nowrap;
-}
-.rank-1 .rank-badge { background: #d97706; color: white; font-size: 0.8rem; padding: 4px 16px; }
-.rank-2 .rank-badge { background: #64748b; color: white; }
-.rank-3 .rank-badge { background: #9a6048; color: white; }
-
-.podium-stat-row {
-  font-size: 0.78rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 2px;
-  line-height: 1.3;
-  white-space: nowrap;
-}
-.podium-stat-label { font-weight: 700; }
-.podium-stat-value { font-weight: 800; }
-.rank-1 .podium-stat-row { font-size: 0.82rem; }
-
-/* Other ranks list */
-.ranking-cards-container {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
-}
-.rank-list-item {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  background: white;
-  border-radius: 14px;
-  padding: 1rem 1.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-  border: 1px solid var(--border);
-  transition: all 0.2s;
-}
-.rank-list-item:hover {
-  border-color: var(--primary);
-  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.12);
-  transform: translateX(4px);
-}
-.rank-list-num {
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: var(--text-light);
-  width: 40px;
-  text-align: center;
-  flex-shrink: 0;
-}
-.rank-list-info {
-  flex: 1;
-}
-.rank-list-name {
-  font-weight: 700;
-  font-size: 1rem;
-  color: var(--text-dark);
-}
-.rank-list-detail {
-  font-size: 0.8rem;
-  color: var(--text-light);
-  margin-top: 2px;
-}
-.rank-list-right {
-  text-align: right;
-}
-.rank-list-score {
-  font-size: 1.3rem;
-  font-weight: 800;
-  color: var(--primary);
-}
-.rank-list-score-label {
-  font-size: 0.75rem;
-  color: var(--text-light);
-}
-.progress-bar-outer {
-  background: #e5e7eb;
-  border-radius: 999px;
-  height: 6px;
-  margin-top: 4px;
-  width: 100px;
-}
-.progress-bar-inner {
-  background: linear-gradient(90deg, var(--primary), #818cf8);
-  height: 6px;
-  border-radius: 999px;
-  transition: width 0.8s ease;
-}
-
-/* Share Modal */
-.share-modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  z-index: 999;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(4px);
-}
-.share-modal-inner {
-  background: white;
-  border-radius: 20px;
-  padding: 2rem;
-  max-width: 520px;
-  width: 90%;
-  box-shadow: 0 24px 64px rgba(0,0,0,0.25);
-  animation: fadeIn 0.3s ease;
-}
-.share-modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-.share-modal-header h3 {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--text-dark);
-}
-.share-modal-close {
-  background: none;
-  border: none;
-  font-size: 1.25rem;
-  cursor: pointer;
-  color: var(--text-light);
-  padding: 0.25rem;
-  border-radius: 6px;
-  transition: background 0.15s;
-}
-.share-modal-close:hover { background: #f3f4f6; }
-.share-textarea {
-  width: 100%;
-  height: 220px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 1rem;
-  font-family: 'Kanit', monospace;
-  font-size: 0.9rem;
-  color: var(--text-dark);
-  resize: none;
-  line-height: 1.6;
-  outline: none;
-}
-.share-modal-actions {
-  display: flex;
-  gap: 0.75rem;
-  margin-top: 1rem;
-}
-.btn-line {
-  background: #06c755;
-  color: white;
-  text-decoration: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: background 0.2s;
-}
-.btn-line:hover { background: #05b34c; }
-
-/* Snapshot card (hidden, used for image capture) */
-#ranking-snapshot {
-  position: fixed;
-  left: -9999px;
-  top: 0;
-  width: 540px;
-  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #4f46e5 100%);
-  padding: 2rem;
-  font-family: 'Kanit', 'Inter', sans-serif;
-  color: white;
-  border-radius: 24px;
-}
-#ranking-snapshot h2 {
-  font-size: 1.4rem;
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: 0.25rem;
-}
-#ranking-snapshot .snap-subtitle {
-  text-align: center;
-  font-size: 0.85rem;
-  opacity: 0.75;
-  margin-bottom: 1.5rem;
-}
-#ranking-snapshot .snap-row {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  background: rgba(255,255,255,0.1);
-  border-radius: 14px;
-  padding: 0.9rem 1.25rem;
-  margin-bottom: 0.6rem;
-}
-#ranking-snapshot .snap-rank {
-  font-size: 1.4rem;
-  font-weight: 800;
-  width: 36px;
-  text-align: center;
-  flex-shrink: 0;
-}
-#ranking-snapshot .snap-info {
-  flex: 1;
-}
-#ranking-snapshot .snap-name {
-  font-weight: 700;
-  font-size: 0.95rem;
-}
-#ranking-snapshot .snap-detail {
-  font-size: 0.75rem;
-  opacity: 0.7;
-  margin-top: 2px;
-}
-#ranking-snapshot .snap-score {
-  font-size: 1.3rem;
-  font-weight: 800;
-  text-align: right;
-}
-#ranking-snapshot .snap-score-label {
-  font-size: 0.7rem;
-  opacity: 0.7;
-  text-align: right;
-}
-#ranking-snapshot .snap-footer {
-  text-align: center;
-  margin-top: 1.5rem;
-  font-size: 0.75rem;
-  opacity: 0.6;
-}
-.snap-top-row {
-  display: flex;
-  gap: 0.75rem;
-  justify-content: center;
-  margin-bottom: 1rem;
-}
-.snap-top-card {
-  background: rgba(255,255,255,0.15);
-  border-radius: 16px;
-  padding: 1rem;
-  text-align: center;
-  flex: 1;
-}
-.snap-top-medal {
-  font-size: 1.8rem;
-  display: block;
-  margin-bottom: 0.25rem;
-}
-.snap-top-name {
-  font-size: 0.85rem;
-  font-weight: 700;
-}
-.snap-top-score {
-  font-size: 1.4rem;
-  font-weight: 800;
-}
-.snap-top-label {
-  font-size: 0.65rem;
-  opacity: 0.7;
-}
-
-/* Toast Notification Styles */
-#toast-container {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  pointer-events: none;
-}
-.toast {
-  min-width: 280px;
-  max-width: 400px;
-  padding: 12px 20px;
-  border-radius: var(--radius);
-  color: white;
-  font-family: 'Kanit', sans-serif;
-  font-size: 0.95rem;
-  font-weight: 500;
-  box-shadow: var(--shadow-lg);
-  opacity: 0;
-  transform: translateY(-20px);
-  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-  pointer-events: auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-.toast-success {
-  background: linear-gradient(135deg, #059669, #10b981);
-  border-left: 5px solid #047857;
-}
-.toast-warning {
-  background: linear-gradient(135deg, #d97706, #f59e0b);
-  border-left: 5px solid #b45309;
-}
-.toast-error {
-  background: linear-gradient(135deg, #dc2626, #ef4444);
-  border-left: 5px solid #b91c1c;
-}
-  /* Form Tabs */
-  .tx-tabs {
-    display: flex;
-    gap: 0.5rem;
-    width: 100%;
-  }
-  .tx-tab {
-    flex: 1;
-    padding: 0.75rem 0.5rem;
-    border-radius: var(--radius);
-    border: 2px solid transparent;
-    background: var(--bg-color);
-    color: var(--text-light);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: center;
-  }
-  .tx-tab.active[data-type="req"] {
-    background: #eff6ff;
-    border-color: #3b82f6;
-    color: #1d4ed8;
-  }
-  .tx-tab.active[data-type="remit"] {
-    background: #f0fdf4;
-    border-color: #10b981;
-    color: #047857;
-  }
-  .tx-tab.active[data-type="return"] {
-    background: #f3f4f6;
-    border-color: #6b7280;
-    color: #374151;
-  }
-  </style>
-</head>
-<body>
-  <div class="mobile-header no-print">
-    <div class="mobile-header-title">
-      <span>🏆</span> <span id="mobile-page-title">ภาพรวมแผนก</span>
-    </div>
-    <div style="display: flex; gap: 0.5rem; align-items: center;">
-      <button onclick="exportData()" style="background: rgba(79, 70, 229, 0.1); border: 1px solid var(--primary); color: var(--primary); border-radius: 8px; padding: 0.35rem 0.5rem; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 4px; cursor: pointer;">
-        💾 สำรองข้อมูล
-      </button>
-      <div class="mobile-header-info">
-        3บ. / ซ 10% <span style="opacity: 0.7; margin-left: 2px;">v1.1.18</span>
-      </div>
-    </div>
-  </div>
-  <div class="app-layout">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <div class="logo-icon">🏆</div>
-        <h2>ฟุตบอลระดับโลก 2026</h2>
-        <p class="subtitle">Postcard Tracker <span style="font-size: 0.75rem; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 12px; margin-left: 4px;">v1.1.18</span></p>
-      </div>
-      <nav class="sidebar-nav">
-        <button class="nav-btn active" data-view="dashboard">
-          <span>📊</span> ภาพรวมแผนก
-        </button>
-        <button class="nav-btn" data-view="transactions">
-          <span>📝</span> บันทึกรายการ
-        </button>
-        <button class="nav-btn" data-view="individuals">
-          <span>👥</span> ทีมงานพนักงาน
-        </button>
-        <button class="nav-btn" data-view="commission">
-          <span>💰</span> สรุปคอมมิชชัน
-        </button>
-        <button class="nav-btn" data-view="print">
-          <span>🖨️</span> พิมพ์เอกสาร
-        </button>
-      </nav>
-      <div class="sidebar-footer">
-        <div class="price-info">
-          <div>ราคาฉบับละ <b>3 บาท</b></div>
-          <div>ค่าคอมมิชชัน <b>10%</b></div>
-        </div>
-        <div class="data-backup-section">
-          <div class="backup-label">💾 สำรอง / กู้คืนข้อมูล</div>
-          <div class="backup-btns">
-            <button class="btn-backup" onclick="exportData()" title="ดาวน์โหลดไฟล์สำรองข้อมูล">📤 Export</button>
-            <label class="btn-backup btn-import" title="นำเข้าข้อมูลจากไฟล์สำรอง">
-              📥 Import
-              <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(this)" />
-            </label>
-          </div>
-          <div class="backup-hint">กดก่อน update เวอร์ชันใหม่</div>
-        </div>
-      </div>
-    </aside>
-
-    <!-- Main Content -->
-    <main class="main-content">
-      <header class="top-header">
-        <h1 id="page-title">ภาพรวมแผนก (Dashboard)</h1>
-      </header>
-
-      <div id="view-dashboard" class="view-section active">
-        <!-- Box Remission Alert -->
-        <div id="box-remission-alert" style="margin-bottom: 1.5rem;"></div>
-
-        <!-- Ranking Header & Share Buttons -->
-        <div class="ranking-header-card no-print">
-          <div class="ranking-trophy">🏆</div>
-          <div>
-            <h2 class="ranking-title">อันดับยอดขายไปรษณียบัตร</h2>
-            <p class="ranking-subtitle">ฟุตบอลระดับโลก 2026 — เรียงตามยอดเบิกสูงสุด</p>
-          </div>
-          <div class="ranking-share-btns">
-            <button class="btn btn-share-text" id="btn-share-text" onclick="shareAsText()">
-              <span>💬</span> คัดลอกส่ง LINE
-            </button>
-            <button class="btn btn-share-img" id="btn-share-img" onclick="shareAsImage()">
-              <span>🖼️</span> แชร์รูปภาพ
-            </button>
-          </div>
-        </div>
-
-        <div class="kpi-grid" id="dashboard-kpi">
-          <!-- Populated by JS -->
-        </div>
-
-        <!-- Leaderboard Cards (Podium) -->
-        <div id="ranking-cards" class="ranking-cards-container"></div>
-
-        <div class="dashboard-cards">
-          <div class="card">
-            <h3>ตารางรายละเอียดทั้งหมด</h3>
-            <div class="table-responsive">
-              <table class="data-table" id="dashboard-emp-table">
-                <thead>
-                  <tr>
-                    <th>พนักงาน</th>
-                    <th>เบิกไป (ฉบับ)</th>
-                    <th>นำส่งแล้ว (ฉบับ)</th>
-                    <th>ค้างส่ง (ฉบับ)</th>
-                    <th>คอมมิชชัน (บาท)</th>
-                  </tr>
-                </thead>
-                <tbody></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- Mobile Data Backup Section (Shown mainly for mobile but fine on desktop too) -->
-        <div class="card" style="margin-top: 1.5rem; background: var(--surface); border: 1px solid var(--border);">
-          <div class="card-header">
-            <h3 style="display: flex; align-items: center; gap: 0.5rem;">💾 จัดการข้อมูล (Backup / Restore)</h3>
-            <button class="btn btn-primary" onclick="exportData()" style="flex: 1; justify-content: center;">
-              <span>📤</span> ส่งออกข้อมูล (Export)
-            </button>
-            <label class="btn btn-secondary" style="flex: 1; justify-content: center; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; border: 1px solid var(--border);">
-              <span>📥</span> นำเข้าข้อมูล (Import)
-              <input type="file" id="import-file-mobile" accept=".json" style="display:none" onchange="importData(this)" />
-            </label>
-          </div>
-          <p style="font-size: 0.8rem; color: var(--text-light); margin-top: 0.75rem; text-align: center;">* แนะนำให้ส่งออก (Export) ข้อมูลเก็บไว้เป็นระยะ</p>
-        </div>
-      </div>
-
-
-      <div id="view-individuals" class="view-section">
-        <div class="card">
-          <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-            <h3>จัดการพนักงาน และตารางยอดค้าง</h3>
-          </div>
-          <form id="form-add-emp" class="inline-form">
-            <input type="text" id="input-emp-name" placeholder="ชื่อพนักงานใหม่" required />
-            <button type="submit" class="btn btn-primary">เพิ่มพนักงาน</button>
-          </form>
-          <div class="table-responsive" style="margin-top: 1.5rem;">
-            <table class="data-table" id="emp-manage-table">
-              <thead>
-                <tr>
-                  <th>ชื่อพนักงาน</th>
-                  <th style="text-align: center; width: 100px;">หน.แผนก</th>
-                  <th>เบิก (ฉบับ)</th>
-                  <th>นำส่งแล้ว (ฉบับ)</th>
-                  <th>ค้างส่ง (ฉบับ)</th>
-                  <th>คอมมิชชัน (บาท)</th>
-                  <th>จัดการ</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- Print Form View -->
-      <!-- Commission Summary View -->
-      <div id="view-commission" class="view-section">
-        <div class="card">
-          <div class="card-header" style="justify-content: space-between; align-items: center; display: flex;">
-            <div>
-              <h3>สรุปยอดจ่ายค่าส่งเสริมการขาย (Incentive)</h3>
-              <p style="font-size: 0.85rem; color: var(--text-light); margin-top: 4px;">คิดจาก 10% ของยอดรวมจำนวนเงินที่นำส่งจริง</p>
-            </div>
-            <button class="btn btn-secondary" style="background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd;" onclick="renderCommissionTable()">🔄 รีเฟรช</button>
-          </div>
-          
-          <div class="table-responsive">
-            <table class="data-table" id="commission-table">
-              <thead>
-                <tr>
-                  <th>ชื่อพนักงาน</th>
-                  <th style="text-align: right;">นำส่งเงิน (ฉบับ)</th>
-                  <th style="text-align: right;">ยอดเงินที่ส่ง (บาท)</th>
-                  <th style="text-align: right;">ค่าคอมมิชชัน 10% (บาท)</th>
-                  <th style="text-align: center;">สถานะการจ่ายเงิน</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <div id="view-print" class="view-section">
-        <div class="card print-card" style="max-width: 950px; margin: 0 auto; background: white;">
-          <div style="display: flex; gap: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; margin-bottom: 2rem;" class="no-print print-tabs">
-            <button class="btn btn-primary" id="btn-tab-type1" onclick="switchPrintTab('1')">📄 ใบเบิกโควต้า (หน.แผนก)</button>
-            <button class="btn btn-secondary" style="background: white; color: var(--text-dark); border: 1px solid var(--border);" id="btn-tab-type2" onclick="switchPrintTab('2')">📑 ทะเบียนคุม (แม่แบบ A4)</button>
-            <button class="btn btn-secondary" style="background: white; color: var(--text-dark); border: 1px solid var(--border);" id="btn-tab-type3" onclick="switchPrintTab('3')">💰 ใบสรุปจ่ายคอมมิชชัน (A4)</button>
-          </div>
-          
-          <div id="printable-area">
-            
-            <!-- Type 1: Individual Form -->
-            <div id="print-type-1" class="print-layout">
-              <div class="no-print" style="background: var(--bg-color); padding: 1rem; border-radius: var(--radius); margin-bottom: 1.5rem; display: flex; justify-content: flex-end; gap: 0.5rem;">
-                <button class="btn btn-primary" onclick="saveMasterTx()">💾 บันทึกผล</button>
-                <button class="btn btn-secondary" onclick="window.print()">🖨️ กดพิมพ์ใบเบิก</button>
-              </div>
-              <div style="font-family: 'Kanit', sans-serif; border: 1px dashed #ccc; padding: 2rem; background: white;" class="print-container">
-                <div style="min-width: 750px;">
-                  <h2 style="text-align: center; margin-bottom: 0.5rem; color: black; font-size: 1.5rem;">ใบเบิกไปรษณียบัตรทายผลการแข่งขันฟุตบอลระดับโลก 2026</h2>
-                  <h3 style="text-align: center; margin-bottom: 2rem; font-weight: normal; color: black; font-size: 1.2rem;">แผนกลูกค้าธุรกิจ ปณฝ.กลาง 10501</h3>
-                  
-                  <table style="width: 100%; border-collapse: collapse; text-align: center; border: 2px solid black; color: black; font-size: 0.95rem;">
-                  <tr>
-                    <td style="border: 1px solid black; padding: 0.75rem; font-weight: bold; width: 25%;">โควต้าที่ได้รับ</td>
-                    <td style="border: 1px solid black; padding: 0.75rem; font-size: 1.25rem; font-weight: bold; width: 25%; background: #fffbe6;" contenteditable="true" id="c-quota" oninput="calcForm()">32,500</td>
-                    <td style="border: 1px solid black; padding: 0.75rem; width: 10%;">ฉบับ</td>
-                    <td style="border: 1px solid black; padding: 0.75rem; font-weight: bold; width: 20%;">ปัจจุบันคงเหลือ</td>
-                    <td style="border: 1px solid black; padding: 0.75rem; width: 10%; font-weight: bold;" contenteditable="true" id="c-remain"></td>
-                    <td style="border: 1px solid black; padding: 0.75rem; width: 10%;">ฉบับ</td>
-                  </tr>
-                </table>
-
-                <table style="width: 100%; border-collapse: collapse; text-align: center; border: 2px solid black; border-top: none; color: black; font-size: 0.95rem;">
-                  <tr style="background: #f3f4f6;">
-                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">ว/ด/ป</th>
-                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">จำนวนที่ขอเบิก<br>ฉบับ</th>
-                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">คิดเป็นเงิน<br>บาท</th>
-                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">เบิกครั้งก่อน<br>ฉบับ</th>
-                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">คิดเป็นเงิน<br>บาท</th>
-                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">รวมเบิก<br>ฉบับ</th>
-                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">คิดเป็นเงิน<br>บาท</th>
-                  </tr>
-                  <tr style="height: 60px;">
-                    <td style="border: 1px solid black; background: #fffbe6;" contenteditable="true" id="c-date1" oninput="syncDates('c-date1')"></td>
-                    <td style="border: 1px solid black; background: #fffbe6;" contenteditable="true" id="c-req-qty" oninput="calcForm()"></td>
-                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-req-amt"></td>
-                    <td style="border: 1px solid black; background: #fffbe6;" contenteditable="true" id="c-prev-qty" oninput="calcForm()"></td>
-                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-prev-amt"></td>
-                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-total-qty"></td>
-                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-total-amt"></td>
-                  </tr>
-                </table>
-
-                <table style="width: 100%; border-collapse: collapse; text-align: center; border: 2px solid black; border-top: none; margin-bottom: 0.5rem; color: black; font-size: 0.95rem;">
-                  <tr style="background: #f3f4f6;">
-                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">ว/ด/ป</th>
-                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">นำส่งเงิน (ครั้งนี้)<br>ฉบับ</th>
-                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">คิดเป็นเงิน<br>บาท</th>
-                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">นำส่งครั้งก่อน<br>ฉบับ</th>
-                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">คิดเป็นเงิน<br>บาท</th>
-                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">ยอดค้างนำส่ง<br>ฉบับ</th>
-                    <th style="border: 1px solid black; padding: 0.75rem; width: 14.28%;">คิดเป็นเงิน<br>บาท</th>
-                  </tr>
-                  <tr style="height: 60px;">
-                    <td style="border: 1px solid black; background: #fffbe6;" contenteditable="true" id="c-date2" oninput="syncDates('c-date2')"></td>
-                    <td style="border: 1px solid black; background: #fffbe6;" contenteditable="true" id="c-remit-qty" oninput="calcForm()"></td>
-                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-remit-amt"></td>
-                    <td style="border: 1px solid black; background: #fffbe6;" contenteditable="true" id="c-remit-accum" oninput="calcForm()"></td>
-                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-remit-prev-amt"></td>
-                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-out-qty"></td>
-                    <td style="border: 1px solid black; background: #f8f9fa;" id="c-out-amt"></td>
-                  </tr>
-                </table>
-                <div style="font-size: 0.85rem; line-height: 1.4; color: black; margin-bottom: 3rem;">
-                  หมายเหตุ: ........................................................................................................................................................................................................
-                </div>
-
-                <div style="display: flex; justify-content: center; margin-left: 15%; margin-bottom: 2rem; color: black;">
-                  <div style="text-align: center; width: 300px;">
-                    <p style="margin-bottom: 0.5rem;" contenteditable="true" id="p-sign-name">(...........................................................)</p>
-                    <p style="margin-top: 0.5rem;" contenteditable="true" id="p-sign-role">(ผู้ส่ง)</p>
-                    <p style="margin-top: 1rem; text-align: center;"><span contenteditable="true" id="p-sign-date-label">วันที่เบิก</span> <span contenteditable="true" id="p-sign-date" oninput="syncDates('p-sign-date')">...................................................</span></p>
-                  </div>
-                </div>
-
-                <p style="font-weight: bold; font-size: 0.9rem; color: black;"><u>หมายเหตุ</u> : ยอดของ หน.ปณ. และ ผช.หน.ปณ. รวมอยู่กับ แผนกธุรการ ปณฝ.กลาง</p>
-                </div>
-              </div>
-              
-
-            </div>
-
-            <!-- Type 2: Log Book Form -->
-            <div id="print-type-2" class="print-layout" style="display: none;">
-              <div class="no-print" style="text-align: right; margin-bottom: 1rem;">
-                <button class="btn btn-primary" onclick="window.print()">🖨️ พิมพ์ตารางลงชื่อ</button>
-              </div>
-              <div style="font-family: 'Kanit', sans-serif; border: 1px dashed #ccc; padding: 2rem;" class="print-container">
-                <div style="min-width: 750px;">
-                  <h2 style="text-align: center; margin-bottom: 0.5rem; color: black; font-size: 1.5rem;">ทะเบียนคุมการขอเบิกไปรษณียบัตรทายผลฟุตบอลระดับโลก 2026</h2>
-                  <h3 style="text-align: center; margin-bottom: 1.5rem; font-weight: normal; color: black; font-size: 1.2rem;">แผนกลูกค้าธุรกิจ ปณฝ.กลาง 10501</h3>
-                  
-                  <table style="width: 100%; border-collapse: collapse; text-align: center; border: 1px solid black; color: black; font-size: 0.95rem;">
-                  <thead>
-                    <tr style="background: #f3f4f6;">
-                      <th style="border: 1px solid black; padding: 0.75rem; width: 8%;">ลำดับ</th>
-                      <th style="border: 1px solid black; padding: 0.75rem; width: 15%;">ว/ด/ป</th>
-                      <th style="border: 1px solid black; padding: 0.75rem; width: 25%;">ชื่อผู้ขอเบิก</th>
-                      <th style="border: 1px solid black; padding: 0.75rem; width: 15%;">จำนวน (ฉบับ)</th>
-                      <th style="border: 1px solid black; padding: 0.75rem; width: 20%;">ลายมือชื่อ</th>
-                      <th style="border: 1px solid black; padding: 0.75rem; width: 17%;">หมายเหตุ</th>
-                    </tr>
-                  </thead>
-                  <tbody id="p-a4-tbody">
-                    <!-- Populated by JS -->
-                  </tbody>
-                </table>
-                </div>
-              </div>
-            </div>
-
-            <!-- Type 3: Commission Summary -->
-            <div id="print-type-3" class="print-layout" style="display: none;">
-              <div class="no-print" style="text-align: right; margin-bottom: 1rem;">
-                <button class="btn btn-primary" onclick="window.print()">🖨️ พิมพ์ใบสรุปจ่ายคอมมิชชัน</button>
-              </div>
-              <div style="font-family: 'Kanit', sans-serif; border: 1px dashed #ccc; padding: 2rem; background: white;" class="print-container">
-                <div style="width: 100%; max-width: 800px; margin: 0 auto;">
-                  <h2 style="text-align: center; margin-bottom: 0.5rem; color: black; font-size: 1.3rem;">สรุปจ่ายค่าส่งเสริมการขาย (Incentive) ไปรษณียบัตรทายผลฯ</h2>
-                  <h3 style="text-align: center; margin-bottom: 1.5rem; font-weight: normal; color: black; font-size: 1.1rem;" id="p-commission-subtitle">แผนกลูกค้าธุรกิจ ปณฝ.กลาง 10501</h3>
-                  
-                  <table style="width: 100%; border-collapse: collapse; text-align: center; border: 1px solid black; color: black; font-size: 1rem;">
-                  <thead>
-                    <tr style="background: #f3f4f6;">
-                      <th style="border: 1px solid black; padding: 0.75rem; width: 25%;">ชื่อพนักงาน</th>
-                      <th style="border: 1px solid black; padding: 0.75rem; width: 15%;">ยอดนำส่ง<br>(ฉบับ)</th>
-                      <th style="border: 1px solid black; padding: 0.75rem; width: 25%;">ค่าคอมมิชชัน 10%<br>(บาท)</th>
-                      <th style="border: 1px solid black; padding: 0.75rem; width: 35%;">ลายมือชื่อผู้รับเงิน</th>
-                    </tr>
-                  </thead>
-                  <tbody id="p-commission-tbody">
-                    <!-- Populated by JS -->
-                  </tbody>
-                </table>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-      <div id="view-transactions" class="view-section">
-        <!-- Logbook Evidence Section -->
-        <div class="card" style="margin-bottom: 1.5rem; border-top: 4px solid var(--primary);">
-          <div class="card-header" style="margin-bottom: 1rem; padding-bottom: 0.5rem;">
-            <h3 style="display: flex; align-items: center; gap: 0.5rem;">📸 รูปถ่ายทะเบียนคุม</h3>
-          </div>
-          <div class="form-group">
-            <label style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 0.5rem;">แนบรูปภาพทะเบียนคุมประจำวัน (ใช้ยืนยันความถูกต้อง)</label>
-            <input type="file" id="logbook-image-input" accept="image/*" multiple style="margin-bottom: 1rem;" />
-            <div id="logbook-image-preview-container" style="display: none; border: 1px dashed var(--border); padding: 0.5rem; border-radius: 8px; background: #f8fafc;">
-              <div id="logbook-gallery" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 0.5rem; margin-bottom: 0.5rem;"></div>
-
-            </div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <h3>บันทึกการเบิก และ นำส่งเงิน</h3>
-          </div>
-          <form id="form-add-tx" class="standard-form">
-            <div class="form-group">
-              <label>พนักงาน</label>
-              <select id="tx-emp" required></select>
-            </div>
-            <div class="form-group">
-              <label>ประเภทรายการ</label>
-              <select id="tx-type" required>
-                <option value="req">ขอเบิกไปรษณียบัตร</option>
-                <option value="remit">นำส่งเงิน (ขายได้)</option>
-                <option value="return">คืนเข้าสต็อก</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>จำนวน (ฉบับ)</label>
-              <input type="number" id="tx-qty" min="1" required />
-              <small class="hint">มูลค่า: <span id="tx-value-calc">0</span> บาท</small>
-              <small id="return-hint" style="display: none; color: #ea580c; margin-top: 4px; line-height: 1.4;">* ดึงยอดค้างส่งทั้งหมดมาให้อัตโนมัติ (สามารถแก้ไขตัวเลขได้หากต้องการคืนไม่เต็มจำนวน)</small>
-            </div>
-            <div class="form-group">
-              <label>วันที่</label>
-              <input type="text" id="tx-date" required autocomplete="off" placeholder="เลือกวันที่..." />
-            </div>
-            <div class="form-group">
-              <label>หลักฐาน (ถ้ามี)</label>
-              <input type="file" id="tx-evidence" accept="image/*,.pdf" />
-            </div>
-            <div class="form-group" style="flex-direction: row; align-items: center; gap: 0.5rem;">
-              <input type="checkbox" id="tx-require-sign" style="width: 16px; height: 16px;" />
-              <label for="tx-require-sign" style="font-weight: normal; cursor: pointer;">ต้องการให้ พนง. มาลงชื่อด้วยกระดาษที่พิมพ์ออกมา</label>
-            </div>
-            <button type="submit" class="btn btn-primary">บันทึกรายการ</button>
-          </form>
-
-        <div class="card" style="margin-top: 2rem; background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border: 1px solid #cbd5e1; padding: 1.5rem;">
-          <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 1rem; margin-bottom: 1.5rem;">
-            <h3 style="color: #334155; margin: 0; display: flex; align-items: center; gap: 0.5rem;">🔄 โอนสต็อก / กระจายยอด (เช่น จาก ลธ.)</h3>
-            <p style="margin: 0.5rem 0 0; font-size: 0.85rem; color: #64748b;">ใช้สำหรับดึงสต็อกจากพนักงานคนหนึ่ง (เช่น ลธ.) ไปให้พนักงานอีกคนหนึ่ง</p>
-          </div>
-          <form id="form-transfer-tx" class="standard-form">
-            <div class="form-group">
-              <label>โอนจาก (ลธ. / ผู้โอน)</label>
-              <select id="transfer-src-emp" required></select>
-              <small class="hint">ยอดคงค้าง: <span id="transfer-src-balance" style="font-weight: 600; color: #ea580c;">0</span> ใบ</small>
-            </div>
-            <div class="form-group">
-              <label>โอนให้ (ผู้รับ)</label>
-              <select id="transfer-dest-emp" required></select>
-            </div>
-            <div class="form-group">
-              <label>จำนวน (ฉบับ)</label>
-              <input type="number" id="transfer-qty" min="1" required />
-            </div>
-            <div class="form-group">
-              <label>วันที่ทำรายการ</label>
-              <input type="text" id="transfer-date" required autocomplete="off" placeholder="เลือกวันที่..." />
-            </div>
-            <div class="form-group" style="flex-direction: row; align-items: center; gap: 0.5rem; background: #fff; padding: 1rem; border-radius: 8px; border: 1px solid #e2e8f0;">
-              <input type="checkbox" id="transfer-remit-now" style="width: 20px; height: 20px; accent-color: #10b981;" />
-              <label for="transfer-remit-now" style="font-weight: 600; cursor: pointer; color: #065f46; margin: 0;">โอนพร้อมนำส่งเงินทันที (พนักงานผู้รับนำส่งเงินแล้ว)</label>
-            </div>
-            <button type="submit" class="btn btn-primary" style="background-color: #3b82f6;">บันทึกการโอนย้าย</button>
-          </form>
-        </div>
-          
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 1rem;">
-            <h4 style="color: var(--text-dark); margin: 0;">ประวัติรายการล่าสุด</h4>
-            <div class="history-tabs" style="display: flex; gap: 0.25rem; background: var(--bg-color); padding: 0.25rem; border-radius: var(--radius); border: 1px solid var(--border);">
-              <button type="button" class="history-tab active" data-filter="all" style="border: none; background: var(--surface); padding: 0.25rem 0.75rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-family: inherit; box-shadow: var(--shadow-sm); font-weight: 600;">ทั้งหมด</button>
-              <button type="button" class="history-tab" data-filter="req" style="border: none; background: transparent; padding: 0.25rem 0.75rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-family: inherit; color: var(--text-light);">เบิก</button>
-              <button type="button" class="history-tab" data-filter="remit" style="border: none; background: transparent; padding: 0.25rem 0.75rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-family: inherit; color: var(--text-light);">ส่งเงิน</button>
-              <button type="button" class="history-tab" data-filter="return" style="border: none; background: transparent; padding: 0.25rem 0.75rem; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-family: inherit; color: var(--text-light);">คืนสต็อก</button>
-            </div>
-          </div>
-          <div class="table-responsive">
-            <table class="data-table" id="tx-history-table">
-              <thead>
-                <tr>
-                  <th>ลำดับ</th>
-                  <th>วันที่</th>
-                  <th>พนักงาน</th>
-                  <th>ประเภท</th>
-                  <th>จำนวน (ฉบับ)</th>
-                  <th>เป็นเงิน (บาท)</th>
-                  <th>หลักฐาน/หมายเหตุ</th>
-                  <th>จัดการ</th>
-                </tr>
-              </thead>
-              <tbody></tbody>
-              <tfoot>
-                <tr id="tx-history-summary" style="display: none; background: #f8fafc; font-weight: 600;">
-                  <td colspan="4" style="text-align: right; border-top: 2px solid var(--border);">รวมยอด:</td>
-                  <td id="tx-history-sum-qty" style="color: var(--primary); border-top: 2px solid var(--border);">0</td>
-                  <td id="tx-history-sum-amt" style="color: var(--primary); border-top: 2px solid var(--border);">0</td>
-                  <td colspan="2" style="border-top: 2px solid var(--border);"></td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-          </div>
-          
-          <div style="margin-top: 3rem; border-top: 1px solid var(--border); padding-top: 2rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
-              <h3 style="color: var(--text-dark); font-size: 1.2rem; margin: 0;">ประวัติของหัวหน้าแผนก (รับโควต้า / นำส่งเงิน)</h3>
-              <!-- The button is removed because they don't have the "form above" anymore. The master tx is saved from the dashboard -->
-            </div>
-            <div class="table-responsive">
-              <table class="data-table" id="master-history-table">
-                <thead>
-                  <tr>
-                    <th>ว/ด/ป</th>
-                    <th>รายการ</th>
-                    <th>จำนวน (ฉบับ)</th>
-                    <th>จำนวนเงิน (บาท)</th>
-                    <th>จัดการ</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <!-- Populated by JS -->
-                </tbody>
-              </table>
-            </div>
-          </div>
-          
-        </div>
-      </div>
-
-
-
-    </main>
-  </div>
-
-  <!-- Share Text Modal -->
-  <div id="share-text-modal" class="share-modal">
-    <div class="share-modal-inner">
-      <div class="share-modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-        <h3 style="margin: 0; font-size: 1.25rem;">คัดลอกข้อความแชร์อันดับ</h3>
-        <button class="share-modal-close" onclick="document.getElementById('share-text-modal').style.display = 'none'" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.25rem 0.5rem; border-radius: 4px;">&times;</button>
-      </div>
-      <textarea id="share-text-content" style="width: 100%; height: 250px; padding: 0.75rem; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 0.9rem; resize: none; margin-bottom: 1.5rem; outline: none; color: black;"></textarea>
-      <div class="share-modal-actions" style="display: flex; gap: 0.75rem; justify-content: flex-end;">
-        <button class="btn btn-secondary" onclick="copyShareText()" style="background: var(--primary); color: white;">📋 คัดลอกข้อความ</button>
-        <a id="line-share-link" href="#" target="_blank" class="btn btn-primary" style="background: #06c755; color: white; display: flex; align-items: center; gap: 0.5rem; text-decoration: none;">💬 ส่งเข้า LINE</a>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Employee Details Modal -->
-  <div id="emp-details-modal" class="share-modal">
-    <div class="share-modal-inner" style="max-width: 600px;">
-      <div class="share-modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-        <h3 id="emp-details-title" style="margin: 0; font-size: 1.25rem;">ประวัติรายการ</h3>
-        <button class="share-modal-close" onclick="document.getElementById('emp-details-modal').style.display = 'none'" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0.25rem 0.5rem; border-radius: 4px;">&times;</button>
-      </div>
-      
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
-        <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; text-align: center;">
-          <div style="font-size: 0.8rem; color: var(--text-light);">เบิกไปทั้งหมด</div>
-          <div id="emp-details-req" style="font-size: 1.25rem; font-weight: 700; color: var(--text-dark);">0</div>
-        </div>
-        <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; text-align: center;">
-          <div style="font-size: 0.8rem; color: var(--text-light);">นำส่งเงินแล้ว</div>
-          <div id="emp-details-remit" style="font-size: 1.25rem; font-weight: 700; color: var(--secondary);">0</div>
-        </div>
-        <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; text-align: center;">
-          <div style="font-size: 0.8rem; color: var(--text-light);">ค้างนำส่ง</div>
-          <div id="emp-details-outstanding" style="font-size: 1.25rem; font-weight: 700; color: var(--danger);">0</div>
-        </div>
-      </div>
-      
-      <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
-        <table class="data-table" id="emp-details-tx-table">
-          <thead>
-            <tr>
-              <th>วันที่</th>
-              <th>ประเภท</th>
-              <th>จำนวน</th>
-              <th>จัดการ</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-  <script>
 // --- FIREBASE CONFIGURATION ---
 // กรุณาใส่ config จาก Firebase Console ของคุณที่นี่
 const firebaseConfig = {
@@ -2104,7 +162,7 @@ class Store {
   }
 
   // --- Master Transactions ---
-  addMasterTx(type, qty, dateStr, allocations = []) {
+  addMasterTx(type, qty, dateStr) {
     const amount = qty * this.data.pricePerTicket;
     
     // Validation
@@ -2127,7 +185,6 @@ class Store {
       type,
       qty,
       amount,
-      allocations: allocations || [],
       date: dateStr || new Date().toISOString()
     });
     this.saveData();
@@ -2576,113 +633,10 @@ txDatePicker = flatpickr("#tx-date", {
   }
 });
 
-// Initialize Flatpickr for transfer-date
-flatpickr("#transfer-date", {
-  locale: "th",
-  dateFormat: "Y-m-d",
-  altInput: true,
-  altFormat: "TH",
-  disableMobile: "true",
-  formatDate: (date, format, locale) => {
-    if (format === "TH") {
-      const d = String(date.getDate()).padStart(2, '0');
-      const m = String(date.getMonth() + 1).padStart(2, '0');
-      const y = date.getFullYear() + 543;
-      return `${d}/${m}/${y}`;
-    }
-    return flatpickr.formatDate(date, format, locale);
-  }
-});
-
-// Transfer logic
-document.getElementById('transfer-src-emp').addEventListener('change', (e) => {
-  const selectedOption = e.target.options[e.target.selectedIndex];
-  if (selectedOption && selectedOption.value) {
-    const balance = selectedOption.getAttribute('data-balance') || 0;
-    document.getElementById('transfer-src-balance').textContent = formatNum(balance);
-    document.getElementById('transfer-qty').max = balance;
-  } else {
-    document.getElementById('transfer-src-balance').textContent = '0';
-    document.getElementById('transfer-qty').max = '';
-  }
-});
-
-document.getElementById('form-transfer-tx').addEventListener('submit', (e) => {
-  e.preventDefault();
-  const srcId = document.getElementById('transfer-src-emp').value;
-  const destId = document.getElementById('transfer-dest-emp').value;
-  const qty = parseInt(document.getElementById('transfer-qty').value) || 0;
-  const dateStr = document.getElementById('transfer-date').value;
-  const remitNow = document.getElementById('transfer-remit-now').checked;
-
-  if (srcId === destId) {
-    return showToast('ไม่สามารถโอนให้ตัวเองได้', 'error');
-  }
-  
-  if (qty <= 0) {
-    return showToast('จำนวนต้องมากกว่า 0', 'error');
-  }
-
-  try {
-    if (srcId === 'HEAD') {
-      // ดึงจากกองกลางโดยตรง (ไม่มีการ return)
-      store.addTransaction('req', destId, qty, dateStr);
-    } else {
-      // 1. คืนสต็อกจาก ลธ. (Return from source)
-      store.addTransaction('return', srcId, qty, dateStr);
-      // 2. เบิกเข้าพนักงาน (Request for destination)
-      store.addTransaction('req', destId, qty, dateStr);
-    }
-    
-    // 3. (Optional) นำส่งเงินทันที (Remit for destination)
-    if (remitNow) {
-      store.addTransaction('remit', destId, qty, dateStr);
-    }
-    
-    document.getElementById('form-transfer-tx').reset();
-    document.getElementById('transfer-src-balance').textContent = '0';
-    showToast('ทำรายการโอนสต็อกสำเร็จ', 'success');
-  } catch (err) {
-    showToast(err.message, 'error');
-  }
-});
-
 // --- Renders ---
 function renderDashboard() {
   const data = store.getOverview();
   
-  // Calculate Box Remission Alert
-  const cashOnHandCards = data.totalRemitted - data.masterRemitted;
-  const alertEl = document.getElementById('box-remission-alert');
-  if (alertEl) {
-    if (cashOnHandCards >= 4000) {
-      const boxes = Math.floor(cashOnHandCards / 4000);
-      const remaining = cashOnHandCards % 4000;
-      const extraText = remaining > 0 ? ` (มีเศษอีก ${formatNum(remaining)} ใบ)` : '';
-      alertEl.innerHTML = `
-        <div style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); border-radius: 16px; padding: 1.5rem; color: white; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2);">
-          <div>
-            <div style="font-size: 1.1rem; font-weight: 600; opacity: 0.9;">🎉 พร้อมนำส่ง ปณ.กลาง แล้ว!</div>
-            <div style="font-size: 1.8rem; font-weight: 800; line-height: 1.2; margin-top: 0.2rem;">ยอดเงินสดพอส่ง ${boxes} กล่อง${extraText}</div>
-          </div>
-          <div style="font-size: 3.5rem; opacity: 0.9;">📦</div>
-        </div>
-      `;
-    } else {
-      const missing = 4000 - cashOnHandCards;
-      alertEl.innerHTML = `
-        <div style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); border-radius: 16px; padding: 1.5rem; color: white; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.2);">
-          <div>
-            <div style="font-size: 1.1rem; font-weight: 600; opacity: 0.9;">⏳ สะสมยอดเงินสดสำหรับนำส่ง</div>
-            <div style="font-size: 1.5rem; font-weight: 800; line-height: 1.2; margin-top: 0.2rem;">ขาดอีก ${formatNum(missing)} ใบ จะครบ 1 กล่อง</div>
-            <div style="font-size: 0.95rem; opacity: 0.8; margin-top: 0.4rem;">(ยอดเงินสดในมือปัจจุบัน: ${formatNum(cashOnHandCards)} ใบ)</div>
-          </div>
-          <div style="font-size: 3.5rem; opacity: 0.6;">📦</div>
-        </div>
-      `;
-    }
-  }
-
   document.getElementById('dashboard-kpi').innerHTML = `
     <div style="grid-column: 1 / -1; margin-bottom: -0.5rem; margin-top: 0.5rem;">
       <h3 style="color: var(--text-dark); font-size: 1.1rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem;">ข้อมูลโควต้าแผนก (ระดับหัวหน้า)</h3>
@@ -2939,29 +893,6 @@ function renderTransactions() {
     });
   }
 
-  const transferSrcSelect = document.getElementById('transfer-src-emp');
-  const transferDestSelect = document.getElementById('transfer-dest-emp');
-  if (transferSrcSelect && transferDestSelect) {
-    const srcVal = transferSrcSelect.value;
-    const destVal = transferDestSelect.value;
-    
-    transferSrcSelect.innerHTML = '<option value="">-- เลือกผู้โอน (ลธ.) --</option>';
-    
-    // Add Head's stock (Central pool)
-    const overview = store.getOverview();
-    transferSrcSelect.innerHTML += `<option value="HEAD" data-balance="${overview.remainingQuota}" style="font-weight:bold; color:var(--primary);">⭐ สต็อกกองกลาง หน.แผนก (คงเหลือ: ${formatNum(overview.remainingQuota)})</option>`;
-
-    transferDestSelect.innerHTML = '<option value="">-- เลือกผู้รับ --</option>';
-    emps.forEach(emp => {
-      transferSrcSelect.innerHTML += `<option value="${emp.id}" data-balance="${emp.outstanding}">${emp.name} (สต็อกในมือ: ${formatNum(emp.outstanding)})</option>`;
-      transferDestSelect.innerHTML += `<option value="${emp.id}">${emp.name}</option>`;
-    });
-    
-    // Restore previous selection if any
-    if (srcVal) transferSrcSelect.value = srcVal;
-    if (destVal) transferDestSelect.value = destVal;
-  }
-
   const allocEmpSelect = document.getElementById('alloc-emp');
   if (allocEmpSelect) {
     allocEmpSelect.innerHTML = '<option value="">-- เลือกพนักงาน --</option>';
@@ -3041,18 +972,6 @@ function renderTransactions() {
       valStr = `<span style="color: #3b82f6">${formatNum(qty)}</span>`;
     } else if (tx.type === 'remit') {
       typeBadge = '<span style="color: #10b981; font-weight: 600;">นำส่งเงิน</span>';
-      
-      // Show allocation details for remit transactions
-      if (tx.allocations && tx.allocations.length > 0) {
-        const empDataList = store.getEmployeesData();
-        const allocDetails = tx.allocations.map(a => {
-          const allocEmp = empDataList.find(e => e.id === a.empId);
-          const empName = allocEmp ? allocEmp.name : 'พนักงาน';
-          return `<div style="font-size: 0.75rem; color: var(--text-light); white-space: normal; line-height: 1.4;">• ${empName}: ${formatNum(a.qty)}</div>`;
-        }).join('');
-        typeBadge += `<div style="margin-top: 6px; padding: 6px; background: #f8fafc; border-radius: 4px; border: 1px dashed #cbd5e1; text-align: left; max-width: 150px;">${allocDetails}</div>`;
-      }
-      
       valStr = `<span style="color: #10b981">${formatNum(qty)}</span>`;
     } else if (tx.type === 'return') {
       typeBadge = '<span style="color: #6b7280; font-weight: 600;">คืนเข้าสต็อก</span>';
@@ -3176,15 +1095,6 @@ function renderMasterHistory() {
       valStr = `<span style="color: var(--text-dark)">${formatNum(tx.qty)}</span>`;
     } else {
       typeBadge = '<span style="color: var(--secondary); font-weight: 600;">นำส่งเงิน</span>';
-      if (tx.allocations && tx.allocations.length > 0) {
-        const empDataList = store.getEmployeesData();
-        const allocDetails = tx.allocations.map(a => {
-          const emp = empDataList.find(e => e.id === a.empId);
-          const empName = emp ? emp.name : 'พนักงาน';
-          return `<div style="font-size: 0.75rem; color: var(--text-light); white-space: normal; line-height: 1.4;">• ${empName}: ${formatNum(a.qty)}</div>`;
-        }).join('');
-        typeBadge += `<div style="margin-top: 6px; padding: 6px; background: #f8fafc; border-radius: 4px; border: 1px dashed #cbd5e1; text-align: left;">${allocDetails}</div>`;
-      }
       valStr = `<span style="color: var(--secondary)">${formatNum(tx.qty)}</span>`;
     }
     
@@ -3315,60 +1225,9 @@ function renderAll() {
 
 // ===== RANKING RENDER =====
 function getRankingData() {
-  const getPaidInFullDate = (empId, requestedQty) => {
-    const empTxs = store.data.transactions
-      .filter(t => t.empId === empId && t.type === 'remit')
-      .sort((a, b) => new Date(a.date) - new Date(b.date));
-    
-    let sum = 0;
-    for (const tx of empTxs) {
-      sum += tx.qty;
-      if (sum >= requestedQty && requestedQty > 0) {
-        return new Date(tx.date).getTime();
-      }
-    }
-    return Infinity; // Not paid in full yet
-  };
-
-  const emps = store.getEmployeesData()
-    .filter(e => !e.isManager && !e.name.includes('ลธ') && !e.name.includes('สต็อก'))
-    .sort((a, b) => {
-      // 1. Sort by requested descending
-      if (b.requested !== a.requested) {
-        return b.requested - a.requested;
-      }
-      
-      // 2. Sort by paid-in-full date (earlier date first)
-      const aPaidDate = getPaidInFullDate(a.id, a.requested);
-      const bPaidDate = getPaidInFullDate(b.id, b.requested);
-      if (aPaidDate !== bPaidDate) {
-        return aPaidDate - bPaidDate;
-      }
-      
-      // 3. Sort by remitted descending
-      if (b.remitted !== a.remitted) {
-        return b.remitted - a.remitted;
-      }
-      
-      // 4. Sort alphabetically by name
-      return a.name.localeCompare(b.name, 'th');
-    });
-    
-  if (emps.length > 0) {
-    let currentRank = 1;
-    emps[0]._rank = currentRank;
-    for (let i = 1; i < emps.length; i++) {
-      const prev = emps[i - 1];
-      const curr = emps[i];
-      if (curr.requested === prev.requested) {
-        curr._rank = currentRank;
-      } else {
-        currentRank++;
-        curr._rank = currentRank;
-      }
-    }
-  }
-  return emps;
+  return store.getEmployeesData()
+    .filter(e => !e.isManager)
+    .sort((a, b) => b.requested - a.requested || b.remitted - a.remitted);
 }
 
 function getManagersData() {
@@ -3389,6 +1248,12 @@ function renderRanking() {
 
   // Let's calculate remaining stock of postcards
   const overview = store.getOverview();
+  // Remaining stock at Head = what Head requested - what employees (including manager) requested
+  // However, the remaining postcards for motivation = remaining quota in hand + what employees still have to sell?
+  // Let's show: Remaining at Head of Department (คงเหลือในมือ หน.แผนก) + Remaining at Postal Center (คงเหลือที่ ปณ.กลาง)
+  // Let's show remaining postcards in team's hands that is not yet remitted, or total remaining quota.
+  // The user requested: "ขอ จำนวน ไปรษณียบัตร ที่เหลือ แสดงไว้เป็น แรงกระตุ้น ทุกคนในแผนกด้วย"
+  // Let's show: ยอดไปรษณียบัตรคงเหลือในโควต้ารวม (โควต้ารวม - เบิกไปแล้ว) และ คงเหลือในมือ หน.แผนก
   const totalStockRemaining = overview.quota - overview.totalRequested;
 
   // Helper to generate text statistics for remaining stock
@@ -3441,8 +1306,7 @@ function renderRanking() {
         <div style="display: flex; flex-direction: column; gap: 0.5rem;">
     `;
     managers.forEach(mgr => {
-      const remainingCards = Math.max(0, (mgr.requested || 0) - (mgr.remitted || 0));
-      const expectedInc = remainingCards * store.data.pricePerTicket * store.data.commissionRate;
+      const expectedInc = mgr.requested * store.data.pricePerTicket * store.data.commissionRate;
       const guaranteedInc = mgr.remitted * store.data.pricePerTicket * store.data.commissionRate;
       const remittedPct = Math.min(100, Math.round((mgr.remitted / (mgr.requested || 1)) * 100));
       const pctText = remittedPct === 100 ? `ส่งครบแล้ว` : ``;
@@ -3488,129 +1352,66 @@ function renderRanking() {
     managerHtml += `</div></div>`;
   }
 
-  // Build podium (top 3 ranks) + list (remaining ranks)
+  // Build podium (top 3) + list (4+)
   let podiumHtml = '';
   let listHtml = '';
-  let topRanks = [];
   if (emps.length === 0) {
     podiumHtml = '<div style="text-align:center; padding: 3rem; color: var(--text-light); font-size: 1.1rem;">⚠️ ยังไม่มีข้อมูลพนักงาน</div>';
   } else {
-    // Group employees by rank
-    const rankGroups = {};
-    emps.forEach(emp => {
-      if (!rankGroups[emp._rank]) {
-        rankGroups[emp._rank] = [];
-      }
-      rankGroups[emp._rank].push(emp);
-    });
-    
-    const ranks = Object.keys(rankGroups).map(Number).sort((a, b) => a - b);
-    topRanks = ranks.slice(0, 3); // Top 3 ranks
-    
+    const top3 = emps.slice(0, 3);
     podiumHtml = `<div class="rank-podium-row">`;
     
-    // Reorder for podium display: Rank 2 on left, Rank 1 in middle, Rank 3 on right
-    let displayRanks = [];
-    if (topRanks.length === 3) displayRanks = [topRanks[1], topRanks[0], topRanks[2]];
-    else if (topRanks.length === 2) displayRanks = [topRanks[1], topRanks[0]];
-    else displayRanks = topRanks;
-    
-    displayRanks.forEach(rankNum => {
-      const groupEmps = rankGroups[rankNum];
-      const rankClassNum = Math.min(rankNum, 3);
+    const displayIndices = top3.length === 3 ? [1, 0, 2] : top3.map((_, i) => i);
+    displayIndices.filter(idx => idx < top3.length).forEach(idx => {
+      const emp = top3[idx];
+      // idx 0 -> rank-1 (Gold), idx 1 -> rank-2 (Silver), idx 2 -> rank-3 (Bronze)
+      const rankClassNum = idx + 1; 
       
-      // Render names - each name nowrap, wrap only between names
-      const namesHtml = groupEmps.map((emp, i) => {
-        const comma = i < groupEmps.length - 1 ? ',' : '';
-        return `<span style="white-space:nowrap; word-break:keep-all; font-weight:700;">${emp.name}${comma}</span>`;
-      }).join(' ');
-      const nameFontSize = groupEmps.length > 1 ? '0.8rem' : '0.95rem';
-      const namesDisplay = `<div style="display:flex; flex-wrap:wrap; justify-content:center; gap:1px 4px; line-height:1.3; font-size:${nameFontSize}; color:inherit;">${namesHtml}</div>`;
-      
-      const allPaidFull = groupEmps.every(emp => emp.outstanding <= 0 && emp.remitted > 0);
-      let incDetailsHtml = '';
-      if (allPaidFull && groupEmps.length > 1) {
-         const suffix = groupEmps.length === 2 ? 'ทั้งคู่' : `ทั้ง ${groupEmps.length} คน`;
-         const commission = groupEmps[0].remitted * store.data.pricePerTicket * store.data.commissionRate;
-         incDetailsHtml = `<div style="width:100%; background:rgba(255,255,255,0.55); border-radius:8px; padding:6px 8px; margin-top:4px; text-align:center;">
-           <div style="font-size:0.75rem; font-weight:900; color:#059669; line-height:1.3; white-space:nowrap;">✅ ส่งเงินครบแล้ว ${suffix}</div>
-           <div style="font-size:0.75rem; color:#4f46e5; font-weight:800; margin-top:2px; white-space:nowrap;">💰 ค่าคอมฯ คนละ: ${formatNum(commission)} .-</div>
-         </div>`;
+      const expectedInc = emp.requested * store.data.pricePerTicket * store.data.commissionRate;
+      const guaranteedInc = emp.remitted * store.data.pricePerTicket * store.data.commissionRate;
+      const remittedPct = Math.min(100, Math.round((emp.remitted / (emp.requested || 1)) * 100));
+      const pctText = remittedPct === 100 ? `ส่งครบแล้ว` : ``;
+
+      let incHtml = '';
+      if (emp.remitted === 0) {
+        incHtml = `<div style="color: #b45309; font-weight: 700;">ในมือ: ${formatNum(expectedInc)} บาท</div>`;
+      } else if (remittedPct === 100) {
+        incHtml = `<div style="color: #059669; font-weight: 700;">ได้ชัวร์: ${formatNum(guaranteedInc)} บาท</div>`;
       } else {
-         incDetailsHtml = groupEmps.map(emp => {
-           const price = store.data.pricePerTicket;
-           const rate = store.data.commissionRate;
-           const remittedMoney = emp.remitted * price;
-           const commission = remittedMoney * rate;
-           const outstandingMoney = emp.outstanding * price;
-           const isPaidFull = emp.outstanding <= 0 && emp.remitted > 0;
-           const isNoPay = emp.remitted === 0;
-           let rows = '';
-           if (isPaidFull) {
-             rows += `<div style="font-size:0.75rem; color:#059669; font-weight:900; text-align:center; white-space:nowrap;">✅ ส่งเงินครบแล้ว</div>`;
-           } else if (!isNoPay) {
-             rows += `<div class="podium-stat-row"><span class="podium-stat-label" style="color:#059669;">💵 ส่ง:</span><span class="podium-stat-value" style="color:#059669;">${formatNum(emp.remitted)}ใบ (${formatNum(remittedMoney)}.-)</span></div>`;
-           }
-           if (outstandingMoney > 0) {
-             rows += `<div class="podium-stat-row"><span class="podium-stat-label" style="color:#dc2626;">⏳ รอ:</span><span class="podium-stat-value" style="color:#dc2626;">${formatNum(emp.outstanding)}ใบ (${formatNum(outstandingMoney)}.-)</span></div>`;
-           }
-           if (commission > 0) {
-             rows += `<div class="podium-stat-row"><span class="podium-stat-label" style="color:#4f46e5;">💰 คอมฯ:</span><span class="podium-stat-value" style="color:#4f46e5;">${formatNum(commission)}.-</span></div>`;
-           }
-           if (!rows) return '';
-           return `<div style="width:100%; background:rgba(255,255,255,0.5); border-radius:8px; padding:4px 6px; margin-top:3px; border-top:1px solid rgba(0,0,0,0.06);">
-             ${groupEmps.length > 1 ? `<div style="font-size:0.75rem; font-weight:900; color:inherit; opacity:0.85; margin-bottom:2px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${emp.name}</div>` : ''}
-             ${rows}
-           </div>`;
-         }).join('');
+        incHtml = `<div style="color: #b45309; font-weight: 700;">ในมือ: ${formatNum(expectedInc)} บาท</div>
+                   <div style="color: #059669; font-weight: 700;">ได้ชัวร์: ${formatNum(guaranteedInc)} บาท</div>`;
       }
 
-      const scoreVal = groupEmps[0].requested;
-
-      const baseColors = [
-        { bg: '#d97706', text: '#ffffff' }, // Gold
-        { bg: '#475569', text: '#ffffff' }, // Silver
-        { bg: '#c2410c', text: '#ffffff' }  // Bronze
-      ];
-      const baseStyle = baseColors[rankClassNum - 1] || { bg: '#4b5563', text: '#ffffff' };
-
       podiumHtml += `
-        <div class="rank-podium-card rank-${rankClassNum}" style="padding-bottom: 0 !important; display: flex; flex-direction: column;">
-          <div class="rank-badge">${rankLabels[rankNum - 1] || 'อันดับ ' + rankNum}</div>
+        <div class="rank-podium-card rank-${rankClassNum}">
+          <div class="rank-badge">${rankLabels[idx]}</div>
+          <span class="rank-medal">${rankMedals[idx]}</span>
+          <div class="rank-podium-name">${emp.name}</div>
+          <div class="rank-podium-score">${formatNum(emp.requested)}</div>
+          <div class="rank-podium-label">ใบ</div>
           
-          <div style="width: 100%; margin-bottom: 0.5rem; text-align: center; padding: 0 2px;">
-            <span class="rank-medal">${rankMedals[rankNum - 1] || '🏅'}</span>
-            ${namesDisplay}
+          <div style="background: rgba(255,255,255,0.6); padding: 4px 6px; border-radius: 8px; margin-top: 6px; font-size: 0.65rem; line-height: 1.2; width: 100%;">
+            ${incHtml}
           </div>
-          
-          <div class="rank-podium-score" style="margin-bottom: 0.1rem; width:100%; text-align:center; white-space:nowrap; overflow:visible;">${formatNum(scoreVal)}</div>
-          <div class="rank-podium-label" style="margin-bottom: 0.5rem;">ใบ</div>
-          
-          <div style="width: 100%; margin-bottom: 0.4rem; display: flex; flex-direction: column; gap: 2px;">
-            ${incDetailsHtml}
-          </div>
-          
-          <!-- Physical sports podium stand bottom styling -->
-          <div class="podium-block-base" style="
-            width: 100%;
-            padding: 12px 0;
-            background: ${baseStyle.bg};
-            color: ${baseStyle.text};
-            font-size: 1.6rem;
-            font-weight: 900;
-            margin-top: auto;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
-            border-radius: 0 0 20px 20px;
-          ">
-            ${rankNum}
+
+          <div style="width: 95%; max-width: 110px; margin: 6px auto 0;">
+            ${pctText ? `<div style="font-size: 0.65rem; color: var(--text-light); margin-bottom: 2px; line-height: 1; text-align: center;">${pctText}</div>` : 
+             `<div style="font-size: 0.65rem; line-height: 1; margin-bottom: 3px; display: flex; justify-content: center; gap: 4px;">
+                <span style="color: #10b981;">ส่ง ${formatNum(emp.remitted)}</span>
+                ${emp.outstanding > 0 ? `<span style="color: #f59e0b;">รอส่ง ${formatNum(emp.outstanding)}</span>` : ''}
+              </div>`
+            }
+            <div style="width: 100%; background: #cbd5e1; border-radius: 99px; height: 5px; overflow: hidden;">
+               <div style="width: ${remittedPct}%; height: 100%; background: #10b981; border-radius: 99px;"></div>
+            </div>
           </div>
         </div>`;
     });
     podiumHtml += '</div>';
 
-    const rest = emps.filter(emp => !topRanks.includes(emp._rank));
+    const rest = emps.slice(3);
     rest.forEach((emp, i) => {
-      const rank = emp._rank;
+      const rank = i + 4;
       const pct = maxRequested > 0 ? Math.round((emp.requested / maxRequested) * 100) : 0;
       
       const expectedInc = emp.requested * store.data.pricePerTicket * store.data.commissionRate;
@@ -3619,38 +1420,38 @@ function renderRanking() {
       const pctText = remittedPct === 100 ? `ส่งครบแล้ว` : ``;
       
       let incHtml = '';
-      if (emp.outstanding <= 0 && emp.remitted > 0) {
-         incHtml = `<div style="color: #059669; font-weight: 800; font-size: 0.75rem;">✅ ส่งเงินครบแล้ว</div>
-                    <div style="color: #4f46e5; font-weight: 800; font-size: 0.7rem;">💰 คอมฯ: ${formatNum(guaranteedInc)}.-</div>`;
+      if (emp.remitted === 0) {
+        incHtml = `<span style="color: #f59e0b; font-weight: 600;">ในมือ: ${formatNum(expectedInc)} บาท</span>`;
+      } else if (remittedPct === 100) {
+        incHtml = `<span style="color: #10b981; font-weight: 600;">ได้ชัวร์: ${formatNum(guaranteedInc)} บาท</span>`;
       } else {
-         const price = store.data.pricePerTicket;
-         const remittedStr = emp.remitted > 0 ? `<span style="color: #059669; font-weight: 600;">💵 ส่ง: ${formatNum(emp.remitted)}ใบ (${formatNum(emp.remitted * price)}.-)</span>` : '';
-         const outStr = emp.outstanding > 0 ? `<span style="color: #dc2626; font-weight: 600;">⏳ รอส่ง: ${formatNum(emp.outstanding)}ใบ (${formatNum(emp.outstanding * price)}.-)</span>` : '';
-         const commStr = emp.remitted > 0 ? `<span style="color: #4f46e5; font-weight: 800;">💰 คอมฯ: ${formatNum(guaranteedInc)}.-</span>` : '';
-         incHtml = `<div style="display: flex; flex-direction: column; gap: 2px; font-size: 0.65rem;">
-            ${remittedStr ? `<div>${remittedStr}</div>` : ''}
-            ${outStr ? `<div>${outStr}</div>` : ''}
-            ${commStr ? `<div>${commStr}</div>` : ''}
-         </div>`;
+        incHtml = `<span style="color: #f59e0b; font-weight: 600;">ในมือ: ${formatNum(expectedInc)} บาท</span>
+                   <span style="color: #10b981; font-weight: 600;">ได้ชัวร์: ${formatNum(guaranteedInc)} บาท</span>`;
       }
       
       listHtml += `
         <div class="rank-list-item">
           <div class="rank-list-num">${rank}</div>
-          <div class="rank-list-info" style="flex: 1;">
+          <div class="rank-list-info">
             <div class="rank-list-name">${emp.name}</div>
             <div class="progress-bar-outer"><div class="progress-bar-inner" style="width:${pct}%"></div></div>
-            <div style="margin-top: 4px;">
+            <div style="display: flex; gap: 8px; font-size: 0.7rem; margin-top: 3px;">
                ${incHtml}
             </div>
           </div>
-          <div class="rank-list-right" style="display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-start;">
+          <div class="rank-list-right" style="display: flex; flex-direction: column; align-items: flex-end;">
             <div style="display: flex; align-items: baseline; justify-content: flex-end; gap: 4px;">
               <div class="rank-list-score">${formatNum(emp.requested)}</div>
               <div class="rank-list-score-label">ใบ</div>
             </div>
-            <div style="width: 100px; margin-top: 6px;">
-              <div style="width: 100%; background: #e2e8f0; border-radius: 99px; height: 6px; overflow: hidden; display: flex; justify-content: flex-start;">
+            <div style="width: 110px; margin-top: 4px;">
+              ${pctText ? `<div style="display: flex; justify-content: flex-end; font-size: 0.65rem; color: var(--text-light); margin-bottom: 2px; line-height: 1;">${pctText}</div>` : 
+               `<div style="display: flex; justify-content: flex-end; font-size: 0.65rem; line-height: 1; margin-bottom: 3px; gap: 4px;">
+                  <span style="color: #10b981;">ส่ง ${formatNum(emp.remitted)}</span>
+                  ${emp.outstanding > 0 ? `<span style="color: #f59e0b;">รอส่ง ${formatNum(emp.outstanding)}</span>` : ''}
+                </div>`
+              }
+              <div style="width: 100%; background: #e2e8f0; border-radius: 99px; height: 4px; overflow: hidden; display: flex; justify-content: flex-end;">
                  <div style="width: ${remittedPct}%; height: 100%; background: #10b981; border-radius: 99px;"></div>
               </div>
             </div>
@@ -3737,7 +1538,7 @@ async function shareAsImage() {
   snapEl.style.color = '#1e2937';
   snapEl.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
   snapEl.style.border = '1px solid #cbd5e1';
-  snapEl.style.width = '720px'; // Wide aspect ratio
+  snapEl.style.width = '720px';
   snapEl.style.padding = '40px';
   snapEl.style.boxSizing = 'border-box';
   snapEl.style.fontFamily = 'Inter, "Kanit", sans-serif';
@@ -3814,7 +1615,7 @@ async function shareAsImage() {
       </div>`;
   });
 
-  // Render managers at the bottom of snapshot list
+  // Render managers at the bottom of snapshot list (just names and scores without Manager header)
   let snapshotManagerHtml = '';
   if (managers.length > 0) {
     managers.forEach(mgr => {
@@ -3931,9 +1732,7 @@ async function shareAsImage() {
       scale: 2,
       backgroundColor: null,
       useCORS: true,
-      logging: false,
-      width: 1080,
-      windowWidth: 1080
+      logging: false
     });
 
     const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
@@ -4001,7 +1800,6 @@ function calcForm() {
   const totalAmt = totalQty * price;
   
   const remitAmt = remitNewQty * price;
-  const remitAccumAmt = remitAccum * price;
   
   const outQty = totalQty - (remitNewQty + remitAccum);
   const outAmt = outQty * price;
@@ -4013,9 +1811,6 @@ function calcForm() {
   document.getElementById('c-total-amt').textContent = totalAmt ? formatNum(totalAmt) : '';
   
   document.getElementById('c-remit-amt').textContent = remitAmt ? formatNum(remitAmt) : '';
-  
-  const elRemitPrevAmt = document.getElementById('c-remit-prev-amt');
-  if (elRemitPrevAmt) elRemitPrevAmt.textContent = remitAccumAmt ? formatNum(remitAccumAmt) : '';
   
   document.getElementById('c-out-qty').textContent = outQty ? formatNum(outQty) : '';
   document.getElementById('c-out-amt').textContent = outAmt ? formatNum(outAmt) : '';
@@ -4179,20 +1974,8 @@ async function saveMasterTx() {
       }
 
       // Action
-      if (reqQty > 0) {
-        store.addMasterTx('req', reqQty, parseThaiDateStr(date1Str));
-        if (remitQty === 0) {
-          showToast('บันทึกข้อมูลเรียบร้อยแล้ว', 'success');
-          renderAll();
-          initPrintForm();
-        }
-      }
-      
-      if (remitQty > 0) {
-        // Intercept to show allocation modal
-        openMasterAllocationModal(remitQty, parseThaiDateStr(date2Str), reqQty, parseThaiDateStr(date1Str));
-        return;
-      }
+      if (reqQty > 0) store.addMasterTx('req', reqQty, parseThaiDateStr(date1Str));
+      if (remitQty > 0) store.addMasterTx('remit', remitQty, parseThaiDateStr(date2Str));
       
       showToast('บันทึกข้อมูลเรียบร้อยแล้ว', 'success');
       renderAll();
@@ -4247,18 +2030,47 @@ async function deleteTx(txId) {
   }
 }
 function printMasterTx(txId) {
+  const txIndex = store.data.masterTransactions.findIndex(t => t.id === txId);
+  if (txIndex === -1) return;
+  const tx = store.data.masterTransactions[txIndex];
+  
+  let prevReq = 0;
+  let prevRemit = 0;
+  for (let i = 0; i < txIndex; i++) {
+    const pastTx = store.data.masterTransactions[i];
+    if (pastTx.type === 'req') prevReq += pastTx.qty;
+    if (pastTx.type === 'remit') prevRemit += pastTx.qty;
+  }
+  
   // Find and click the "พิมพ์เอกสาร" nav button to switch tab
   const printBtn = document.querySelector('.nav-btn[data-view="print"]');
   if (printBtn) printBtn.click();
   
   switchPrintTab('1');
   
-  const selectEl = document.getElementById('print-master-tx-select');
-  if (selectEl) {
-    selectEl.value = txId;
+  // Populate the form fields manually
+  const dateStr = formatThaiDate(tx.date);
+  document.getElementById('c-date1').textContent = dateStr;
+  document.getElementById('c-date2').textContent = dateStr;
+  document.getElementById('p-sign-date').textContent = dateStr;
+  
+  document.getElementById('c-prev-qty').textContent = prevReq || '';
+  document.getElementById('c-remit-accum').textContent = prevRemit || '0';
+  
+  if (tx.type === 'req') {
+    document.getElementById('c-req-qty').textContent = tx.qty;
+    document.getElementById('c-remit-qty').textContent = '';
+    document.getElementById('p-sign-role').textContent = '(ผู้เบิก)';
+    document.getElementById('p-sign-date-label').textContent = 'วันที่เบิก';
+  } else {
+    document.getElementById('c-req-qty').textContent = '';
+    document.getElementById('c-remit-qty').textContent = tx.qty;
+    document.getElementById('p-sign-role').textContent = '(ผู้นำส่ง)';
+    document.getElementById('p-sign-date-label').textContent = 'วันที่นำส่ง';
   }
   
-  populatePrintFieldsForTx(txId);
+  // Trigger calculation
+  calcForm();
   
   // Scroll to the form and highlight briefly
   setTimeout(() => {
@@ -4365,6 +2177,32 @@ function importData(input) {
   reader.readAsText(file, 'utf-8');
 }
 
+// Toast notification helper
+function showToast(message, type = 'success') {
+  let toast = document.getElementById('app-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'app-toast';
+    toast.style.cssText = `
+      position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px);
+      padding: 0.75rem 1.5rem; border-radius: 12px; font-size: 0.95rem; font-weight: 600;
+      font-family: 'Kanit', sans-serif; z-index: 9999; opacity: 0;
+      transition: all 0.3s ease; box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      max-width: 320px; text-align: center; white-space: nowrap;
+    `;
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.style.background = type === 'success' ? '#10b981' : '#ef4444';
+  toast.style.color = 'white';
+  toast.style.opacity = '1';
+  toast.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(-50%) translateY(20px)';
+  }, 3000);
+}
 
 // Event Listeners
 window.addEventListener('storeUpdated', renderAll);
@@ -4410,27 +2248,6 @@ function updateReturnQty() {
 
 document.getElementById('tx-emp').addEventListener('change', updateReturnQty);
 document.getElementById('tx-type').addEventListener('change', updateReturnQty);
-
-function updateTxTypeColor() {
-  const typeEl = document.getElementById('tx-type');
-  const val = typeEl.value;
-  if (val === 'req') {
-    typeEl.style.border = '2px solid #3b82f6';
-    typeEl.style.backgroundColor = '#eff6ff';
-    typeEl.style.color = '#1e3a8a';
-  } else if (val === 'remit') {
-    typeEl.style.border = '2px solid #10b981';
-    typeEl.style.backgroundColor = '#ecfdf5';
-    typeEl.style.color = '#064e3b';
-  } else if (val === 'return') {
-    typeEl.style.border = '2px solid #ea580c';
-    typeEl.style.backgroundColor = '#fff7ed';
-    typeEl.style.color = '#7c2d12';
-  }
-}
-document.getElementById('tx-type').addEventListener('change', updateTxTypeColor);
-// Initialize color on load
-updateTxTypeColor();
 
 // Calculate value dynamically
 document.getElementById('tx-qty').addEventListener('input', (e) => {
@@ -4614,7 +2431,6 @@ document.getElementById('share-text-modal').addEventListener('click', function(e
 renderAll();
 initPrintForm();
 renderA4Logbook();
-switchPrintTab('1');
 
 // Print Function
 function switchPrintTab(type) {
@@ -4622,19 +2438,6 @@ function switchPrintTab(type) {
   document.querySelectorAll('.print-layout').forEach(el => el.style.display = 'none');
   // Show selected layout
   document.getElementById('print-type-' + type).style.display = 'block';
-  
-  // Dynamically update print orientation
-  let printStyle = document.getElementById('dynamic-print-style');
-  if (!printStyle) {
-    printStyle = document.createElement('style');
-    printStyle.id = 'dynamic-print-style';
-    document.head.appendChild(printStyle);
-  }
-  if (type === '1') {
-    printStyle.innerHTML = '@page { size: landscape; margin: 15mm; }';
-  } else {
-    printStyle.innerHTML = '@page { size: portrait; margin: 15mm; }';
-  }
   
   // Update active state on tab buttons
   for (let i = 1; i <= 3; i++) {
@@ -4834,169 +2637,4 @@ if (logbookInput) {
   
   loadLogbookImage();
 }
-  </script>
-<!-- Master Remit Allocation Modal -->
-<div id="master-allocation-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); z-index: 10000; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s ease;">
-  <div style="max-width: 500px; width: 90%; background: white; border-radius: 16px; padding: 2rem; transform: scale(0.9); transition: transform 0.2s ease; max-height: 90vh; display: flex; flex-direction: column;">
-    <h3 style="margin-top: 0; margin-bottom: 1rem; font-size: 1.3rem; font-weight: 700; color: var(--text-dark); text-align: center;">จับคู่ยอดเงินลงกล่องนำส่ง</h3>
-    <div style="margin-bottom: 1rem; padding: 1rem; background: #f0fdf4; border-radius: 8px; border: 1px solid #bbf7d0; text-align: center;">
-      <h4 style="margin:0 0 0.5rem 0; color: #166534;">ยอดที่ต้องจัดลงกล่อง: <span id="master-alloc-target" style="font-size: 1.5rem; font-weight: bold;">0</span> ฉบับ</h4>
-      <p style="margin:0; font-size: 0.9rem; color: #15803d;">จัดไปแล้ว: <span id="master-alloc-current">0</span> / <span id="master-alloc-total">0</span> ฉบับ</p>
-    </div>
-    
-    <p style="font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--text-light);">เลือกว่ายอดที่นำส่งครั้งนี้ เป็นของใครบ้าง:</p>
-    
-    <div class="table-responsive" style="flex: 1; overflow-y: auto; margin-bottom: 1rem; border: 1px solid var(--border); border-radius: 8px;">
-      <table class="data-table" style="width: 100%; margin: 0;">
-        <thead style="position: sticky; top: 0; z-index: 1;">
-          <tr>
-            <th style="padding: 0.5rem;">พนักงาน</th>
-            <th style="padding: 0.5rem; text-align: center;">ยอดว่าง</th>
-            <th style="padding: 0.5rem; text-align: center;">จัดลงกล่อง</th>
-          </tr>
-        </thead>
-        <tbody id="master-alloc-tbody">
-        </tbody>
-      </table>
-    </div>
-    
-    <div style="display: flex; gap: 0.75rem; justify-content: center; width: 100%;">
-      <button class="btn" onclick="closeMasterAllocationModal()" style="background: #f1f5f9; color: var(--text-dark); flex: 1; border: 1px solid var(--border); transition: background 0.15s; font-family: inherit;">ยกเลิก</button>
-      <button class="btn" id="btn-save-master-allocation" onclick="confirmMasterAllocation()" style="background: var(--primary); color: white; flex: 2; transition: background 0.15s; font-family: inherit; font-weight: 600;">💾 บันทึกและนำส่ง</button>
-    </div>
-  </div>
-</div>
-
-<script>
-let tempMasterRemitData = null;
-
-function openMasterAllocationModal(remitQty, date2Str, reqQty, date1Str) {
-  const modal = document.getElementById('master-allocation-modal');
-  const inner = modal.querySelector('div');
   
-  tempMasterRemitData = { remitQty, date2Str, reqQty, date1Str };
-  
-  document.getElementById('master-alloc-target').textContent = formatNum(remitQty);
-  document.getElementById('master-alloc-total').textContent = formatNum(remitQty);
-  
-  const unallocatedList = store.getUnallocatedRemittances();
-  const tbody = document.getElementById('master-alloc-tbody');
-  tbody.innerHTML = '';
-  
-  if (unallocatedList.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-light); padding: 1rem;">ไม่มีพนักงานที่มียอดค้างจัดสรร</td></tr>';
-  } else {
-    // Auto-fill logic
-    let remainingToFill = remitQty;
-    
-    unallocatedList.forEach((item, index) => {
-      let autoFill = 0;
-      if (remainingToFill > 0) {
-        autoFill = Math.min(remainingToFill, item.unallocatedQty);
-        remainingToFill -= autoFill;
-      }
-      
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td style="padding: 0.5rem; white-space: nowrap;">${item.name}</td>
-        <td style="padding: 0.5rem; text-align: center; font-weight: bold; color: var(--primary);">${formatNum(item.unallocatedQty)}</td>
-        <td style="padding: 0.5rem; text-align: center;">
-          <input type="number" class="alloc-input form-control" data-emp-id="${item.empId}" data-max="${item.unallocatedQty}" value="${autoFill > 0 ? autoFill : ''}" min="0" max="${item.unallocatedQty}" oninput="updateMasterAllocTotal()" style="width: 80px; text-align: center; margin: 0 auto; padding: 4px;">
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-  
-  updateMasterAllocTotal();
-  
-  modal.style.display = 'flex';
-  // Trigger reflow
-  modal.offsetWidth;
-  modal.style.opacity = '1';
-  inner.style.transform = 'scale(1)';
-}
-
-function closeMasterAllocationModal() {
-  const modal = document.getElementById('master-allocation-modal');
-  const inner = modal.querySelector('div');
-  modal.style.opacity = '0';
-  inner.style.transform = 'scale(0.9)';
-  setTimeout(() => {
-    modal.style.display = 'none';
-    tempMasterRemitData = null;
-  }, 200);
-}
-
-function updateMasterAllocTotal() {
-  const inputs = document.querySelectorAll('.alloc-input');
-  let currentTotal = 0;
-  inputs.forEach(input => {
-    let val = parseInt(input.value) || 0;
-    const max = parseInt(input.getAttribute('data-max')) || 0;
-    if (val > max) {
-      val = max;
-      input.value = max;
-    }
-    if (val < 0) {
-      val = 0;
-      input.value = '';
-    }
-    currentTotal += val;
-  });
-  
-  const currentEl = document.getElementById('master-alloc-current');
-  currentEl.textContent = formatNum(currentTotal);
-  
-  const targetQty = tempMasterRemitData ? tempMasterRemitData.remitQty : 0;
-  const btn = document.getElementById('btn-save-master-allocation');
-  
-  if (currentTotal === targetQty) {
-    currentEl.style.color = '#15803d'; // Green
-    btn.disabled = false;
-    btn.style.opacity = '1';
-    btn.style.cursor = 'pointer';
-  } else {
-    currentEl.style.color = '#dc2626'; // Red
-    btn.disabled = true;
-    btn.style.opacity = '0.5';
-    btn.style.cursor = 'not-allowed';
-  }
-}
-
-function confirmMasterAllocation() {
-  if (!tempMasterRemitData) return;
-  
-  const inputs = document.querySelectorAll('.alloc-input');
-  let currentTotal = 0;
-  const allocations = [];
-  
-  inputs.forEach(input => {
-    const val = parseInt(input.value) || 0;
-    if (val > 0) {
-      currentTotal += val;
-      allocations.push({
-        empId: input.getAttribute('data-emp-id'),
-        qty: val
-      });
-    }
-  });
-  
-  if (currentTotal !== tempMasterRemitData.remitQty) {
-    showToast('ยอดจัดสรรไม่ตรงกับยอดที่ต้องการนำส่ง', 'error');
-    return;
-  }
-  
-  try {
-    store.addMasterTx('remit', tempMasterRemitData.remitQty, tempMasterRemitData.date2Str, allocations);
-    showToast('บันทึกรายการนำส่งเรียบร้อยแล้ว', 'success');
-    renderAll();
-    initPrintForm();
-    closeMasterAllocationModal();
-  } catch(e) {
-    showToast(e.message, 'error');
-  }
-}
-</script>
-</body>
-</html>
