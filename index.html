@@ -2149,6 +2149,37 @@ class Store {
     this.saveData();
   }
 
+  getUnallocatedRemittances() {
+    const employeesData = this.getEmployeesData();
+    const allocationsByEmp = {};
+    
+    // Sum all allocations inside master transactions
+    this.data.masterTransactions.forEach(mt => {
+      if (mt.type === 'remit' && Array.isArray(mt.allocations)) {
+        mt.allocations.forEach(alloc => {
+          if (!allocationsByEmp[alloc.empId]) allocationsByEmp[alloc.empId] = 0;
+          allocationsByEmp[alloc.empId] += alloc.qty;
+        });
+      }
+    });
+
+    const unallocated = [];
+    employeesData.forEach(emp => {
+      const allocatedQty = allocationsByEmp[emp.id] || 0;
+      const unallocatedQty = emp.remitted - allocatedQty;
+      
+      if (unallocatedQty > 0) {
+        unallocated.push({
+          empId: emp.id,
+          name: emp.name,
+          unallocatedQty
+        });
+      }
+    });
+    
+    return unallocated;
+  }
+
   // --- Employees ---
   addEmployee(name, isManager = false) {
     const lowerName = name.trim().toLowerCase();
@@ -4023,6 +4054,20 @@ function calcForm() {
   // Update Remaining
   const remain = quota - (prevQty + reqQty);
   document.getElementById('c-remain').textContent = formatNum(remain);
+
+  // Update Role dynamically
+  const roleEl = document.getElementById('p-sign-role');
+  if (roleEl) {
+    if (reqQty > 0 && remitNewQty === 0) {
+      roleEl.textContent = '(ผู้เบิก)';
+    } else if (remitNewQty > 0 && reqQty === 0) {
+      roleEl.textContent = '(ผู้ส่ง)';
+    } else if (reqQty > 0 && remitNewQty > 0) {
+      roleEl.textContent = '(ผู้เบิก / ผู้ส่ง)';
+    } else {
+      roleEl.textContent = '(ผู้ส่ง)';
+    }
+  }
 }
 
 
