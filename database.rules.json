@@ -1,1 +1,6 @@
-@C:\Users\Admin\Documents\Codex\2026-07-16\c-users-admin-gemini-antigravity-scratch\work\wpc-publish-local\database.rules.json
+{
+  "rules": {
+    ".read": "auth != null && auth.token.email == 'khunnawut.yu@gmail.com' && auth.token.email_verified == true",
+    ".write": "auth != null && auth.token.email == 'khunnawut.yu@gmail.com' && auth.token.email_verified == true"
+  }
+}
