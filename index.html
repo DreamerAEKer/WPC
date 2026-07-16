@@ -1392,9 +1392,30 @@ input:focus, select:focus {
     border-color: #6b7280;
     color: #374151;
   }
+  .auth-gate {
+    position: fixed; inset: 0; z-index: 50000; display: flex; align-items: center; justify-content: center;
+    padding: 1.5rem; background: linear-gradient(135deg, #eef2ff, #f8fafc);
+  }
+  .auth-card {
+    width: min(420px, 100%); background: white; border: 1px solid var(--border); border-radius: 20px;
+    padding: 2rem; text-align: center; box-shadow: var(--shadow-lg);
+  }
+  .auth-card h1 { font-size: 1.4rem; margin: 0.75rem 0 0.5rem; }
+  .auth-card p { color: var(--text-light); margin-bottom: 1.25rem; }
+  .auth-error { display: none; color: #b91c1c !important; background: #fef2f2; padding: 0.75rem; border-radius: 8px; }
   </style>
 </head>
 <body>
+  <div id="auth-gate" class="auth-gate" aria-live="polite">
+    <div class="auth-card">
+      <div style="font-size:3rem;">🔐</div>
+      <h1>เข้าสู่ระบบ Postcard Tracker</h1>
+      <p>อนุญาตเฉพาะบัญชีเจ้าของระบบเท่านั้น</p>
+      <button id="google-sign-in" class="btn btn-primary" type="button" onclick="signInWithGoogle()" disabled>เข้าสู่ระบบด้วย Google</button>
+      <p id="auth-status" style="margin-top:1rem; font-size:0.85rem;">กำลังตรวจสอบสถานะการเข้าสู่ระบบ…</p>
+      <p id="auth-error" class="auth-error"></p>
+    </div>
+  </div>
   <div class="mobile-header no-print">
     <div class="mobile-header-title">
       <span>🏆</span> <span id="mobile-page-title">ภาพรวมแผนก</span>
@@ -1404,7 +1425,7 @@ input:focus, select:focus {
         💾 สำรองข้อมูล
       </button>
       <div class="mobile-header-info">
-        3บ. / ซ 10% <span style="opacity: 0.7; margin-left: 2px;">v1.1.19</span>
+        3บ. / ซ 10% <span style="opacity: 0.7; margin-left: 2px;">v1.1.20</span>
       </div>
     </div>
   </div>
@@ -1414,7 +1435,7 @@ input:focus, select:focus {
       <div class="sidebar-header">
         <div class="logo-icon">🏆</div>
         <h2>ฟุตบอลระดับโลก 2026</h2>
-        <p class="subtitle">Postcard Tracker <span style="font-size: 0.75rem; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 12px; margin-left: 4px;">v1.1.19</span></p>
+        <p class="subtitle">Postcard Tracker <span style="font-size: 0.75rem; background: #e2e8f0; color: #475569; padding: 2px 6px; border-radius: 12px; margin-left: 4px;">v1.1.20</span></p>
       </div>
       <nav class="sidebar-nav">
         <button class="nav-btn active" data-view="dashboard">
@@ -1442,12 +1463,14 @@ input:focus, select:focus {
           <div class="backup-label">💾 สำรอง / กู้คืนข้อมูล</div>
           <div class="backup-btns">
             <button class="btn-backup" onclick="exportData()" title="ดาวน์โหลดไฟล์สำรองข้อมูล">📤 Export</button>
+            <button class="btn-backup" onclick="restoreLatestRecovery()" title="กู้คืนข้อมูลก่อน Import หรือลบพนักงานครั้งล่าสุด">↩️ กู้คืน</button>
             <label class="btn-backup btn-import" title="นำเข้าข้อมูลจากไฟล์สำรอง">
               📥 Import
               <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(this)" />
             </label>
           </div>
           <div class="backup-hint">กดก่อน update เวอร์ชันใหม่</div>
+          <button class="btn-backup" onclick="signOutApp()" style="margin-top:0.5rem; width:100%;">ออกจากระบบ</button>
         </div>
       </div>
     </aside>
@@ -1512,6 +1535,9 @@ input:focus, select:focus {
             <h3 style="display: flex; align-items: center; gap: 0.5rem;">💾 จัดการข้อมูล (Backup / Restore)</h3>
             <button class="btn btn-primary" onclick="exportData()" style="flex: 1; justify-content: center;">
               <span>📤</span> ส่งออกข้อมูล (Export)
+            </button>
+            <button class="btn btn-secondary" onclick="restoreLatestRecovery()" style="flex: 1; justify-content: center;">
+              <span>↩️</span> กู้คืนล่าสุด
             </button>
             <label class="btn btn-secondary" style="flex: 1; justify-content: center; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; border: 1px solid var(--border);">
               <span>📥</span> นำเข้าข้อมูล (Import)
@@ -1939,6 +1965,7 @@ input:focus, select:focus {
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
   <script>
 // --- FIREBASE CONFIGURATION ---
@@ -1955,11 +1982,13 @@ const firebaseConfig = {
   databaseURL: "https://wpcgpo-default-rtdb.asia-southeast1.firebasedatabase.app"
 };
 
-let firebaseApp, firebaseDb;
+const ALLOWED_EMAIL = 'khunnawut.yu@gmail.com';
+let firebaseApp, firebaseDb, firebaseAuth;
 const isFirebaseEnabled = !!firebaseConfig.apiKey;
 
 if (isFirebaseEnabled) {
   firebaseApp = firebase.initializeApp(firebaseConfig);
+  firebaseAuth = firebase.auth();
   firebaseDb = firebase.database();
 }
 
@@ -1980,9 +2009,10 @@ const defaultData = {
 class Store {
   constructor() {
     this.data = this.loadLocalData();
-    if (isFirebaseEnabled) {
-      this.initFirebase();
-    }
+    this.lastSyncedData = null;
+    this.hasSyncedRemote = false;
+    this.isSaving = false;
+    this.firebaseListenerStarted = false;
   }
 
   loadLocalData() {
@@ -2001,9 +2031,13 @@ class Store {
   }
 
   initFirebase() {
+    if (this.firebaseListenerStarted) return;
+    this.firebaseListenerStarted = true;
     const dataRef = firebaseDb.ref('tracker_data');
     dataRef.on('value', (snapshot) => {
       const val = snapshot.val();
+      this.hasSyncedRemote = true;
+      this.lastSyncedData = val === null ? null : JSON.stringify(val);
       if (val) {
         this.data = { ...defaultData, ...val };
         // Ensure arrays exist even if empty in Firebase
@@ -2043,10 +2077,33 @@ class Store {
 
   saveData() {
     if (isFirebaseEnabled) {
-      firebaseDb.ref('tracker_data').set(this.data).catch(error => {
+      const payload = JSON.parse(JSON.stringify(this.data));
+      const expectedRemote = this.lastSyncedData;
+      const expectedHasSynced = this.hasSyncedRemote;
+      this.isSaving = true;
+      firebaseDb.ref('tracker_data').transaction(current => {
+        const currentJson = current === null ? null : JSON.stringify(current);
+        if (expectedHasSynced && currentJson !== expectedRemote) return;
+        return payload;
+      }, undefined, false).then(result => {
+        this.isSaving = false;
+        if (!result.committed) {
+          const latest = result.snapshot.val();
+          if (latest) {
+            this.lastSyncedData = JSON.stringify(latest);
+            this.data = { ...defaultData, ...latest };
+            localStorage.setItem(STORE_KEY, JSON.stringify(this.data));
+            window.dispatchEvent(new Event('storeUpdated'));
+          }
+          if (typeof showToast === 'function') {
+            showToast('ข้อมูลถูกแก้จากอีกเครื่อง ระบบจึงยกเลิกการบันทึกเพื่อป้องกันข้อมูลทับกัน กรุณาทำรายการใหม่', 'warning');
+          }
+        }
+      }).catch(error => {
+        this.isSaving = false;
         console.error("Firebase write failed:", error);
         if (typeof showToast === 'function') {
-          showToast('❌ บันทึกข้อมูลขึ้น Firebase ไม่สำเร็จ', 'error');
+          showToast('บันทึกข้อมูลขึ้น Firebase ไม่สำเร็จ ข้อมูลเดิมบนระบบยังไม่ถูกทับ', 'error');
         }
       });
     } else {
@@ -2182,14 +2239,15 @@ class Store {
 
   // --- Employees ---
   addEmployee(name, isManager = false) {
-    const lowerName = name.trim().toLowerCase();
+    name = cleanUserText(name, 'ชื่อพนักงาน', 100);
+    const lowerName = name.toLowerCase();
     const exists = this.data.employees.some(e => e.name.trim().toLowerCase() === lowerName);
     if (exists) {
       throw new Error(`พนักงานชื่อ "${name}" มีอยู่ในระบบแล้ว`);
     }
 
     const id = Date.now().toString();
-    this.data.employees.push({ id, name: name.trim(), paidAmount: 0, note: '', isManager });
+    this.data.employees.push({ id, name, paidAmount: 0, note: '', isManager });
     this.saveData();
     return id;
   }
@@ -2371,14 +2429,15 @@ class Store {
 
   // --- Gifts ---
   addGift(name, totalStock) {
-    const lowerName = name.trim().toLowerCase();
+    name = cleanUserText(name, 'ชื่อของสมนาคุณ', 100);
+    const lowerName = name.toLowerCase();
     const exists = this.data.gifts.some(g => g.name.trim().toLowerCase() === lowerName);
     if (exists) {
       throw new Error(`ของสมมนาคุณชื่อ "${name}" มีอยู่ในระบบแล้ว`);
     }
 
     const id = Date.now().toString();
-    this.data.gifts.push({ id, name: name.trim(), totalStock });
+    this.data.gifts.push({ id, name, totalStock });
     this.saveData();
   }
 
@@ -2416,6 +2475,121 @@ class Store {
 
 const store = new Store();
 
+function setAuthGate(errorMessage = '') {
+  const gate = document.getElementById('auth-gate');
+  const button = document.getElementById('google-sign-in');
+  const status = document.getElementById('auth-status');
+  const error = document.getElementById('auth-error');
+  if (gate) gate.style.display = 'flex';
+  if (button) button.disabled = false;
+  if (status) status.textContent = 'กรุณาเข้าสู่ระบบด้วยบัญชีเจ้าของระบบ';
+  if (error) {
+    error.textContent = errorMessage;
+    error.style.display = errorMessage ? 'block' : 'none';
+  }
+}
+
+function initSingleUserAuth() {
+  if (!isFirebaseEnabled || !firebaseAuth) {
+    setAuthGate('ไม่สามารถเชื่อมต่อระบบเข้าสู่ระบบได้');
+    return;
+  }
+  firebaseAuth.onAuthStateChanged(async user => {
+    if (user && String(user.email || '').toLowerCase() === ALLOWED_EMAIL) {
+      document.getElementById('auth-gate').style.display = 'none';
+      store.initFirebase();
+      return;
+    }
+    if (user) {
+      await firebaseAuth.signOut();
+      setAuthGate(`บัญชี ${user.email || 'นี้'} ไม่มีสิทธิ์ใช้งาน`);
+    } else {
+      setAuthGate();
+    }
+  });
+}
+
+async function signInWithGoogle() {
+  const button = document.getElementById('google-sign-in');
+  const error = document.getElementById('auth-error');
+  button.disabled = true;
+  error.style.display = 'none';
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ login_hint: ALLOWED_EMAIL, prompt: 'select_account' });
+    await firebaseAuth.signInWithPopup(provider);
+  } catch (authError) {
+    const friendlyMessage = authError.code === 'auth/popup-blocked'
+      ? 'เบราว์เซอร์ปิดกั้นหน้าต่างเข้าสู่ระบบ กรุณาอนุญาต Pop-up แล้วลองใหม่'
+      : 'เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่';
+    setAuthGate(friendlyMessage);
+    console.error('Sign-in failed', authError);
+  }
+}
+
+async function signOutApp() {
+  if (firebaseAuth) await firebaseAuth.signOut();
+}
+
+initSingleUserAuth();
+
+// --- DATA SAFETY UTILITIES ---
+const RECOVERY_KEY = 'world_cup_tracker_recovery_snapshots';
+const MAX_RECOVERY_SNAPSHOTS = 5;
+const MAX_EVIDENCE_BYTES = 2 * 1024 * 1024;
+
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+function cleanUserText(value, fieldName = 'ข้อความ', maxLength = 120) {
+  const cleaned = String(value ?? '').replace(/[\u0000-\u001F\u007F]/g, ' ').trim();
+  if (!cleaned) throw new Error(`กรุณาระบุ${fieldName}`);
+  if (cleaned.length > maxLength) throw new Error(`${fieldName}ยาวเกิน ${maxLength} ตัวอักษร`);
+  return cleaned;
+}
+
+function createRecoverySnapshot(reason) {
+  try {
+    const current = JSON.parse(localStorage.getItem(RECOVERY_KEY) || '[]');
+    current.unshift({ createdAt: new Date().toISOString(), reason, data: store.data });
+    localStorage.setItem(RECOVERY_KEY, JSON.stringify(current.slice(0, MAX_RECOVERY_SNAPSHOTS)));
+  } catch (error) {
+    console.warn('Unable to create recovery snapshot', error);
+  }
+}
+
+function validateImportPayload(parsed) {
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('โครงสร้างไฟล์ไม่ถูกต้อง');
+  const arrays = ['employees', 'transactions', 'masterTransactions', 'gifts', 'giftAllocations'];
+  arrays.forEach(key => {
+    if (parsed[key] !== undefined && !Array.isArray(parsed[key])) throw new Error(`${key} ต้องเป็นรายการ`);
+  });
+  ['quota', 'pricePerTicket', 'commissionRate'].forEach(key => {
+    if (parsed[key] !== undefined && (!Number.isFinite(Number(parsed[key])) || Number(parsed[key]) < 0)) {
+      throw new Error(`${key} มีค่าไม่ถูกต้อง`);
+    }
+  });
+  (parsed.employees || []).forEach((emp, index) => {
+    if (!emp || typeof emp !== 'object' || !String(emp.id || '').trim()) throw new Error(`ข้อมูลพนักงานลำดับ ${index + 1} ไม่ถูกต้อง`);
+    if (!/^[A-Za-z0-9_-]{1,100}$/.test(String(emp.id))) throw new Error(`รหัสพนักงานลำดับ ${index + 1} ไม่ปลอดภัย`);
+    emp.name = cleanUserText(emp.name, 'ชื่อพนักงาน', 100);
+  });
+  [...(parsed.transactions || []), ...(parsed.masterTransactions || [])].forEach((tx, index) => {
+    if (!tx || typeof tx !== 'object' || !String(tx.id || '').trim() || !['req', 'remit', 'return'].includes(tx.type)) {
+      throw new Error(`ข้อมูลรายการลำดับ ${index + 1} ไม่ถูกต้อง`);
+    }
+    if (!Number.isInteger(Number(tx.qty)) || Number(tx.qty) <= 0) throw new Error(`จำนวนในรายการลำดับ ${index + 1} ไม่ถูกต้อง`);
+    tx.qty = Number(tx.qty);
+  });
+  return parsed;
+}
+
 
 // --- TOAST NOTIFICATIONS ---
 function showToast(message, type = 'error') {
@@ -2436,7 +2610,7 @@ function showToast(message, type = 'error') {
   toast.innerHTML = `
     <div style="display: flex; align-items: center; gap: 8px;">
       <span style="font-size: 1.25rem;">${icon}</span>
-      <span>${message}</span>
+      <span>${escapeHtml(message)}</span>
     </div>
     <span style="cursor: pointer; font-weight: bold; font-size: 1.2rem; opacity: 0.7; transition: opacity 0.2s;" onclick="this.parentElement.remove()" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.7">&times;</span>
   `;
@@ -2775,7 +2949,7 @@ function renderDashboard() {
   emps.forEach(emp => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${emp.name}</td>
+      <td>${escapeHtml(emp.name)}</td>
       <td>${formatNum(emp.requested)}</td>
       <td>${formatNum(emp.remitted)}</td>
       <td>${formatNum(emp.outstanding)}</td>
@@ -2815,7 +2989,7 @@ function renderSummary() {
     const tr = document.createElement('tr');
     tr.style.background = emp.paid ? 'linear-gradient(90deg, #f0fdf4, #ffffff)' : '';
     tr.innerHTML = `
-      <td style="font-weight: 600; color: var(--text-dark);">${emp.name}</td>
+      <td style="font-weight: 600; color: var(--text-dark);">${escapeHtml(emp.name)}</td>
       <td>
         <span style="font-weight: 500;">${formatNum(emp.requested)}</span>
         <span style="font-size: 0.8rem; color: var(--text-light); display: block;">(${formatNum(emp.requested * store.data.pricePerTicket)} บาท)</span>
@@ -2868,7 +3042,7 @@ function renderEmployees() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td style="font-weight:600;">
-        ${emp.name}
+        ${escapeHtml(emp.name)}
       </td>
       <td style="text-align: center;">
         <input type="checkbox" ${emp.isManager ? 'checked' : ''} onchange="toggleManager('${emp.id}', this.checked)" style="width: 18px; height: 18px; cursor: pointer;" />
@@ -2879,7 +3053,7 @@ function renderEmployees() {
       <td style="color: var(--secondary); font-weight: 600;">${formatNum(emp.commission)}</td>
       <td>
         <button class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-right: 4px;" onclick="openEmployeeDetails('${emp.id}')">🔍 ประวัติ</button>
-        <button class="btn-delete-emp" onclick="deleteEmployee('${emp.id}', '${emp.name}')" title="ลบพนักงาน">
+        <button class="btn-delete-emp" onclick="deleteEmployee('${emp.id}', decodeURIComponent('${encodeURIComponent(emp.name)}'))" title="ลบพนักงาน">
           🗑️ ลบ
         </button>
       </td>
@@ -2939,6 +3113,7 @@ window.openEmployeeDetails = function(empId) {
 window.deleteEmpTx = async function(txId, empId) {
   if (await showConfirm('ต้องการลบรายการนี้ใช่หรือไม่?', 'ยืนยันการลบ')) {
     try {
+      createRecoverySnapshot('ก่อนลบรายการพนักงาน');
       store.deleteTransaction(txId);
       renderAll();
       openEmployeeDetails(empId); // Refresh modal
@@ -2954,8 +3129,10 @@ function toggleManager(empId, isChecked) {
 
 async function deleteEmployee(empId, empName) {
   if (await showConfirm(`ลบพนักงาน "${empName}" ออกจากระบบ?\n(รายการทั้งหมดของพนักงานคนนี้จะถูกลบด้วย)`, 'ยืนยันการลบพนักงาน')) {
+    createRecoverySnapshot(`ก่อนลบพนักงาน ${empName}`);
     store.deleteEmployee(empId);
     renderAll();
+    showToast('ลบพนักงานแล้ว และเก็บข้อมูลกู้คืนไว้ในเครื่อง', 'success');
   }
 }
 
@@ -2966,7 +3143,7 @@ function renderTransactions() {
   if (txEmpSelect) {
     txEmpSelect.innerHTML = '<option value="">-- เลือกพนักงาน --</option>';
     emps.forEach(emp => {
-      txEmpSelect.innerHTML += `<option value="${emp.id}">${emp.name} (ค้างส่ง: ${emp.outstanding})</option>`;
+      txEmpSelect.innerHTML += `<option value="${emp.id}">${escapeHtml(emp.name)} (ค้างส่ง: ${emp.outstanding})</option>`;
     });
   }
 
@@ -2984,8 +3161,8 @@ function renderTransactions() {
 
     transferDestSelect.innerHTML = '<option value="">-- เลือกผู้รับ --</option>';
     emps.forEach(emp => {
-      transferSrcSelect.innerHTML += `<option value="${emp.id}" data-balance="${emp.outstanding}">${emp.name} (สต็อกในมือ: ${formatNum(emp.outstanding)})</option>`;
-      transferDestSelect.innerHTML += `<option value="${emp.id}">${emp.name}</option>`;
+      transferSrcSelect.innerHTML += `<option value="${emp.id}" data-balance="${emp.outstanding}">${escapeHtml(emp.name)} (สต็อกในมือ: ${formatNum(emp.outstanding)})</option>`;
+      transferDestSelect.innerHTML += `<option value="${emp.id}">${escapeHtml(emp.name)}</option>`;
     });
     
     // Restore previous selection if any
@@ -2997,7 +3174,7 @@ function renderTransactions() {
   if (allocEmpSelect) {
     allocEmpSelect.innerHTML = '<option value="">-- เลือกพนักงาน --</option>';
     emps.forEach(emp => {
-      allocEmpSelect.innerHTML += `<option value="${emp.id}">${emp.name}</option>`;
+      allocEmpSelect.innerHTML += `<option value="${emp.id}">${escapeHtml(emp.name)}</option>`;
     });
   }
 
@@ -3161,7 +3338,7 @@ function renderGifts() {
   if (allocGiftSelect) {
     allocGiftSelect.innerHTML = '<option value="">-- เลือกของสมมนาคุณ --</option>';
     gifts.forEach(gift => {
-      allocGiftSelect.innerHTML += `<option value="${gift.id}">${gift.name} (เหลือ: ${gift.remaining})</option>`;
+      allocGiftSelect.innerHTML += `<option value="${gift.id}">${escapeHtml(gift.name)} (เหลือ: ${gift.remaining})</option>`;
     });
   }
 
@@ -3175,7 +3352,7 @@ function renderGifts() {
     gifts.forEach(gift => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td>${gift.name}</td>
+        <td>${escapeHtml(gift.name)}</td>
         <td>${formatNum(gift.totalStock)}</td>
         <td>${formatNum(gift.allocated)}</td>
         <td style="font-weight: 600; color: ${gift.remaining <= 0 ? 'var(--danger)' : 'var(--secondary)'}">${formatNum(gift.remaining)}</td>
@@ -3265,7 +3442,7 @@ function renderCommissionTable() {
       
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td style="font-weight: 600;">${emp.name} ${emp.isManager ? '<span class="badge" style="background:#e2e8f0;color:#475569;font-size:0.7rem;margin-left:4px;">หัวหน้า</span>' : ''}</td>
+        <td style="font-weight: 600;">${escapeHtml(emp.name)} ${emp.isManager ? '<span class="badge" style="background:#e2e8f0;color:#475569;font-size:0.7rem;margin-left:4px;">หัวหน้า</span>' : ''}</td>
         <td style="text-align: right;">${formatNum(emp.remitted)}</td>
         <td style="text-align: right; color: var(--secondary);">${formatNum(emp.revenue)}</td>
         <td style="text-align: right; font-weight: 700; color: #16a34a;">${formatNum(emp.commission)}</td>
@@ -3544,7 +3721,7 @@ function renderRanking() {
       // Render names - each name nowrap, wrap only between names
       const namesHtml = groupEmps.map((emp, i) => {
         const comma = i < groupEmps.length - 1 ? ',' : '';
-        return `<span style="white-space:nowrap; word-break:keep-all; font-weight:700;">${emp.name}${comma}</span>`;
+        return `<span style="white-space:nowrap; word-break:keep-all; font-weight:700;">${escapeHtml(emp.name)}${comma}</span>`;
       }).join(' ');
       const nameFontSize = groupEmps.length > 1 ? '0.8rem' : '0.95rem';
       const namesDisplay = `<div style="display:flex; flex-wrap:wrap; justify-content:center; gap:1px 4px; line-height:1.3; font-size:${nameFontSize}; color:inherit;">${namesHtml}</div>`;
@@ -3581,7 +3758,7 @@ function renderRanking() {
            }
            if (!rows) return '';
            return `<div style="width:100%; background:rgba(255,255,255,0.5); border-radius:8px; padding:4px 6px; margin-top:3px; border-top:1px solid rgba(0,0,0,0.06);">
-             ${groupEmps.length > 1 ? `<div style="font-size:0.75rem; font-weight:900; color:inherit; opacity:0.85; margin-bottom:2px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${emp.name}</div>` : ''}
+             ${groupEmps.length > 1 ? `<div style="font-size:0.75rem; font-weight:900; color:inherit; opacity:0.85; margin-bottom:2px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(emp.name)}</div>` : ''}
              ${rows}
            </div>`;
          }).join('');
@@ -3660,7 +3837,7 @@ function renderRanking() {
         <div class="rank-list-item">
           <div class="rank-list-num">${rank}</div>
           <div class="rank-list-info" style="flex: 1;">
-            <div class="rank-list-name">${emp.name}</div>
+            <div class="rank-list-name">${escapeHtml(emp.name)}</div>
             <div class="progress-bar-outer"><div class="progress-bar-inner" style="width:${pct}%"></div></div>
             <div style="margin-top: 4px;">
                ${incHtml}
@@ -3800,7 +3977,7 @@ async function shareAsImage() {
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
       ">
         <div style="font-size: 2.2rem; margin-bottom: 0.4rem;">${rankMedals[idx]}</div>
-        <div style="font-size: 1.6rem; font-weight: 800; color: ${sz.nameColor}; margin-bottom: 0.5rem; line-height: 1.2;">${emp.name}</div>
+        <div style="font-size: 1.6rem; font-weight: 800; color: ${sz.nameColor}; margin-bottom: 0.5rem; line-height: 1.2;">${escapeHtml(emp.name)}</div>
         <div style="font-size: ${sz.numSize}; font-weight: 900; color: ${sz.numColor}; line-height: 1; letter-spacing: -2px;">${formatNum(emp.requested)}</div>
         <div style="font-size: 1rem; color: ${sz.labelColor}; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 0.3rem;">ใบ</div>
         <div style="font-size: 0.95rem; color: ${sz.labelColor}; margin-top: 0.8rem; background: rgba(255,255,255,0.5); padding: 2px 8px; border-radius: 6px; font-weight: bold;">ส่งเงิน: ${formatNum(emp.remitted)}</div>
@@ -3826,7 +4003,7 @@ async function shareAsImage() {
       ">
         <div style="font-size: 1.6rem; font-weight: 800; width: 40px; text-align: center; color: #94a3b8;">${i+4}</div>
         <div style="flex: 1;">
-          <div style="font-weight: 800; font-size: 1.7rem; color: #1e2937;">${emp.name}</div>
+          <div style="font-weight: 800; font-size: 1.7rem; color: #1e2937;">${escapeHtml(emp.name)}</div>
         </div>
         <div style="text-align: right;">
           <div style="font-size: 2.2rem; font-weight: 900; line-height: 1; color: #4f46e5;">${formatNum(emp.requested)}</div>
@@ -4091,7 +4268,7 @@ function renderA4Commission() {
       const tr = document.createElement('tr');
       tr.style.height = '40px';
       tr.innerHTML = `
-        <td style="border: 1px solid black; text-align: left; padding-left: 1rem;">${emp.name} ${emp.isManager ? '(หัวหน้า)' : ''}</td>
+        <td style="border: 1px solid black; text-align: left; padding-left: 1rem;">${escapeHtml(emp.name)} ${emp.isManager ? '(หัวหน้า)' : ''}</td>
         <td style="border: 1px solid black; text-align: right; padding-right: 1rem;">${formatNum(emp.remitted)}</td>
         <td style="border: 1px solid black; text-align: right; padding-right: 1rem; font-weight: bold;">${formatNum(emp.commission)}</td>
         <td style="border: 1px solid black; text-align: center;"></td>
@@ -4267,6 +4444,7 @@ function renderA4Logbook() {
 async function deleteTx(txId) {
   if (await showConfirm('คุณแน่ใจหรือไม่ที่จะลบรายการนี้? (การลบจะดึงยอดกลับคืนอัตโนมัติ)', 'ยืนยันการลบรายการ')) {
     try {
+      createRecoverySnapshot('ก่อนลบรายการ');
       store.deleteTransaction(txId);
       renderAll();
       showToast('ลบรายการเรียบร้อยแล้ว', 'success');
@@ -4344,6 +4522,7 @@ function printMasterTx(txId) {
 async function deleteMasterTx(txId) {
   if (await showConfirm('คุณแน่ใจหรือไม่ที่จะลบรายการประวัตินี้?', 'ยืนยันการลบประวัติแผนก')) {
     try {
+      createRecoverySnapshot('ก่อนลบประวัติแผนก');
       store.deleteMasterTx(txId);
       renderAll();
       showToast('ลบรายการประวัติแผนกเรียบร้อยแล้ว', 'success');
@@ -4371,13 +4550,36 @@ function exportData() {
   showToast('✅ Export สำเร็จ! ไฟล์ถูกดาวน์โหลดแล้ว', 'success');
 }
 
+async function restoreLatestRecovery() {
+  let snapshots;
+  try {
+    snapshots = JSON.parse(localStorage.getItem(RECOVERY_KEY) || '[]');
+  } catch (_) {
+    snapshots = [];
+  }
+  if (!snapshots.length || !snapshots[0].data) {
+    showToast('ยังไม่มีข้อมูลกู้คืนในเครื่องนี้', 'warning');
+    return;
+  }
+  const latest = snapshots[0];
+  const restoredAt = new Date(latest.createdAt).toLocaleString('th-TH');
+  if (!(await showConfirm(`กู้คืนข้อมูลจาก ${restoredAt}?\nเหตุผลที่สำรอง: ${latest.reason}\n\nข้อมูลปัจจุบันจะถูกเก็บเป็นจุดกู้คืนอีกชุดก่อนดำเนินการ`, 'ยืนยันการกู้คืนข้อมูล'))) return;
+  createRecoverySnapshot('ก่อนกู้คืนข้อมูลชุดก่อนหน้า');
+  store.data = { ...defaultData, ...JSON.parse(JSON.stringify(latest.data)) };
+  store.saveData();
+  renderAll();
+  initPrintForm();
+  renderA4Logbook();
+  showToast('กู้คืนข้อมูลเรียบร้อยแล้ว', 'success');
+}
+
 function importData(input) {
   const file = input.files[0];
   if (!file) return;
   const reader = new FileReader();
   reader.onload = async function(e) {
     try {
-      const parsed = JSON.parse(e.target.result);
+      const parsed = validateImportPayload(JSON.parse(e.target.result));
       if (!parsed.employees && !parsed.transactions) {
         throw new Error('ไฟล์ไม่ถูกต้อง');
       }
@@ -4386,6 +4588,7 @@ function importData(input) {
         return;
       }
       
+      createRecoverySnapshot(`ก่อนนำเข้าไฟล์ ${file.name}`);
       const newData = { ...store.data };
       
       const mergeArray = (existingArr, importedArr) => {
@@ -4611,6 +4814,10 @@ document.getElementById('form-add-tx').addEventListener('submit', (e) => {
     };
 
     if (fileInput.files && fileInput.files[0]) {
+      if (fileInput.files[0].size > MAX_EVIDENCE_BYTES) {
+        showToast('ไฟล์หลักฐานต้องมีขนาดไม่เกิน 2 MB', 'warning');
+        return;
+      }
       const reader = new FileReader();
       reader.onload = function(evt) {
         processSave(evt.target.result);
