@@ -1498,7 +1498,7 @@ input:focus, select:focus {
             <button class="btn btn-share-text" id="btn-share-text" onclick="shareAsText()">
               <span>💬</span> คัดลอกส่ง LINE
             </button>
-            <button class="btn btn-share-img" id="btn-share-img" onclick="shareAsImage()">
+            <button class="btn btn-share-img" id="btn-share-img" onclick="shareAsImageV2()">
               <span>🖼️</span> แชร์รูปภาพ
             </button>
           </div>
@@ -3566,7 +3566,7 @@ function getRankingData() {
       if (curr.requested === prev.requested) {
         curr._rank = currentRank;
       } else {
-        currentRank++;
+        currentRank = i + 1;
         curr._rank = currentRank;
       }
     }
@@ -3708,7 +3708,7 @@ function renderRanking() {
     });
     
     const ranks = Object.keys(rankGroups).map(Number).sort((a, b) => a - b);
-    topRanks = ranks.slice(0, 3); // Top 3 ranks
+    topRanks = ranks.filter(rank => rank <= 3); // Standard competition ranks: 1, 2, 2, 4
     
     podiumHtml = `<div class="rank-podium-row">`;
     
@@ -3880,9 +3880,9 @@ function shareAsText() {
   text += `${'─'.repeat(30)}\n`;
   
   text += `👥 อันดับพนักงาน:\n`;
-  emps.forEach((emp, i) => {
-    const medal = rankMedals[i] || `${i+1}.`;
-    text += `${medal} ${emp.name} — ยอดเบิก ${formatNum(emp.requested)} ใบ | ยอดนำส่ง ${formatNum(emp.remitted)} ใบ\n`;
+  emps.forEach(emp => {
+    const medal = rankMedals[emp._rank - 1] || `${emp._rank}.`;
+    text += `${medal} ${emp.name} — เบิก ${formatNum(emp.requested)} ใบ | ส่ง ${formatNum(emp.remitted)} ใบ | ค้าง ${formatNum(emp.outstanding)} ใบ | Incentive ${formatNum(emp.commission)} บาท\n`;
   });
   
   if (managers.length > 0) {
@@ -3916,6 +3916,160 @@ function copyShareText() {
     const btn = document.getElementById('btn-copy-text');
     btn.textContent = '✅ คัดลอกแล้ว!';
     setTimeout(() => { btn.textContent = '📋 คัดลอก'; }, 2000);
+  }
+}
+
+async function shareAsImageV2() {
+  const emps = getRankingData();
+  const managers = getManagersData();
+  const overview = store.getOverview();
+  const now = new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
+  const price = store.data.pricePerTicket;
+  const rate = store.data.commissionRate;
+  const totalStockRemaining = overview.quota - overview.totalRequested;
+  const groups = [];
+  emps.forEach(emp => {
+    let group = groups.find(item => item.rank === emp._rank);
+    if (!group) {
+      group = { rank: emp._rank, requested: emp.requested, employees: [] };
+      groups.push(group);
+    }
+    group.employees.push(emp);
+  });
+
+  const rankTheme = {
+    1: { medal: '🥇', bg: 'linear-gradient(135deg,#fff8dc,#fde68a)', border: '#f59e0b', accent: '#92400e' },
+    2: { medal: '🥈', bg: 'linear-gradient(135deg,#f8fafc,#dbe4ef)', border: '#94a3b8', accent: '#334155' },
+    3: { medal: '🥉', bg: 'linear-gradient(135deg,#fff7ed,#fed7aa)', border: '#fb923c', accent: '#9a3412' }
+  };
+
+  const employeeStats = emp => {
+    const fullIncentive = emp.requested * price * rate;
+    return `
+      <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(148,163,184,.3);">
+        <div style="font-size:18px;font-weight:800;color:#172033;">${escapeHtml(emp.name)}</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:7px;font-size:13px;font-weight:700;">
+          <span style="color:#059669;background:#ecfdf5;padding:4px 8px;border-radius:8px;">ส่ง ${formatNum(emp.remitted)}</span>
+          <span style="color:${emp.outstanding > 0 ? '#dc2626' : '#059669'};background:${emp.outstanding > 0 ? '#fef2f2' : '#ecfdf5'};padding:4px 8px;border-radius:8px;">${emp.outstanding > 0 ? `ค้าง ${formatNum(emp.outstanding)}` : 'ส่งครบแล้ว'}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px;">
+          <div style="background:#eef2ff;border-radius:9px;padding:7px 9px;">
+            <div style="font-size:10px;color:#6366f1;font-weight:700;">INCENTIVE ได้แล้ว</div>
+            <div style="font-size:16px;color:#4338ca;font-weight:900;">${formatNum(emp.commission)} บาท</div>
+          </div>
+          <div style="background:#f8fafc;border-radius:9px;padding:7px 9px;">
+            <div style="font-size:10px;color:#64748b;font-weight:700;">เมื่อส่งครบทั้งหมด</div>
+            <div style="font-size:16px;color:#334155;font-weight:900;">${formatNum(fullIncentive)} บาท</div>
+          </div>
+        </div>
+      </div>`;
+  };
+
+  const featuredHtml = groups.filter(group => group.rank <= 3).map(group => {
+    const theme = rankTheme[group.rank];
+    return `
+      <div style="background:${theme.bg};border:2px solid ${theme.border};border-radius:22px;padding:18px;box-shadow:0 8px 20px rgba(15,23,42,.08);">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:34px;">${theme.medal}</span>
+            <div>
+              <div style="font-size:12px;font-weight:800;color:${theme.accent};letter-spacing:.05em;">อันดับ ${group.rank}${group.employees.length > 1 ? ' ร่วม' : ''}</div>
+              <div style="font-size:13px;color:#64748b;">จัดอันดับตามยอดเบิกสะสม</div>
+            </div>
+          </div>
+          <div style="text-align:right;color:${theme.accent};">
+            <span style="font-size:38px;line-height:1;font-weight:900;">${formatNum(group.requested)}</span>
+            <span style="font-size:14px;font-weight:700;"> ใบ</span>
+          </div>
+        </div>
+        ${group.employees.map(employeeStats).join('')}
+      </div>`;
+  }).join('');
+
+  const remainingHtml = emps.filter(emp => emp._rank > 3).map(emp => {
+    const fullIncentive = emp.requested * price * rate;
+    return `
+      <div style="display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:center;background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:14px 16px;box-shadow:0 3px 10px rgba(15,23,42,.04);">
+        <div style="font-size:22px;font-weight:900;color:#94a3b8;text-align:center;">${emp._rank}</div>
+        <div>
+          <div style="font-size:18px;font-weight:900;color:#172033;">${escapeHtml(emp.name)}</div>
+          <div style="font-size:12px;font-weight:700;margin-top:5px;">
+            <span style="color:#059669;">ส่ง ${formatNum(emp.remitted)}</span>
+            <span style="color:${emp.outstanding > 0 ? '#dc2626' : '#059669'};margin-left:9px;">${emp.outstanding > 0 ? `ค้าง ${formatNum(emp.outstanding)}` : 'ส่งครบแล้ว'}</span>
+          </div>
+          <div style="font-size:12px;color:#4f46e5;font-weight:800;margin-top:5px;">Incentive ${formatNum(emp.commission)} บาท <span style="color:#94a3b8;font-weight:600;">/ ส่งครบ ${formatNum(fullIncentive)} บาท</span></div>
+        </div>
+        <div style="text-align:right;color:#4f46e5;">
+          <div style="font-size:27px;line-height:1;font-weight:900;">${formatNum(emp.requested)}</div>
+          <div style="font-size:11px;color:#94a3b8;margin-top:3px;">ใบ</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  const managerHtml = managers.map(mgr => `
+    <div style="display:flex;justify-content:space-between;align-items:center;background:#f8fafc;border:1px dashed #94a3b8;border-radius:14px;padding:12px 15px;">
+      <div><b>${escapeHtml(mgr.name)}</b> <span style="font-size:11px;color:#64748b;">(หัวหน้าแผนก — ไม่ร่วมอันดับ)</span></div>
+      <div style="text-align:right;font-weight:900;color:#475569;">${formatNum(mgr.requested)} ใบ · Incentive ${formatNum(mgr.commission)} บาท</div>
+    </div>`).join('');
+
+  let snapEl = document.getElementById('ranking-snapshot-v2');
+  if (!snapEl) {
+    snapEl = document.createElement('div');
+    snapEl.id = 'ranking-snapshot-v2';
+    document.body.appendChild(snapEl);
+  }
+  snapEl.style.cssText = 'position:fixed;left:-9999px;top:0;width:720px;padding:34px;box-sizing:border-box;background:linear-gradient(180deg,#eef2ff 0,#f8fafc 38%,#f1f5f9 100%);font-family:Inter,Kanit,sans-serif;color:#172033;';
+  snapEl.innerHTML = `
+    <div style="background:linear-gradient(135deg,#1e1b4b,#4338ca 58%,#7c3aed);border-radius:24px;padding:24px;color:#fff;box-shadow:0 14px 30px rgba(67,56,202,.24);">
+      <div style="font-size:28px;font-weight:900;">🏆 อันดับยอดเบิกสะสม</div>
+      <div style="font-size:13px;opacity:.8;margin-top:3px;">ฟุตบอลระดับโลก 2026 · ${now}</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px;">
+        <div style="background:rgba(255,255,255,.12);border-radius:12px;padding:11px;"><div style="font-size:10px;opacity:.75;">พนักงานเบิกรวม</div><b style="font-size:22px;">${formatNum(overview.totalRequested)}</b> ใบ</div>
+        <div style="background:rgba(255,255,255,.12);border-radius:12px;padding:11px;"><div style="font-size:10px;opacity:.75;">นำส่งแล้ว</div><b style="font-size:22px;">${formatNum(overview.totalRemitted)}</b> ใบ</div>
+        <div style="background:rgba(255,255,255,.12);border-radius:12px;padding:11px;"><div style="font-size:10px;opacity:.75;">คงเหลือทั้งแผนก</div><b style="font-size:22px;">${formatNum(totalStockRemaining)}</b> ใบ</div>
+      </div>
+      <div style="margin-top:12px;font-size:12px;font-weight:700;color:#ddd6fe;">Incentive รวมที่เกิดขึ้นแล้ว ${formatNum(overview.totalCommission)} บาท · อัตรา ${formatNum(rate * 100)}%</div>
+    </div>
+    <div style="font-size:12px;color:#64748b;font-weight:700;margin:18px 2px 9px;">อันดับ 1–3 · ยอดเท่ากันเป็นอันดับร่วม</div>
+    <div style="display:grid;gap:12px;">${featuredHtml || '<div style="text-align:center;padding:25px;color:#64748b;">ยังไม่มีข้อมูลอันดับ</div>'}</div>
+    ${remainingHtml ? `<div style="font-size:12px;color:#64748b;font-weight:700;margin:20px 2px 9px;">อันดับถัดไป</div><div style="display:grid;gap:8px;">${remainingHtml}</div>` : ''}
+    ${managerHtml ? `<div style="font-size:12px;color:#64748b;font-weight:700;margin:20px 2px 9px;">ข้อมูลหัวหน้าแผนก</div><div style="display:grid;gap:8px;">${managerHtml}</div>` : ''}
+    <div style="text-align:center;margin-top:22px;font-size:11px;color:#94a3b8;">แผนกลูกค้าธุรกิจ ปณฝ.กลาง 10501 · Incentive คำนวณจากยอดนำส่งแล้ว</div>`;
+
+  const btn = document.getElementById('btn-share-img');
+  btn.textContent = '⏳ กำลังสร้างรูป...';
+  btn.disabled = true;
+  try {
+    if (!window.html2canvas) {
+      await new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    }
+    const canvas = await html2canvas(snapEl, { scale: 2, backgroundColor: '#f1f5f9', useCORS: true, logging: false });
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+    const file = new File([blob], `ranking-worldcup-${Date.now()}.png`, { type: 'image/png' });
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'อันดับยอดเบิกสะสม', text: 'อันดับยอดเบิกสะสมและ Incentive ฟุตบอลระดับโลก 2026' });
+      btn.textContent = '✅ แชร์เรียบร้อย!';
+    } else {
+      const link = document.createElement('a');
+      link.download = file.name;
+      link.href = URL.createObjectURL(blob);
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+      btn.textContent = '✅ โหลดรูปแล้ว!';
+    }
+  } catch (err) {
+    if (err.name !== 'AbortError') {
+      console.error(err);
+      showToast('สร้างรูปไม่สำเร็จ กรุณาลองใหม่', 'error');
+    }
+  } finally {
+    setTimeout(() => { btn.innerHTML = '<span>🖼️</span> แชร์รูปภาพ'; btn.disabled = false; }, 1800);
   }
 }
 
