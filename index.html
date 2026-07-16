@@ -3566,7 +3566,7 @@ function getRankingData() {
       if (curr.requested === prev.requested) {
         curr._rank = currentRank;
       } else {
-        currentRank = i + 1;
+        currentRank++;
         curr._rank = currentRank;
       }
     }
@@ -3708,7 +3708,7 @@ function renderRanking() {
     });
     
     const ranks = Object.keys(rankGroups).map(Number).sort((a, b) => a - b);
-    topRanks = ranks.filter(rank => rank <= 3); // Standard competition ranks: 1, 2, 2, 4
+    topRanks = ranks.filter(rank => rank <= 3); // Dense ranks: 1, 2, 2, 3
     
     podiumHtml = `<div class="rank-podium-row">`;
     
@@ -3965,24 +3965,49 @@ async function shareAsImageV2() {
       </div>`;
   };
 
-  const featuredHtml = groups.filter(group => group.rank <= 3).map(group => {
-    const theme = rankTheme[group.rank];
-    return `
-      <div style="background:${theme.bg};border:2px solid ${theme.border};border-radius:22px;padding:18px;box-shadow:0 8px 20px rgba(15,23,42,.08);">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
-          <div style="display:flex;align-items:center;gap:10px;">
-            <span style="font-size:34px;">${theme.medal}</span>
-            <div>
-              <div style="font-size:12px;font-weight:800;color:${theme.accent};letter-spacing:.05em;">อันดับ ${group.rank}${group.employees.length > 1 ? ' ร่วม' : ''}</div>
-              <div style="font-size:13px;color:#64748b;">จัดอันดับตามยอดเบิกสะสม</div>
-            </div>
-          </div>
-          <div style="text-align:right;color:${theme.accent};">
-            <span style="font-size:38px;line-height:1;font-weight:900;">${formatNum(group.requested)}</span>
-            <span style="font-size:14px;font-weight:700;"> ใบ</span>
+  const champion = emps.find(emp => emp._rank === 1);
+  const championPct = champion ? Math.min(100, Math.round((champion.remitted / (champion.requested || 1)) * 100)) : 0;
+  const championFullIncentive = champion ? champion.requested * price * rate : 0;
+  const championHtml = champion ? `
+    <div style="position:relative;overflow:hidden;background:linear-gradient(135deg,#451a03 0%,#b45309 45%,#f59e0b 100%);border-radius:28px;padding:26px;color:#fff;box-shadow:0 18px 35px rgba(180,83,9,.28);">
+      <div style="position:absolute;right:-30px;top:-55px;font-size:150px;opacity:.12;transform:rotate(14deg);">🏆</div>
+      <div style="display:grid;grid-template-columns:1fr 150px;gap:18px;align-items:center;position:relative;z-index:1;">
+        <div>
+          <div style="display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.18);padding:6px 12px;border-radius:99px;font-size:12px;font-weight:900;">🥇 CHAMPION · อันดับ 1</div>
+          <div style="font-size:33px;font-weight:900;margin-top:13px;line-height:1.1;">${escapeHtml(champion.name)}</div>
+          <div style="display:flex;align-items:baseline;gap:7px;margin-top:7px;"><span style="font-size:60px;line-height:1;font-weight:1000;letter-spacing:-2px;">${formatNum(champion.requested)}</span><span style="font-size:18px;font-weight:800;opacity:.9;">ใบ</span></div>
+          <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:12px;font-size:13px;font-weight:800;">
+            <span style="background:#fff;color:#047857;padding:7px 11px;border-radius:10px;">ส่งแล้ว ${formatNum(champion.remitted)}</span>
+            <span style="background:${champion.outstanding > 0 ? '#fee2e2' : '#dcfce7'};color:${champion.outstanding > 0 ? '#b91c1c' : '#047857'};padding:7px 11px;border-radius:10px;">${champion.outstanding > 0 ? `เหลือ ${formatNum(champion.outstanding)}` : 'ส่งครบแล้ว'}</span>
           </div>
         </div>
-        ${group.employees.map(employeeStats).join('')}
+        <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+          <div style="width:122px;height:122px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#fef3c7 ${championPct}%,rgba(255,255,255,.2) 0);">
+            <div style="width:91px;height:91px;border-radius:50%;background:#78350f;display:grid;place-items:center;text-align:center;"><div><b style="font-size:28px;">${championPct}%</b><div style="font-size:10px;opacity:.75;">นำส่งแล้ว</div></div></div>
+          </div>
+          <div style="width:100%;background:#fff;color:#4338ca;border-radius:13px;padding:9px;text-align:center;box-shadow:0 5px 14px rgba(0,0,0,.12);">
+            <div style="font-size:9px;font-weight:800;">INCENTIVE ได้แล้ว</div><div style="font-size:21px;font-weight:1000;">${formatNum(champion.commission)} บาท</div><div style="font-size:9px;color:#94a3b8;">ส่งครบ ${formatNum(championFullIncentive)} บาท</div>
+          </div>
+        </div>
+      </div>
+    </div>` : '';
+
+  const secondaryHtml = emps.filter(emp => emp._rank === 2 || emp._rank === 3).map(emp => {
+    const theme = rankTheme[emp._rank];
+    const pct = Math.min(100, Math.round((emp.remitted / (emp.requested || 1)) * 100));
+    const fullIncentive = emp.requested * price * rate;
+    return `
+      <div style="position:relative;overflow:hidden;background:${theme.bg};border:2px solid ${theme.border};border-radius:22px;padding:18px;box-shadow:0 9px 20px rgba(15,23,42,.08);">
+        <div style="position:absolute;right:-8px;top:-12px;font-size:64px;opacity:.12;">${theme.medal}</div>
+        <div style="display:flex;justify-content:space-between;position:relative;z-index:1;"><div style="font-size:12px;font-weight:900;color:${theme.accent};">${theme.medal} อันดับ ${emp._rank}${groups.find(g => g.rank === emp._rank)?.employees.length > 1 ? ' ร่วม' : ''}</div><div style="font-size:12px;font-weight:900;color:${theme.accent};">ส่งแล้ว ${pct}%</div></div>
+        <div style="font-size:24px;font-weight:1000;color:#172033;margin-top:12px;position:relative;z-index:1;">${escapeHtml(emp.name)}</div>
+        <div style="display:flex;align-items:baseline;gap:5px;color:${theme.accent};margin-top:3px;"><span style="font-size:40px;font-weight:1000;">${formatNum(emp.requested)}</span><span style="font-size:13px;font-weight:800;">ใบ</span></div>
+        <div style="height:8px;background:rgba(148,163,184,.25);border-radius:99px;overflow:hidden;margin-top:10px;"><div style="height:100%;width:${pct}%;background:#10b981;border-radius:99px;"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:800;margin-top:7px;"><span style="color:#059669;">ส่ง ${formatNum(emp.remitted)}</span><span style="color:${emp.outstanding > 0 ? '#dc2626' : '#059669'};">${emp.outstanding > 0 ? `เหลือ ${formatNum(emp.outstanding)}` : 'ส่งครบแล้ว'}</span></div>
+        <div style="background:#fff;border-radius:12px;padding:9px 10px;margin-top:12px;display:flex;justify-content:space-between;align-items:center;">
+          <div><div style="font-size:9px;color:#6366f1;font-weight:800;">INCENTIVE</div><div style="font-size:19px;color:#4338ca;font-weight:1000;">${formatNum(emp.commission)} บาท</div></div>
+          <div style="font-size:10px;color:#94a3b8;text-align:right;">เมื่อส่งครบ<br><b style="color:#64748b;font-size:13px;">${formatNum(fullIncentive)} บาท</b></div>
+        </div>
       </div>`;
   }).join('');
 
@@ -4030,8 +4055,9 @@ async function shareAsImageV2() {
       </div>
       <div style="margin-top:12px;font-size:12px;font-weight:700;color:#ddd6fe;">Incentive รวมที่เกิดขึ้นแล้ว ${formatNum(overview.totalCommission)} บาท · อัตรา ${formatNum(rate * 100)}%</div>
     </div>
-    <div style="font-size:12px;color:#64748b;font-weight:700;margin:18px 2px 9px;">อันดับ 1–3 · ยอดเท่ากันเป็นอันดับร่วม</div>
-    <div style="display:grid;gap:12px;">${featuredHtml || '<div style="text-align:center;padding:25px;color:#64748b;">ยังไม่มีข้อมูลอันดับ</div>'}</div>
+    <div style="font-size:12px;color:#64748b;font-weight:700;margin:18px 2px 9px;">ดาวเด่นประจำแคมเปญ · ยอดเท่ากันเป็นอันดับร่วม</div>
+    ${championHtml || '<div style="text-align:center;padding:25px;color:#64748b;">ยังไม่มีข้อมูลอันดับ</div>'}
+    ${secondaryHtml ? `<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px;">${secondaryHtml}</div>` : ''}
     ${remainingHtml ? `<div style="font-size:12px;color:#64748b;font-weight:700;margin:20px 2px 9px;">อันดับถัดไป</div><div style="display:grid;gap:8px;">${remainingHtml}</div>` : ''}
     ${managerHtml ? `<div style="font-size:12px;color:#64748b;font-weight:700;margin:20px 2px 9px;">ข้อมูลหัวหน้าแผนก</div><div style="display:grid;gap:8px;">${managerHtml}</div>` : ''}
     <div style="text-align:center;margin-top:22px;font-size:11px;color:#94a3b8;">แผนกลูกค้าธุรกิจ ปณฝ.กลาง 10501 · Incentive คำนวณจากยอดนำส่งแล้ว</div>`;
