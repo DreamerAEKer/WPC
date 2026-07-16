@@ -1403,9 +1403,11 @@ input:focus, select:focus {
   .auth-card h1 { font-size: 1.4rem; margin: 0.75rem 0 0.5rem; }
   .auth-card p { color: var(--text-light); margin-bottom: 1.25rem; }
   .auth-error { display: none; color: #b91c1c !important; background: #fef2f2; padding: 0.75rem; border-radius: 8px; }
+  body.auth-locked .app-layout,
+  body.auth-locked .mobile-header { visibility: hidden; }
   </style>
 </head>
-<body>
+<body class="auth-locked">
   <div id="auth-gate" class="auth-gate" aria-live="polite">
     <div class="auth-card">
       <div style="font-size:3rem;">🔐</div>
@@ -2476,6 +2478,7 @@ class Store {
 const store = new Store();
 
 function setAuthGate(errorMessage = '') {
+  document.body.classList.add('auth-locked');
   const gate = document.getElementById('auth-gate');
   const button = document.getElementById('google-sign-in');
   const status = document.getElementById('auth-status');
@@ -2496,6 +2499,7 @@ function initSingleUserAuth() {
   }
   firebaseAuth.onAuthStateChanged(async user => {
     if (user && String(user.email || '').toLowerCase() === ALLOWED_EMAIL) {
+      document.body.classList.remove('auth-locked');
       document.getElementById('auth-gate').style.display = 'none';
       store.initFirebase();
       return;
