@@ -3882,7 +3882,8 @@ function shareAsText() {
   text += `👥 อันดับพนักงาน:\n`;
   emps.forEach(emp => {
     const medal = rankMedals[emp._rank - 1] || `${emp._rank}.`;
-    text += `${medal} ${emp.name} — เบิก ${formatNum(emp.requested)} ใบ | ส่ง ${formatNum(emp.remitted)} ใบ | ค้าง ${formatNum(emp.outstanding)} ใบ | Incentive ${formatNum(emp.commission)} บาท\n`;
+    const remitText = emp.outstanding > 0 ? `ส่งแล้ว ${formatNum(emp.remitted)} ใบ | รอส่ง ${formatNum(emp.outstanding)} ใบ` : `ส่งครบแล้ว ${formatNum(emp.remitted)} ใบ`;
+    text += `${medal} ${emp.name} — เบิก ${formatNum(emp.requested)} ใบ | ${remitText} | Incentive ที่ได้รับแน่นอน ${formatNum(emp.commission)} บาท\n`;
   });
   
   if (managers.length > 0) {
@@ -3949,16 +3950,17 @@ async function shareAsImageV2() {
       <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(148,163,184,.3);">
         <div style="font-size:18px;font-weight:800;color:#172033;">${escapeHtml(emp.name)}</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:7px;font-size:13px;font-weight:700;">
-          <span style="color:#059669;background:#ecfdf5;padding:4px 8px;border-radius:8px;">ส่ง ${formatNum(emp.remitted)}</span>
-          <span style="color:${emp.outstanding > 0 ? '#dc2626' : '#059669'};background:${emp.outstanding > 0 ? '#fef2f2' : '#ecfdf5'};padding:4px 8px;border-radius:8px;">${emp.outstanding > 0 ? `ค้าง ${formatNum(emp.outstanding)}` : 'ส่งครบแล้ว'}</span>
+          ${emp.outstanding > 0
+            ? `<span style="color:#059669;background:#ecfdf5;padding:4px 8px;border-radius:8px;">ส่งแล้ว ${formatNum(emp.remitted)} ใบ</span><span style="color:#dc2626;background:#fef2f2;padding:4px 8px;border-radius:8px;">รอส่ง ${formatNum(emp.outstanding)} ใบ</span>`
+            : `<span style="color:#059669;background:#ecfdf5;padding:4px 8px;border-radius:8px;">ส่งครบแล้ว ${formatNum(emp.remitted)} ใบ</span>`}
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px;">
           <div style="background:#eef2ff;border-radius:9px;padding:7px 9px;">
-            <div style="font-size:10px;color:#6366f1;font-weight:700;">INCENTIVE ได้แล้ว</div>
+            <div style="font-size:10px;color:#6366f1;font-weight:700;">ได้รับแน่นอน</div>
             <div style="font-size:16px;color:#4338ca;font-weight:900;">${formatNum(emp.commission)} บาท</div>
           </div>
           <div style="background:#f8fafc;border-radius:9px;padding:7px 9px;">
-            <div style="font-size:10px;color:#64748b;font-weight:700;">เมื่อส่งครบทั้งหมด</div>
+            <div style="font-size:10px;color:#64748b;font-weight:700;">เมื่อส่งครบจะได้</div>
             <div style="font-size:16px;color:#334155;font-weight:900;">${formatNum(fullIncentive)} บาท</div>
           </div>
         </div>
@@ -3977,8 +3979,9 @@ async function shareAsImageV2() {
           <div style="font-size:33px;font-weight:900;margin-top:13px;line-height:1.1;">${escapeHtml(champion.name)}</div>
           <div style="display:flex;align-items:baseline;gap:7px;margin-top:7px;"><span style="font-size:60px;line-height:1;font-weight:1000;letter-spacing:-2px;">${formatNum(champion.requested)}</span><span style="font-size:18px;font-weight:800;opacity:.9;">ใบ</span></div>
           <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:12px;font-size:13px;font-weight:800;">
-            <span style="background:#fff;color:#047857;padding:7px 11px;border-radius:10px;">ส่งแล้ว ${formatNum(champion.remitted)}</span>
-            <span style="background:${champion.outstanding > 0 ? '#fee2e2' : '#dcfce7'};color:${champion.outstanding > 0 ? '#b91c1c' : '#047857'};padding:7px 11px;border-radius:10px;">${champion.outstanding > 0 ? `เหลือ ${formatNum(champion.outstanding)}` : 'ส่งครบแล้ว'}</span>
+            ${champion.outstanding > 0
+              ? `<span style="background:#fff;color:#047857;padding:7px 11px;border-radius:10px;">ส่งแล้ว ${formatNum(champion.remitted)} ใบ</span><span style="background:#fee2e2;color:#b91c1c;padding:7px 11px;border-radius:10px;">รอส่ง ${formatNum(champion.outstanding)} ใบ</span>`
+              : `<span style="background:#dcfce7;color:#047857;padding:7px 11px;border-radius:10px;">ส่งครบแล้ว ${formatNum(champion.remitted)} ใบ</span>`}
           </div>
         </div>
         <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
@@ -3986,7 +3989,7 @@ async function shareAsImageV2() {
             <div style="width:91px;height:91px;border-radius:50%;background:#78350f;display:grid;place-items:center;text-align:center;"><div><b style="font-size:28px;">${championPct}%</b><div style="font-size:10px;opacity:.75;">นำส่งแล้ว</div></div></div>
           </div>
           <div style="width:100%;background:#fff;color:#4338ca;border-radius:13px;padding:9px;text-align:center;box-shadow:0 5px 14px rgba(0,0,0,.12);">
-            <div style="font-size:9px;font-weight:800;">INCENTIVE ได้แล้ว</div><div style="font-size:21px;font-weight:1000;">${formatNum(champion.commission)} บาท</div><div style="font-size:9px;color:#94a3b8;">ส่งครบ ${formatNum(championFullIncentive)} บาท</div>
+            <div style="font-size:9px;font-weight:800;">ได้รับแน่นอน</div><div style="font-size:21px;font-weight:1000;">${formatNum(champion.commission)} บาท</div><div style="font-size:9px;color:#94a3b8;">เมื่อส่งครบจะได้ ${formatNum(championFullIncentive)} บาท</div>
           </div>
         </div>
       </div>
@@ -4003,10 +4006,10 @@ async function shareAsImageV2() {
         <div style="font-size:24px;font-weight:1000;color:#172033;margin-top:12px;position:relative;z-index:1;">${escapeHtml(emp.name)}</div>
         <div style="display:flex;align-items:baseline;gap:5px;color:${theme.accent};margin-top:3px;"><span style="font-size:40px;font-weight:1000;">${formatNum(emp.requested)}</span><span style="font-size:13px;font-weight:800;">ใบ</span></div>
         <div style="height:8px;background:rgba(148,163,184,.25);border-radius:99px;overflow:hidden;margin-top:10px;"><div style="height:100%;width:${pct}%;background:#10b981;border-radius:99px;"></div></div>
-        <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:800;margin-top:7px;"><span style="color:#059669;">ส่ง ${formatNum(emp.remitted)}</span><span style="color:${emp.outstanding > 0 ? '#dc2626' : '#059669'};">${emp.outstanding > 0 ? `เหลือ ${formatNum(emp.outstanding)}` : 'ส่งครบแล้ว'}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:800;margin-top:7px;">${emp.outstanding > 0 ? `<span style="color:#059669;">ส่งแล้ว ${formatNum(emp.remitted)} ใบ</span><span style="color:#dc2626;">รอส่ง ${formatNum(emp.outstanding)} ใบ</span>` : `<span style="color:#059669;">ส่งครบแล้ว ${formatNum(emp.remitted)} ใบ</span>`}</div>
         <div style="background:#fff;border-radius:12px;padding:9px 10px;margin-top:12px;display:flex;justify-content:space-between;align-items:center;">
-          <div><div style="font-size:9px;color:#6366f1;font-weight:800;">INCENTIVE</div><div style="font-size:19px;color:#4338ca;font-weight:1000;">${formatNum(emp.commission)} บาท</div></div>
-          <div style="font-size:10px;color:#94a3b8;text-align:right;">เมื่อส่งครบ<br><b style="color:#64748b;font-size:13px;">${formatNum(fullIncentive)} บาท</b></div>
+          <div><div style="font-size:9px;color:#6366f1;font-weight:800;">ได้รับแน่นอน</div><div style="font-size:19px;color:#4338ca;font-weight:1000;">${formatNum(emp.commission)} บาท</div></div>
+          <div style="font-size:10px;color:#94a3b8;text-align:right;">เมื่อส่งครบจะได้<br><b style="color:#64748b;font-size:13px;">${formatNum(fullIncentive)} บาท</b></div>
         </div>
       </div>`;
   }).join('');
@@ -4018,11 +4021,8 @@ async function shareAsImageV2() {
         <div style="font-size:22px;font-weight:900;color:#94a3b8;text-align:center;">${emp._rank}</div>
         <div>
           <div style="font-size:18px;font-weight:900;color:#172033;">${escapeHtml(emp.name)}</div>
-          <div style="font-size:12px;font-weight:700;margin-top:5px;">
-            <span style="color:#059669;">ส่ง ${formatNum(emp.remitted)}</span>
-            <span style="color:${emp.outstanding > 0 ? '#dc2626' : '#059669'};margin-left:9px;">${emp.outstanding > 0 ? `ค้าง ${formatNum(emp.outstanding)}` : 'ส่งครบแล้ว'}</span>
-          </div>
-          <div style="font-size:12px;color:#4f46e5;font-weight:800;margin-top:5px;">Incentive ${formatNum(emp.commission)} บาท <span style="color:#94a3b8;font-weight:600;">/ ส่งครบ ${formatNum(fullIncentive)} บาท</span></div>
+          <div style="font-size:12px;font-weight:700;margin-top:5px;">${emp.outstanding > 0 ? `<span style="color:#059669;">ส่งแล้ว ${formatNum(emp.remitted)} ใบ</span><span style="color:#dc2626;margin-left:9px;">รอส่ง ${formatNum(emp.outstanding)} ใบ</span>` : `<span style="color:#059669;">ส่งครบแล้ว ${formatNum(emp.remitted)} ใบ</span>`}</div>
+          <div style="font-size:12px;color:#4f46e5;font-weight:800;margin-top:5px;">ได้รับแน่นอน ${formatNum(emp.commission)} บาท <span style="color:#94a3b8;font-weight:600;">/ เมื่อส่งครบจะได้ ${formatNum(fullIncentive)} บาท</span></div>
         </div>
         <div style="text-align:right;color:#4f46e5;">
           <div style="font-size:27px;line-height:1;font-weight:900;">${formatNum(emp.requested)}</div>
@@ -4053,7 +4053,7 @@ async function shareAsImageV2() {
         <div style="background:rgba(255,255,255,.12);border-radius:12px;padding:11px;"><div style="font-size:10px;opacity:.75;">นำส่งแล้ว</div><b style="font-size:22px;">${formatNum(overview.totalRemitted)}</b> ใบ</div>
         <div style="background:rgba(255,255,255,.12);border-radius:12px;padding:11px;"><div style="font-size:10px;opacity:.75;">คงเหลือทั้งแผนก</div><b style="font-size:22px;">${formatNum(totalStockRemaining)}</b> ใบ</div>
       </div>
-      <div style="margin-top:12px;font-size:12px;font-weight:700;color:#ddd6fe;">Incentive รวมที่เกิดขึ้นแล้ว ${formatNum(overview.totalCommission)} บาท · อัตรา ${formatNum(rate * 100)}%</div>
+      <div style="margin-top:12px;font-size:12px;font-weight:700;color:#ddd6fe;">Incentive ที่ได้รับแน่นอนรวม ${formatNum(overview.totalCommission)} บาท · อัตรา ${formatNum(rate * 100)}%</div>
     </div>
     <div style="font-size:12px;color:#64748b;font-weight:700;margin:18px 2px 9px;">ดาวเด่นประจำแคมเปญ · ยอดเท่ากันเป็นอันดับร่วม</div>
     ${championHtml || '<div style="text-align:center;padding:25px;color:#64748b;">ยังไม่มีข้อมูลอันดับ</div>'}
