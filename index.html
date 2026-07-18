@@ -3919,7 +3919,11 @@ async function shareAsImage() {
   const emps = getRankingData();
   const managers = getManagersData();
   const overview = store.getOverview();
-  const totalStockRemaining = overview.quota - overview.totalRequested;
+  const cardsPerBox = 4000;
+  const departmentBoxesWithdrawn = Math.floor(overview.masterRequested / cardsPerBox);
+  const departmentWithdrawnRemainder = overview.masterRequested % cardsPerBox;
+  const departmentBoxesRemaining = Math.floor(overview.masterRemainingQuota / cardsPerBox);
+  const departmentRemainingRemainder = overview.masterRemainingQuota % cardsPerBox;
   const now = new Date().toLocaleDateString('th-TH', {day:'numeric', month:'long', year:'numeric'});
 
   // Build snapshot DOM with TRUE PODIUM HEIGHTS
@@ -4066,29 +4070,28 @@ async function shareAsImage() {
     `;
   };
 
-  // Calculate total money remitted
-  const totalRemittedMoney = overview.totalRemitted * store.data.pricePerTicket;
-
-  // Render stock motivator in snapshot image (Clean green look)
+  // Department-level quota only. Employee withdrawals are intentionally excluded.
   let snapshotMotivatorHtml = `
-    <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 24px; padding: 1.8rem 1.8rem; margin-bottom: 1.8rem; display: flex; flex-direction: column; color: white; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1);">
-      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-        <div>
-          <div style="font-size: 1.3rem; font-weight: bold; opacity: 0.9;">🔥 ไปรษณียบัตรคงเหลือในแผนก:</div>
-          <div style="font-size: 3.4rem; font-weight: 900; margin-top: 0.2rem; line-height: 1;">${formatNum(totalStockRemaining)} <span style="font-size: 1.6rem; font-weight: normal;">ใบ</span></div>
-        </div>
-        <div style="font-size: 3.2rem; opacity: 0.8;">📦</div>
+    <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 24px; padding: 1.8rem; margin-bottom: 1.8rem; color: white; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1);">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-size:1.3rem;font-weight:800;">📦 ข้อมูลโควตาระดับแผนก</div>
+        <div style="font-size:2.6rem;opacity:.85;">🏤</div>
       </div>
-      ${getStockStatsHtml(totalStockRemaining)}
-      
-      <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px dashed rgba(255,255,255,0.3); display: flex; justify-content: space-between;">
-        <div>
-          <div style="font-size: 1.25rem; opacity: 0.9;">ยอดรวมพนักงานเบิก:</div>
-          <div style="font-size: 2rem; font-weight: 800;">${formatNum(overview.totalRequested)} <span style="font-size: 1.25rem; font-weight: normal;">ใบ</span></div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:1rem;">
+        <div style="background:rgba(255,255,255,.16);border-radius:15px;padding:14px;">
+          <div style="font-size:.95rem;opacity:.85;">แผนกเบิกมาแล้ว</div>
+          <div style="font-size:2rem;font-weight:900;">${formatNum(departmentBoxesWithdrawn)} กล่อง</div>
+          <div style="font-size:.9rem;opacity:.85;">${formatNum(overview.masterRequested)} ใบ${departmentWithdrawnRemainder ? ` · เศษ ${formatNum(departmentWithdrawnRemainder)} ใบ` : ''}</div>
         </div>
-        <div style="text-align: right;">
-          <div style="font-size: 1.25rem; opacity: 0.9;">ส่งเงินแล้ว:</div>
-          <div style="font-size: 2rem; font-weight: 800; color: #fde68a;">${formatNum(overview.totalRemitted)} <span style="font-size: 1.25rem; font-weight: normal; color: white;">ใบ</span> <span style="font-size: 1.6rem;">(${formatNum(totalRemittedMoney)} บาท)</span></div>
+        <div style="background:rgba(255,255,255,.16);border-radius:15px;padding:14px;">
+          <div style="font-size:.95rem;opacity:.85;">ยังเบิกได้อีก</div>
+          <div style="font-size:2rem;font-weight:900;">${formatNum(departmentBoxesRemaining)} กล่อง</div>
+          <div style="font-size:.9rem;opacity:.85;">${departmentRemainingRemainder ? `และอีก ${formatNum(departmentRemainingRemainder)} ใบ` : 'ครบกล่องพอดี'}</div>
+        </div>
+        <div style="background:rgba(255,255,255,.16);border-radius:15px;padding:14px;">
+          <div style="font-size:.95rem;opacity:.85;">โควตาแผนกคงเหลือ</div>
+          <div style="font-size:2rem;font-weight:900;">${formatNum(overview.masterRemainingQuota)} ใบ</div>
+          <div style="font-size:.9rem;opacity:.85;">ไม่หักยอดเบิกของพนักงาน</div>
         </div>
       </div>
     </div>
