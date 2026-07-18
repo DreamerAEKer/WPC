@@ -4069,24 +4069,24 @@ async function shareAsImageV2() {
   const remainingHtml = emps.filter(emp => emp._rank > 3).map(emp => {
     const fullIncentive = emp.requested * price * rate;
     return `
-      <div style="display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:center;background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:14px 16px;box-shadow:0 3px 10px rgba(15,23,42,.04);">
-        <div style="font-size:22px;font-weight:900;color:#94a3b8;text-align:center;">${emp._rank}</div>
+      <div style="display:grid;grid-template-columns:58px 1fr auto;gap:14px;align-items:center;background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:18px;box-shadow:0 3px 10px rgba(15,23,42,.04);">
+        <div style="font-size:26px;font-weight:900;color:#94a3b8;text-align:center;">${emp._rank}</div>
         <div>
-          <div style="font-size:18px;font-weight:900;color:#172033;">${escapeHtml(emp.name)}</div>
-          <div style="font-size:12px;font-weight:700;margin-top:5px;">${emp.outstanding > 0 ? `<span style="color:#059669;">ส่งแล้ว ${formatNum(emp.remitted)} ใบ</span><span style="color:#dc2626;margin-left:9px;">รอส่ง ${formatNum(emp.outstanding)} ใบ</span>` : `<span style="color:#059669;">ส่งครบแล้ว ${formatNum(emp.remitted)} ใบ</span>`}</div>
-          <div style="font-size:12px;color:#4f46e5;font-weight:800;margin-top:5px;">ได้รับแน่นอน ${formatNum(emp.commission)} บาท${emp.outstanding > 0 ? ` <span style="color:#94a3b8;font-weight:600;">/ เมื่อส่งครบจะได้ ${formatNum(fullIncentive)} บาท</span>` : ''}</div>
+          <div style="font-size:22px;font-weight:900;color:#172033;">${escapeHtml(emp.name)}</div>
+          <div style="font-size:15px;font-weight:700;margin-top:7px;">${emp.outstanding > 0 ? `<span style="color:#059669;">ส่งแล้ว ${formatNum(emp.remitted)} ใบ</span><span style="color:#dc2626;margin-left:9px;">รอส่ง ${formatNum(emp.outstanding)} ใบ</span>` : `<span style="color:#059669;">ส่งครบแล้ว ${formatNum(emp.remitted)} ใบ</span>`}</div>
+          <div style="font-size:15px;line-height:1.4;color:#4f46e5;font-weight:800;margin-top:7px;">ได้รับแน่นอน ${formatNum(emp.commission)} บาท${emp.outstanding > 0 ? ` <span style="color:#94a3b8;font-weight:600;">/ เมื่อส่งครบจะได้ ${formatNum(fullIncentive)} บาท</span>` : ''}</div>
         </div>
         <div style="text-align:right;color:#4f46e5;">
-          <div style="font-size:27px;line-height:1;font-weight:900;">${formatNum(emp.requested)}</div>
-          <div style="font-size:11px;color:#94a3b8;margin-top:3px;">ใบ</div>
+          <div style="font-size:34px;line-height:1;font-weight:900;">${formatNum(emp.requested)}</div>
+          <div style="font-size:13px;color:#94a3b8;margin-top:4px;">ใบ</div>
         </div>
       </div>`;
   }).join('');
 
   const managerHtml = managers.map(mgr => `
-    <div style="display:flex;justify-content:space-between;align-items:center;background:#f8fafc;border:1px dashed #94a3b8;border-radius:14px;padding:12px 15px;">
-      <div><b>${escapeHtml(mgr.name)}</b> <span style="font-size:11px;color:#64748b;">(หัวหน้าแผนก — ไม่ร่วมอันดับ)</span></div>
-      <div style="text-align:right;font-weight:900;color:#475569;">${formatNum(mgr.requested)} ใบ · Incentive ${formatNum(mgr.commission)} บาท</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:18px;background:#f8fafc;border:1px dashed #94a3b8;border-radius:14px;padding:16px 18px;">
+      <div style="font-size:18px;"><b>${escapeHtml(mgr.name)}</b> <span style="font-size:13px;color:#64748b;">(หัวหน้าแผนก — ไม่ร่วมอันดับ)</span></div>
+      <div style="text-align:right;font-size:16px;font-weight:900;color:#475569;">${formatNum(mgr.requested)} ใบ · Incentive ${formatNum(mgr.commission)} บาท</div>
     </div>`).join('');
 
   let snapEl = document.getElementById('ranking-snapshot-v2');
@@ -4113,12 +4113,20 @@ async function shareAsImageV2() {
       </div>
       <div style="margin-top:16px;font-size:13px;font-weight:800;color:#ede9fe;">Incentive ที่ได้รับแน่นอนรวม ${formatNum(overview.totalCommission)} บาท · อัตรา ${formatNum(rate * 100)}%</div>
     </div>
-    <div style="font-size:12px;color:#64748b;font-weight:700;margin:18px 2px 9px;">ดาวเด่นประจำแคมเปญ · ยอดเท่ากันเป็นอันดับร่วม</div>
+    <div style="font-size:15px;color:#64748b;font-weight:800;margin:18px 2px 10px;">ดาวเด่นประจำแคมเปญ · ยอดเท่ากันเป็นอันดับร่วม</div>
     ${championHtml || '<div style="text-align:center;padding:25px;color:#64748b;">ยังไม่มีข้อมูลอันดับ</div>'}
     ${secondaryHtml ? `<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px;">${secondaryHtml}</div>` : ''}
-    ${remainingHtml ? `<div style="font-size:12px;color:#64748b;font-weight:700;margin:20px 2px 9px;">อันดับถัดไป</div><div style="display:grid;gap:8px;">${remainingHtml}</div>` : ''}
-    ${managerHtml ? `<div style="font-size:12px;color:#64748b;font-weight:700;margin:20px 2px 9px;">ข้อมูลหัวหน้าแผนก</div><div style="display:grid;gap:8px;">${managerHtml}</div>` : ''}
-    <div style="text-align:center;margin-top:22px;font-size:11px;color:#94a3b8;">แผนกลูกค้าธุรกิจ ปณฝ.กลาง 10501 · Incentive คำนวณจากยอดนำส่งแล้ว</div>`;
+    ${remainingHtml ? `<div style="font-size:17px;color:#475569;font-weight:900;margin:22px 2px 10px;">อันดับถัดไป</div><div style="display:grid;gap:10px;">${remainingHtml}</div>` : ''}
+    ${managerHtml ? `<div style="font-size:17px;color:#475569;font-weight:900;margin:22px 2px 10px;">ข้อมูลหัวหน้าแผนก</div><div style="display:grid;gap:10px;">${managerHtml}</div>` : ''}
+    <div style="text-align:center;margin-top:22px;font-size:13px;color:#94a3b8;">แผนกลูกค้าธุรกิจ ปณฝ.กลาง 10501 · Incentive คำนวณจากยอดนำส่งแล้ว</div>`;
+
+  snapEl.innerHTML = snapEl.innerHTML
+    .replaceAll('font-size:12px;font-weight:900;color:', 'font-size:14px;font-weight:900;color:')
+    .replaceAll('font-size:11px;font-weight:800;margin-top:7px;', 'font-size:13px;font-weight:800;margin-top:7px;')
+    .replaceAll('font-size:9px;color:#6366f1;font-weight:800;', 'font-size:11px;color:#6366f1;font-weight:800;')
+    .replaceAll('font-size:19px;color:#4338ca;font-weight:1000;', 'font-size:21px;color:#4338ca;font-weight:1000;')
+    .replaceAll('font-size:10px;color:#94a3b8;text-align:right;', 'font-size:12px;color:#94a3b8;text-align:right;')
+    .replaceAll('color:#64748b;font-size:13px;', 'color:#64748b;font-size:15px;');
 
   const btn = document.getElementById('btn-share-img');
   btn.textContent = '⏳ กำลังสร้างรูป...';
