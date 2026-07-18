@@ -1466,8 +1466,8 @@ input:focus, select:focus {
           <div class="backup-btns">
             <button class="btn-backup" onclick="exportData()" title="ดาวน์โหลดไฟล์สำรองข้อมูล">📤 Export</button>
             <button class="btn-backup" onclick="restoreLatestRecovery()" title="กู้คืนข้อมูลก่อน Import หรือลบพนักงานครั้งล่าสุด">↩️ กู้คืน</button>
-            <label class="btn-backup btn-import" title="นำเข้าข้อมูลจากไฟล์สำรอง">
-              📥 Import
+            <label class="btn-backup btn-import" title="นำเข้าและรวมข้อมูลจากไฟล์สำรอง JSON โดยไม่ลบข้อมูลเดิม">
+              📥 รวม Backup
               <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(this)" />
             </label>
           </div>
@@ -1542,7 +1542,7 @@ input:focus, select:focus {
               <span>↩️</span> กู้คืนล่าสุด
             </button>
             <label class="btn btn-secondary" style="flex: 1; justify-content: center; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; border: 1px solid var(--border);">
-              <span>📥</span> นำเข้าข้อมูล (Import)
+              <span>📥</span> นำเข้า/รวมไฟล์สำรอง (JSON)
               <input type="file" id="import-file-mobile" accept=".json" style="display:none" onchange="importData(this)" />
             </label>
           </div>
@@ -1620,9 +1620,15 @@ input:focus, select:focus {
             
             <!-- Type 1: Individual Form -->
             <div id="print-type-1" class="print-layout">
-              <div class="no-print" style="background: var(--bg-color); padding: 1rem; border-radius: var(--radius); margin-bottom: 1.5rem; display: flex; justify-content: flex-end; gap: 0.5rem;">
-                <button class="btn btn-primary" onclick="saveMasterTx()">💾 บันทึกผล</button>
-                <button class="btn btn-secondary" onclick="window.print()">🖨️ กดพิมพ์ใบเบิก</button>
+              <div class="no-print" style="background: var(--bg-color); padding: 1rem; border-radius: var(--radius); margin-bottom: 1.5rem; display: grid; grid-template-columns: 1fr auto; gap: 0.75rem; align-items: end;">
+                <div class="form-group" style="margin:0;">
+                  <label for="print-master-tx-select" style="font-weight:700;">เลือกรายการแผนกที่บันทึกไว้</label>
+                  <select id="print-master-tx-select" onchange="populatePrintFieldsForTx(this.value)">
+                    <option value="">-- ยังไม่มีรายการสำหรับพิมพ์ --</option>
+                  </select>
+                  <small class="hint">หน้านี้ใช้เลือกข้อมูลเดิมและสั่งพิมพ์เท่านั้น หากต้องการเพิ่มรายการให้ไปหน้า “บันทึกรายการ”</small>
+                </div>
+                <button class="btn btn-primary" onclick="window.print()">🖨️ พิมพ์เอกสาร</button>
               </div>
               <div style="font-family: 'Kanit', sans-serif; border: 1px dashed #ccc; padding: 2rem; background: white;" class="print-container">
                 <div style="min-width: 750px;">
@@ -1881,10 +1887,37 @@ input:focus, select:focus {
           </div>
           </div>
           
-          <div style="margin-top: 3rem; border-top: 1px solid var(--border); padding-top: 2rem;">
+          <div class="card" style="margin-top: 2rem; background: linear-gradient(135deg,#eff6ff,#f8fafc); border: 1px solid #bfdbfe;">
+            <div class="card-header" style="margin-bottom:1rem;">
+              <div>
+                <h3 style="margin:0;">🏢 บันทึกรายการระดับแผนก</h3>
+                <p style="font-size:.85rem;color:var(--text-light);margin:.35rem 0 0;">ใช้บันทึกเฉพาะการรับโควต้าจาก ปณ.กลาง และการนำส่งเงินของแผนก</p>
+              </div>
+            </div>
+            <form id="form-add-master-tx" class="standard-form">
+              <div class="form-group">
+                <label>ประเภทรายการ</label>
+                <select id="master-tx-type" required>
+                  <option value="req">รับโควต้า / เบิกจาก ปณ.กลาง</option>
+                  <option value="remit">นำส่งเงินของแผนก</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>จำนวน (ฉบับ)</label>
+                <input type="number" id="master-tx-qty" min="1" required />
+                <small class="hint">มูลค่า: <span id="master-tx-value-calc">0</span> บาท</small>
+              </div>
+              <div class="form-group">
+                <label>วันที่ทำรายการ</label>
+                <input type="date" id="master-tx-date" required />
+              </div>
+              <button type="submit" class="btn btn-primary">💾 เพิ่มรายการระดับแผนก</button>
+            </form>
+          </div>
+
+          <div style="margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 2rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
               <h3 style="color: var(--text-dark); font-size: 1.2rem; margin: 0;">ประวัติของหัวหน้าแผนก (รับโควต้า / นำส่งเงิน)</h3>
-              <!-- The button is removed because they don't have the "form above" anymore. The master tx is saved from the dashboard -->
             </div>
             <div class="table-responsive">
               <table class="data-table" id="master-history-table">
@@ -3370,8 +3403,19 @@ function renderMasterHistory() {
   const tbody = document.querySelector('#master-history-table tbody');
   if(!tbody) return;
   tbody.innerHTML = '';
-  
+
   const txs = [...store.data.masterTransactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const printSelect = document.getElementById('print-master-tx-select');
+  if (printSelect) {
+    const previousSelection = printSelect.value;
+    printSelect.innerHTML = txs.length
+      ? txs.map(tx => `<option value="${tx.id}">${formatThaiDate(tx.date)} · ${tx.type === 'req' ? 'รับโควต้า' : 'นำส่งเงิน'} · ${formatNum(tx.qty)} ฉบับ</option>`).join('')
+      : '<option value="">-- ยังไม่มีรายการสำหรับพิมพ์ --</option>';
+    if (txs.some(tx => tx.id === previousSelection)) {
+      printSelect.value = previousSelection;
+    }
+    if (printSelect.value) populatePrintFieldsForTx(printSelect.value);
+  }
   
   if (txs.length === 0) {
     tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-light); padding: 2rem;">ยังไม่มีประวัติการรับโควต้าหรือนำส่งเงิน</td></tr>';
@@ -4516,6 +4560,11 @@ function renderA4Commission() {
 }
 
 function initPrintForm() {
+  const savedTxSelect = document.getElementById('print-master-tx-select');
+  if (savedTxSelect && savedTxSelect.value) {
+    populatePrintFieldsForTx(savedTxSelect.value);
+    return;
+  }
   const dateStr = formatThaiDate(new Date());
   
   document.getElementById('c-date1').textContent = dateStr;
@@ -5027,6 +5076,43 @@ document.getElementById('form-add-tx').addEventListener('submit', (e) => {
     showToast('กรุณากรอกข้อมูลให้ครบถ้วน', 'warning');
   }
 });
+
+// Add department-level transaction. Printing is intentionally kept read-only.
+const formAddMasterTx = document.getElementById('form-add-master-tx');
+const masterTxQtyInput = document.getElementById('master-tx-qty');
+const masterTxDateInput = document.getElementById('master-tx-date');
+if (masterTxDateInput && !masterTxDateInput.value) {
+  masterTxDateInput.value = new Date().toISOString().slice(0, 10);
+}
+if (masterTxQtyInput) {
+  masterTxQtyInput.addEventListener('input', () => {
+    const qty = parseInt(masterTxQtyInput.value) || 0;
+    document.getElementById('master-tx-value-calc').textContent = formatNum(qty * store.data.pricePerTicket);
+  });
+}
+if (formAddMasterTx) {
+  formAddMasterTx.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const type = document.getElementById('master-tx-type').value;
+    const qty = parseInt(masterTxQtyInput.value) || 0;
+    const date = masterTxDateInput.value;
+    if (qty <= 0 || !date) {
+      showToast('กรุณากรอกจำนวนและวันที่ให้ครบถ้วน', 'warning');
+      return;
+    }
+    const typeName = type === 'req' ? 'รับโควต้าจาก ปณ.กลาง' : 'นำส่งเงินของแผนก';
+    if (!(await showConfirm(`ยืนยันเพิ่มรายการ “${typeName}” จำนวน ${formatNum(qty)} ฉบับ?\n\nรายการนี้จะถูกนำไปคำนวณในภาพรวมแผนก`, 'ยืนยันการเพิ่มรายการ'))) return;
+    try {
+      store.addMasterTx(type, qty, new Date(`${date}T00:00:00`).toISOString());
+      formAddMasterTx.reset();
+      masterTxDateInput.value = new Date().toISOString().slice(0, 10);
+      document.getElementById('master-tx-value-calc').textContent = '0';
+      showToast('เพิ่มรายการระดับแผนกเรียบร้อยแล้ว', 'success');
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  });
+}
 
 // Add Gift (Optional premium gifts management)
 const formAddGift = document.getElementById('form-add-gift');
