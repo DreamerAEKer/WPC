@@ -3927,7 +3927,11 @@ async function shareAsImageV2() {
   const now = new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
   const price = store.data.pricePerTicket;
   const rate = store.data.commissionRate;
-  const totalStockRemaining = overview.quota - overview.totalRequested;
+  const cardsPerBox = 4000;
+  const departmentBoxesWithdrawn = Math.floor(overview.masterRequested / cardsPerBox);
+  const departmentWithdrawnRemainder = overview.masterRequested % cardsPerBox;
+  const departmentBoxesRemaining = Math.floor(overview.masterRemainingQuota / cardsPerBox);
+  const departmentRemainingRemainder = overview.masterRemainingQuota % cardsPerBox;
   const groups = [];
   emps.forEach(emp => {
     let group = groups.find(item => item.rank === emp._rank);
@@ -4049,9 +4053,9 @@ async function shareAsImageV2() {
       <div style="font-size:28px;font-weight:900;">🏆 อันดับยอดเบิกสะสม</div>
       <div style="font-size:13px;opacity:.8;margin-top:3px;">ฟุตบอลระดับโลก 2026 · ${now}</div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px;">
-        <div style="background:rgba(255,255,255,.12);border-radius:12px;padding:11px;"><div style="font-size:10px;opacity:.75;">พนักงานเบิกรวม</div><b style="font-size:22px;">${formatNum(overview.totalRequested)}</b> ใบ</div>
-        <div style="background:rgba(255,255,255,.12);border-radius:12px;padding:11px;"><div style="font-size:10px;opacity:.75;">นำส่งแล้ว</div><b style="font-size:22px;">${formatNum(overview.totalRemitted)}</b> ใบ</div>
-        <div style="background:rgba(255,255,255,.12);border-radius:12px;padding:11px;"><div style="font-size:10px;opacity:.75;">คงเหลือทั้งแผนก</div><b style="font-size:22px;">${formatNum(totalStockRemaining)}</b> ใบ</div>
+        <div style="background:rgba(255,255,255,.12);border-radius:12px;padding:11px;"><div style="font-size:10px;opacity:.75;">แผนกเบิกมาแล้ว</div><b style="font-size:22px;">${formatNum(departmentBoxesWithdrawn)}</b> กล่อง<div style="font-size:10px;opacity:.8;margin-top:2px;">${formatNum(overview.masterRequested)} ใบ${departmentWithdrawnRemainder ? ` · เศษ ${formatNum(departmentWithdrawnRemainder)} ใบ` : ''}</div></div>
+        <div style="background:rgba(255,255,255,.12);border-radius:12px;padding:11px;"><div style="font-size:10px;opacity:.75;">ยังเบิกได้อีก</div><b style="font-size:22px;">${formatNum(departmentBoxesRemaining)}</b> กล่อง<div style="font-size:10px;opacity:.8;margin-top:2px;">${departmentRemainingRemainder ? `และอีก ${formatNum(departmentRemainingRemainder)} ใบ` : 'ครบกล่องพอดี'}</div></div>
+        <div style="background:rgba(255,255,255,.12);border-radius:12px;padding:11px;"><div style="font-size:10px;opacity:.75;">โควตาแผนกคงเหลือ</div><b style="font-size:22px;">${formatNum(overview.masterRemainingQuota)}</b> ใบ<div style="font-size:10px;opacity:.8;margin-top:2px;">ไม่หักยอดเบิกของพนักงาน</div></div>
       </div>
       <div style="margin-top:12px;font-size:12px;font-weight:700;color:#ddd6fe;">Incentive ที่ได้รับแน่นอนรวม ${formatNum(overview.totalCommission)} บาท · อัตรา ${formatNum(rate * 100)}%</div>
     </div>
