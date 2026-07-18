@@ -2904,8 +2904,9 @@ function renderDashboard() {
       alertEl.innerHTML = `
         <div style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); border-radius: 16px; padding: 1.5rem; color: white; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2);">
           <div>
-            <div style="font-size: 1.1rem; font-weight: 600; opacity: 0.9;">🎉 พร้อมนำส่ง ปณ.กลาง แล้ว!</div>
-            <div style="font-size: 1.8rem; font-weight: 800; line-height: 1.2; margin-top: 0.2rem;">ยอดเงินสดพอส่ง ${boxes} กล่อง${extraText}</div>
+            <div style="font-size: 1.1rem; font-weight: 700; opacity: 0.95;">💰 เงินที่รับจากพนักงานแล้ว และยังไม่ได้นำส่ง ปณ.กลาง</div>
+            <div style="font-size: 1.8rem; font-weight: 800; line-height: 1.2; margin-top: 0.25rem;">คงรอนำส่ง ${formatNum(cashOnHandCards)} ฉบับ = ${boxes} กล่อง${extraText}</div>
+            <div style="font-size: 0.9rem; opacity: 0.85; margin-top: 0.55rem;">พนักงานนำส่งเงินแล้ว ${formatNum(data.totalRemitted)} − แผนกนำส่ง ปณ.กลางแล้ว ${formatNum(data.masterRemitted)} = ${formatNum(cashOnHandCards)} ฉบับ</div>
           </div>
           <div style="font-size: 3.5rem; opacity: 0.9;">📦</div>
         </div>
@@ -2915,9 +2916,9 @@ function renderDashboard() {
       alertEl.innerHTML = `
         <div style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); border-radius: 16px; padding: 1.5rem; color: white; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.2);">
           <div>
-            <div style="font-size: 1.1rem; font-weight: 600; opacity: 0.9;">⏳ สะสมยอดเงินสดสำหรับนำส่ง</div>
+            <div style="font-size: 1.1rem; font-weight: 700; opacity: 0.95;">⏳ เงินที่รับจากพนักงานแล้ว และยังไม่ได้นำส่ง ปณ.กลาง</div>
             <div style="font-size: 1.5rem; font-weight: 800; line-height: 1.2; margin-top: 0.2rem;">ขาดอีก ${formatNum(missing)} ใบ จะครบ 1 กล่อง</div>
-            <div style="font-size: 0.95rem; opacity: 0.8; margin-top: 0.4rem;">(ยอดเงินสดในมือปัจจุบัน: ${formatNum(cashOnHandCards)} ใบ)</div>
+            <div style="font-size: 0.95rem; opacity: 0.85; margin-top: 0.4rem;">คงรอนำส่ง ${formatNum(cashOnHandCards)} ฉบับ · พนักงานส่งแล้ว ${formatNum(data.totalRemitted)} − แผนกส่ง ปณ.กลางแล้ว ${formatNum(data.masterRemitted)}</div>
           </div>
           <div style="font-size: 3.5rem; opacity: 0.6;">📦</div>
         </div>
