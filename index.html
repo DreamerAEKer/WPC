@@ -4493,10 +4493,8 @@ function renderA4Commission() {
   const tbody = document.getElementById('p-commission-tbody');
   if (!tbody) return;
   tbody.innerHTML = '';
-  
+
   const allEmps = store.getEmployeesData().sort((a, b) => b.remitted - a.remitted);
-  const emps = allEmps.filter(e => !e.isManager);
-  const managers = allEmps.filter(e => e.isManager);
 
   const now = new Date().toLocaleDateString('th-TH', {day:'numeric', month:'long', year:'numeric'});
   const subtitle = document.getElementById('p-commission-subtitle');
@@ -4527,32 +4525,9 @@ function renderA4Commission() {
     }
   };
 
-  // Render Subordinates
-  emps.forEach(renderRow);
-
-  // Add Subordinate Total Row
-  if (managers.some(m => m.remitted > 0) && emps.some(e => e.remitted > 0)) {
-     const subTr = document.createElement('tr');
-     subTr.style.background = '#f3f4f6';
-     subTr.style.height = '35px';
-     subTr.innerHTML = `
-      <td style="border: 1px solid black; text-align: center; color:#4b5563;">รวมเฉพาะทีมงาน</td>
-      <td style="border: 1px solid black; text-align: right; padding-right: 1rem; color:#4b5563;">${formatNum(emps.reduce((s, e) => s + e.remitted, 0))}</td>
-      <td style="border: 1px solid black; text-align: right; padding-right: 1rem; color:#4b5563;">${formatNum(emps.reduce((s, e) => s + e.commission, 0))}</td>
-      <td style="border: 1px solid black; text-align: center;"></td>
-     `;
-     tbody.appendChild(subTr);
-  }
-
-  // Render Managers
-  if (managers.some(m => m.remitted > 0)) {
-    const mgrHeader = document.createElement('tr');
-    mgrHeader.style.background = '#e5e7eb';
-    mgrHeader.style.height = '35px';
-    mgrHeader.innerHTML = `<td colspan="4" style="border: 1px solid black; text-align: center; font-weight: bold;">ส่วนของระดับหัวหน้า</td>`;
-    tbody.appendChild(mgrHeader);
-    managers.forEach(renderRow);
-  }
+  // Print every employee in one incentive-ranked list. Manager status remains a
+  // label only and does not affect dashboard, ranking cards, LINE, or share data.
+  allEmps.forEach(renderRow);
 
   // Add total row
   const totalTr = document.createElement('tr');
