@@ -1748,10 +1748,10 @@ input:focus, select:focus {
                   <table style="width: 100%; border-collapse: collapse; text-align: center; border: 1px solid black; color: black; font-size: 1rem;">
                   <thead>
                     <tr style="background: #f3f4f6;">
-                      <th style="border: 1px solid black; padding: 0.75rem; width: 25%;">ชื่อพนักงาน</th>
-                      <th style="border: 1px solid black; padding: 0.75rem; width: 15%;">ยอดนำส่ง<br>(ฉบับ)</th>
-                      <th style="border: 1px solid black; padding: 0.75rem; width: 25%;">ค่าคอมมิชชัน 10%<br>(บาท)</th>
-                      <th style="border: 1px solid black; padding: 0.75rem; width: 35%;">ลายมือชื่อผู้รับเงิน</th>
+                      <th style="border: 1px solid black; padding: 0.75rem; width: 34%;">ชื่อพนักงาน</th>
+                      <th style="border: 1px solid black; padding: 0.75rem; width: 18%;">รหัสพนักงาน</th>
+                      <th style="border: 1px solid black; padding: 0.75rem; width: 20%;">ยอดนำส่ง<br>(ฉบับ)</th>
+                      <th style="border: 1px solid black; padding: 0.75rem; width: 28%;">ค่าคอมมิชชัน 10%<br>(บาท)</th>
                     </tr>
                   </thead>
                   <tbody id="p-commission-tbody">
@@ -4495,6 +4495,33 @@ function renderA4Commission() {
   tbody.innerHTML = '';
 
   const allEmps = store.getEmployeesData().sort((a, b) => b.remitted - a.remitted);
+  // ใช้ชื่อจริงเฉพาะใบสรุปจ่ายคอมมิชชั่น โดยไม่แก้ชื่อในข้อมูลหลักหรือหน้าอื่น
+  const commissionPrintNames = {
+    'น้องอ้น': 'น.ส.จุฑารัตน์ ศรีวิไล',
+    'เอก': 'นายคุณวุฒิ ยุชัย',
+    'น้องแมว': 'น.ส.เนาวศิริ สมองาม',
+    'พี่ต๋อย': 'พรพรรณ อุ่นพวก',
+    'พี่ฟาง': 'น.ส.ชลธิชา บุญโท',
+    'พี่กล้า': 'นายอัมรินทร์ ใช้ประทุม',
+    'ตูน': 'น.ส.อัญญารัศม์ ทรัพย์บางยาง',
+    'น้องอุ้ม': 'น.ส.ปุณณดา อัครวรัญ',
+    'น้องวัชร': 'นายวัชรพงศ์ รัตนะเรืองโชติ',
+    'ต๊อกแต๊ก': 'น.ส.เสาวลักษณ์ สีโคตร',
+    'น้องนัท': 'นายศุภณัฐ มีหิรัญ',
+    'ติ๊ก': 'น.ส.นิภาภรณ์ จันทร์ทิพย์'
+  };
+  const commissionEmployeeCodes = {
+    'น้องอ้น': '51253',
+    'เอก': '379773',
+    'น้องแมว': '444103',
+    'พี่ต๋อย': '312057',
+    'พี่ฟาง': '440880',
+    'พี่กล้า': '431006',
+    'ตูน': '580688',
+    'น้องวัชร': '428284',
+    'น้องนัท': '550233',
+    'ติ๊ก': '481344'
+  };
 
   const now = new Date().toLocaleDateString('th-TH', {day:'numeric', month:'long', year:'numeric'});
   const subtitle = document.getElementById('p-commission-subtitle');
@@ -4516,10 +4543,10 @@ function renderA4Commission() {
       const tr = document.createElement('tr');
       tr.style.height = '40px';
       tr.innerHTML = `
-        <td style="border: 1px solid black; text-align: left; padding-left: 1rem;">${escapeHtml(emp.name)} ${emp.isManager ? '(หัวหน้า)' : ''}</td>
+        <td style="border: 1px solid black; text-align: left; padding-left: 1rem;">${escapeHtml(commissionPrintNames[emp.name] || emp.name)} ${emp.isManager ? '(หัวหน้า)' : ''}</td>
+        <td style="border: 1px solid black; text-align: center;">${escapeHtml(commissionEmployeeCodes[emp.name] || '')}</td>
         <td style="border: 1px solid black; text-align: right; padding-right: 1rem;">${formatNum(emp.remitted)}</td>
         <td style="border: 1px solid black; text-align: right; padding-right: 1rem; font-weight: bold;">${formatNum(emp.commission)}</td>
-        <td style="border: 1px solid black; text-align: center;"></td>
       `;
       tbody.appendChild(tr);
     }
@@ -4535,10 +4562,9 @@ function renderA4Commission() {
   totalTr.style.fontWeight = 'bold';
   totalTr.style.height = '45px';
   totalTr.innerHTML = `
-    <td style="border: 1px solid black; text-align: center;">ยอดรวมทั้งหมด</td>
+    <td colspan="2" style="border: 1px solid black; text-align: center;">ยอดรวมทั้งหมด</td>
     <td style="border: 1px solid black; text-align: right; padding-right: 1rem;">${formatNum(totalRemitted)}</td>
     <td style="border: 1px solid black; text-align: right; padding-right: 1rem; font-size: 1.1rem;">${formatNum(totalCommission)}</td>
-    <td style="border: 1px solid black; text-align: center;"></td>
   `;
   tbody.appendChild(totalTr);
 }
