@@ -1737,7 +1737,11 @@ input:focus, select:focus {
 
             <!-- Type 3: Commission Summary -->
             <div id="print-type-3" class="print-layout" style="display: none;">
-              <div class="no-print" style="text-align: right; margin-bottom: 1rem;">
+              <div class="no-print" style="display: flex; align-items: center; justify-content: flex-end; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+                <label style="display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: 600;">
+                  <input type="checkbox" id="commission-show-signature" checked onchange="renderA4Commission()" style="width: 18px; height: 18px;">
+                  แสดงช่องลายมือชื่อผู้รับเงิน
+                </label>
                 <button class="btn btn-primary" onclick="window.print()">🖨️ พิมพ์ใบสรุปจ่ายคอมมิชชัน</button>
               </div>
               <div style="font-family: 'Kanit', sans-serif; border: 1px dashed #ccc; padding: 2rem; background: white;" class="print-container">
@@ -1748,10 +1752,11 @@ input:focus, select:focus {
                   <table style="width: 100%; border-collapse: collapse; text-align: center; border: 1px solid black; color: black; font-size: 1rem;">
                   <thead>
                     <tr style="background: #f3f4f6;">
-                      <th style="border: 1px solid black; padding: 0.75rem; width: 34%;">ชื่อพนักงาน</th>
-                      <th style="border: 1px solid black; padding: 0.75rem; width: 18%;">รหัสพนักงาน</th>
-                      <th style="border: 1px solid black; padding: 0.75rem; width: 20%;">ยอดนำส่ง<br>(ฉบับ)</th>
-                      <th style="border: 1px solid black; padding: 0.75rem; width: 28%;">ค่าคอมมิชชัน 10%<br>(บาท)</th>
+                      <th style="border: 1px solid black; padding: 0.75rem; width: 28%;">ชื่อพนักงาน</th>
+                      <th style="border: 1px solid black; padding: 0.75rem; width: 14%;">รหัสพนักงาน</th>
+                      <th style="border: 1px solid black; padding: 0.75rem; width: 16%;">ยอดนำส่ง<br>(ฉบับ)</th>
+                      <th style="border: 1px solid black; padding: 0.75rem; width: 18%;">ค่าคอมมิชชัน 10%<br>(บาท)</th>
+                      <th class="commission-signature-cell" style="border: 1px solid black; padding: 0.75rem; width: 24%;">ลายมือชื่อผู้รับเงิน</th>
                     </tr>
                   </thead>
                   <tbody id="p-commission-tbody">
@@ -4493,6 +4498,10 @@ function renderA4Commission() {
   const tbody = document.getElementById('p-commission-tbody');
   if (!tbody) return;
   tbody.innerHTML = '';
+  const showSignature = document.getElementById('commission-show-signature')?.checked !== false;
+  document.querySelectorAll('.commission-signature-cell').forEach((cell) => {
+    cell.style.display = showSignature ? '' : 'none';
+  });
 
   const allEmps = store.getEmployeesData().sort((a, b) => b.remitted - a.remitted);
   // ใช้ชื่อจริงเฉพาะใบสรุปจ่ายคอมมิชชั่น โดยไม่แก้ชื่อในข้อมูลหลักหรือหน้าอื่น
@@ -4528,7 +4537,7 @@ function renderA4Commission() {
   if (subtitle) subtitle.textContent = `แผนกลูกค้าธุรกิจ ปณฝ.กลาง 10501 — อัพเดท ณ วันที่ ${now}`;
   
   if (allEmps.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-light); border: 1px solid black; padding: 2rem;">ยังไม่มีข้อมูลพนักงาน</td></tr>';
+    tbody.innerHTML = `<tr><td colspan="${showSignature ? 5 : 4}" style="text-align: center; color: var(--text-light); border: 1px solid black; padding: 2rem;">ยังไม่มีข้อมูลพนักงาน</td></tr>`;
     return;
   }
   
@@ -4543,10 +4552,11 @@ function renderA4Commission() {
       const tr = document.createElement('tr');
       tr.style.height = '40px';
       tr.innerHTML = `
-        <td style="border: 1px solid black; text-align: left; padding-left: 1rem;">${escapeHtml(commissionPrintNames[emp.name] || emp.name)} ${emp.isManager ? '(หัวหน้า)' : ''}</td>
+        <td style="border: 1px solid black; text-align: left; padding-left: 1rem;">${escapeHtml(commissionPrintNames[emp.name] || emp.name)}</td>
         <td style="border: 1px solid black; text-align: center;">${escapeHtml(commissionEmployeeCodes[emp.name] || '')}</td>
         <td style="border: 1px solid black; text-align: right; padding-right: 1rem;">${formatNum(emp.remitted)}</td>
         <td style="border: 1px solid black; text-align: right; padding-right: 1rem; font-weight: bold;">${formatNum(emp.commission)}</td>
+        ${showSignature ? '<td class="commission-signature-cell" style="border: 1px solid black; min-width: 9rem;"></td>' : ''}
       `;
       tbody.appendChild(tr);
     }
@@ -4565,6 +4575,7 @@ function renderA4Commission() {
     <td colspan="2" style="border: 1px solid black; text-align: center;">ยอดรวมทั้งหมด</td>
     <td style="border: 1px solid black; text-align: right; padding-right: 1rem;">${formatNum(totalRemitted)}</td>
     <td style="border: 1px solid black; text-align: right; padding-right: 1rem; font-size: 1.1rem;">${formatNum(totalCommission)}</td>
+    ${showSignature ? '<td class="commission-signature-cell" style="border: 1px solid black;"></td>' : ''}
   `;
   tbody.appendChild(totalTr);
 }
