@@ -1752,11 +1752,12 @@ input:focus, select:focus {
                   <table style="width: 100%; border-collapse: collapse; text-align: center; border: 1px solid black; color: black; font-size: 1rem;">
                   <thead>
                     <tr style="background: #f3f4f6;">
-                      <th style="border: 1px solid black; padding: 0.75rem; width: 28%;">ชื่อพนักงาน</th>
+                      <th style="border: 1px solid black; padding: 0.75rem; width: 7%;">ลำดับ</th>
+                      <th style="border: 1px solid black; padding: 0.75rem; width: 23%;">ชื่อพนักงาน</th>
                       <th style="border: 1px solid black; padding: 0.75rem; width: 14%;">รหัสพนักงาน</th>
                       <th style="border: 1px solid black; padding: 0.75rem; width: 16%;">ยอดนำส่ง<br>(ฉบับ)</th>
-                      <th style="border: 1px solid black; padding: 0.75rem; width: 18%;">ค่าคอมมิชชัน 10%<br>(บาท)</th>
-                      <th class="commission-signature-cell" style="border: 1px solid black; padding: 0.75rem; width: 24%;">ลายมือชื่อผู้รับเงิน</th>
+                      <th style="border: 1px solid black; padding: 0.75rem; width: 17%;">ค่าคอมมิชชัน 10%<br>(บาท)</th>
+                      <th class="commission-signature-cell" style="border: 1px solid black; padding: 0.75rem; width: 23%;">ลายมือชื่อผู้รับเงิน</th>
                     </tr>
                   </thead>
                   <tbody id="p-commission-tbody">
@@ -4537,21 +4538,24 @@ function renderA4Commission() {
   if (subtitle) subtitle.textContent = `แผนกลูกค้าธุรกิจ ปณฝ.กลาง 10501 — อัพเดท ณ วันที่ ${now}`;
   
   if (allEmps.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="${showSignature ? 5 : 4}" style="text-align: center; color: var(--text-light); border: 1px solid black; padding: 2rem;">ยังไม่มีข้อมูลพนักงาน</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="${showSignature ? 6 : 5}" style="text-align: center; color: var(--text-light); border: 1px solid black; padding: 2rem;">ยังไม่มีข้อมูลพนักงาน</td></tr>`;
     return;
   }
   
   let totalRemitted = 0;
   let totalCommission = 0;
+  let rowNumber = 0;
   
   const renderRow = (emp) => {
     if (emp.remitted > 0) {
+      rowNumber += 1;
       totalRemitted += emp.remitted;
       totalCommission += emp.commission;
       
       const tr = document.createElement('tr');
       tr.style.height = '40px';
       tr.innerHTML = `
+        <td style="border: 1px solid black; text-align: center;">${rowNumber}</td>
         <td style="border: 1px solid black; text-align: left; padding-left: 1rem;">${escapeHtml(commissionPrintNames[emp.name] || emp.name)}</td>
         <td style="border: 1px solid black; text-align: center;">${escapeHtml(commissionEmployeeCodes[emp.name] || '')}</td>
         <td style="border: 1px solid black; text-align: right; padding-right: 1rem;">${formatNum(emp.remitted)}</td>
@@ -4572,7 +4576,7 @@ function renderA4Commission() {
   totalTr.style.fontWeight = 'bold';
   totalTr.style.height = '45px';
   totalTr.innerHTML = `
-    <td colspan="2" style="border: 1px solid black; text-align: center;">ยอดรวมทั้งหมด</td>
+    <td colspan="3" style="border: 1px solid black; text-align: center;">ยอดรวมทั้งหมด</td>
     <td style="border: 1px solid black; text-align: right; padding-right: 1rem;">${formatNum(totalRemitted)}</td>
     <td style="border: 1px solid black; text-align: right; padding-right: 1rem; font-size: 1.1rem;">${formatNum(totalCommission)}</td>
     ${showSignature ? '<td class="commission-signature-cell" style="border: 1px solid black;"></td>' : ''}
